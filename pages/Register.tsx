@@ -57,8 +57,8 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
       <div className="w-full max-w-sm bg-[#0B0C15] border border-white/10 rounded-2xl p-8 shadow-2xl">
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center"><Logo /></div>
-          <h2 className="text-xl font-medium text-white mb-2">Criar conta</h2>
-          <p className="text-sm text-slate-500">Comece a automatizar seus imoveis</p>
+          <h2 className="text-xl font-medium text-white mb-2">Crie sua conta gratis</h2>
+          <p className="text-sm text-slate-500">Comece agora - e gratis!</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,14 +102,14 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
           )}
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? 'Criando conta...' : 'Criar conta'}
+            {loading ? 'Criando conta...' : 'Criar Minha Conta'}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-xs text-slate-500">
+          <p className="text-sm text-slate-500">
             Ja tem uma conta?{' '}
-            <button onClick={onGoToLogin} className="text-blue-400 hover:text-blue-300 transition-colors">
+            <button onClick={onGoToLogin} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
               Fazer login
             </button>
           </p>

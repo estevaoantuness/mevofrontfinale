@@ -37,8 +37,8 @@ export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageP
       <div className="w-full max-w-sm bg-[#0B0C15] border border-white/10 rounded-2xl p-8 shadow-2xl">
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center"><Logo /></div>
-          <h2 className="text-xl font-medium text-white mb-2">Bem-vindo de volta</h2>
-          <p className="text-sm text-slate-500">Acesse o painel administrativo</p>
+          <h2 className="text-xl font-medium text-white mb-2">Entrar na sua conta</h2>
+          <p className="text-sm text-slate-500">Acesse o painel do Mevo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -66,16 +66,16 @@ export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageP
           )}
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar no Dashboard'}
+            {loading ? 'Entrando...' : 'Fazer Login'}
           </Button>
         </form>
 
         <div className="mt-6 text-center space-y-3">
           {onGoToRegister && (
-            <p className="text-xs text-slate-500">
-              Nao tem uma conta?{' '}
-              <button onClick={onGoToRegister} className="text-blue-400 hover:text-blue-300 transition-colors">
-                Criar conta
+            <p className="text-sm text-slate-500">
+              Ainda nao tem conta?{' '}
+              <button onClick={onGoToRegister} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                Criar conta gratis
               </button>
             </p>
           )}

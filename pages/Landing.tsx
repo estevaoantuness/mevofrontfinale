@@ -18,8 +18,8 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex gap-4">
-            <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Entrar</Button>
-            <Button variant="primary" onClick={onRegister || onLogin}>Criar Conta</Button>
+            <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Fazer Login</Button>
+            <Button variant="primary" onClick={onRegister || onLogin}>Criar Conta Gratis</Button>
           </div>
         </div>
       </nav>
@@ -45,10 +45,10 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
 
         <div className="flex flex-col sm:flex-row gap-4 z-10">
           <Button variant="primary" className="h-12 px-8 text-base" onClick={onRegister || onLogin}>
-            Comecar Gratis
+            Criar Minha Conta
           </Button>
           <Button variant="secondary" className="h-12 px-8 text-base" onClick={onLogin}>
-            Ja tenho conta
+            Fazer Login
           </Button>
         </div>
 
