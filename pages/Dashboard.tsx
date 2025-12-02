@@ -49,7 +49,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [testLoading, setTestLoading] = useState(false);
 
   // Settings State
-  const [messageTemplate, setMessageTemplate] = useState('Ola {employee_name}! Lembrete: hoje tem checkout no {property_name}. Por favor, prepare a limpeza.');
+  const [messageTemplate, setMessageTemplate] = useState('Olá (nome da funcionária), tudo bem? Hoje tem checkout no (nome do imóvel). Pode preparar a limpeza? Obrigado!');
   const [sendTime, setSendTime] = useState('08:00');
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -482,7 +482,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       onChange={e => setMessageTemplate(e.target.value)}
                     />
                     <p className="mt-2 text-xs text-slate-500">
-                      Variaveis disponiveis: <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">{'{employee_name}'}</code>, <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">{'{property_name}'}</code>
+                      Use <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome da funcionária)</code> e <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do imóvel)</code> para personalizar
                     </p>
                   </div>
 
@@ -514,8 +514,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 <h4 className="text-sm font-medium text-slate-300 mb-3">Preview da mensagem</h4>
                 <div className="bg-white/5 rounded-lg p-4 text-sm text-slate-400">
                   {messageTemplate
-                    .replace('{employee_name}', 'Maria')
-                    .replace('{property_name}', 'Loft Centro 402')}
+                    .replace('(nome da funcionária)', 'Maria')
+                    .replace('(nome do imóvel)', 'Loft Centro 402')}
                 </div>
               </div>
             </div>
