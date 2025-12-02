@@ -18,3 +18,8 @@ View your app in AI Studio: https://ai.studio/apps/drive/1w2iJ948aiNzYxWKsV8UMG4
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Backend Integration
+
+- Create a `.env.local` (or copy `.env.example`) and set `VITE_API_URL` to your backend (example: `http://localhost:3001/api`).
+- The hero shows API status by calling `GET /health`; ensure the backend is running and CORS allows the frontend origin.
