@@ -1,58 +1,102 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './lib/AuthContext';
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
-import { isAuthenticated, logout } from './lib/api';
 
-type Page = 'landing' | 'login' | 'register' | 'dashboard';
+// Protected Route Component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
 
-export default function App() {
-  // Check if user is already authenticated
-  const [page, setPage] = useState<Page>(isAuthenticated() ? 'dashboard' : 'landing');
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#050509]">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  const handleLoginSuccess = () => {
-    setPage('dashboard');
-  };
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-  const handleRegisterSuccess = () => {
-    setPage('dashboard');
-  };
+  return <>{children}</>;
+}
 
-  const handleLogout = () => {
-    logout();
-    setPage('landing');
-  };
+// Public Route (redirects if logged in)
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
 
-  const handleGoToLogin = () => {
-    setPage('login');
-  };
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#050509]">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  const handleGoToRegister = () => {
-    setPage('register');
-  };
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-  const handleBackToLanding = () => {
-    setPage('landing');
-  };
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  const { logout } = useAuth();
 
   return (
-    <>
-      {page === 'landing' && <LandingPage onLogin={handleGoToLogin} onRegister={handleGoToRegister} />}
-      {page === 'login' && (
-        <LoginPage
-          onLoginSuccess={handleLoginSuccess}
-          onBack={handleBackToLanding}
-          onGoToRegister={handleGoToRegister}
-        />
-      )}
-      {page === 'register' && (
-        <RegisterPage
-          onRegisterSuccess={handleRegisterSuccess}
-          onGoToLogin={handleGoToLogin}
-        />
-      )}
-      {page === 'dashboard' && <Dashboard onLogout={handleLogout} onGoToLanding={handleBackToLanding} />}
-    </>
+    <Routes>
+      <Route path="/" element={<LandingPage onLogin={() => { }} onRegister={() => { }} />} />
+
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage
+              onLoginSuccess={() => { }}
+              onBack={() => { }}
+              onGoToRegister={() => { }}
+            />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage
+              onRegisterSuccess={() => { }}
+              onGoToLogin={() => { }}
+            />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 - Redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
