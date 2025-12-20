@@ -19,7 +19,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import * as api from '../lib/api';
-import type { Property, DashboardStats, WhatsAppStatus } from '../lib/api';
+import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse } from '../lib/api';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -31,8 +31,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({ totalProperties: 0, messagesToday: 0, messagesThisMonth: 0 });
-  const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus>({ status: 'disconnected', hasQR: false });
+  const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus>({ configured: false, connected: false });
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // New Property Form State
@@ -78,7 +79,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   useEffect(() => {
     if (activeTab === 'whatsapp') {
       fetchWhatsAppStatus();
-      const interval = setInterval(fetchWhatsAppStatus, 3000);
+      const interval = setInterval(fetchWhatsAppStatus, 5000);
       return () => clearInterval(interval);
     }
   }, [activeTab]);
@@ -88,14 +89,41 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       const status = await api.getWhatsAppStatus();
       setWhatsappStatus(status);
 
-      if (status.hasQR) {
-        const qrData = await api.getWhatsAppQR();
-        setQrCode(qrData.qr);
-      } else {
+      // Se conectou, limpa o QR
+      if (status.connected) {
         setQrCode(null);
       }
     } catch (err) {
       console.error('Erro ao buscar status WhatsApp:', err);
+    }
+  };
+
+  const handleConnectWhatsApp = async () => {
+    setQrLoading(true);
+    try {
+      const result = await api.getWhatsAppQR();
+      if (result.connected) {
+        setWhatsappStatus({ ...whatsappStatus, connected: true, phone: result.phone });
+        setQrCode(null);
+      } else {
+        setQrCode(result.qr || null);
+      }
+    } catch (err: any) {
+      alert('Erro ao gerar QR Code: ' + err.message);
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleDisconnectWhatsApp = async () => {
+    if (!confirm('Tem certeza que deseja desconectar o WhatsApp?')) return;
+
+    try {
+      await api.disconnectWhatsApp();
+      setWhatsappStatus({ configured: false, connected: false });
+      setQrCode(null);
+    } catch (err: any) {
+      alert('Erro ao desconectar: ' + err.message);
     }
   };
 
@@ -312,9 +340,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-lg">
-                  <div className={`w-2 h-2 rounded-full ${whatsappStatus.status === 'connected' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <div className={`w-2 h-2 rounded-full ${whatsappStatus.connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
                   <span className="text-sm text-slate-400">
-                    WhatsApp: {whatsappStatus.status === 'connected' ? 'Conectado' : 'Desconectado'}
+                    WhatsApp: {whatsappStatus.connected ? `Conectado (${whatsappStatus.phone || 'verificando...'})` : 'Desconectado'}
                   </span>
                 </div>
               </div>
@@ -422,45 +450,66 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
                 <h3 className="text-xl font-medium text-white mb-2">Conexao WhatsApp</h3>
                 <p className="text-sm text-slate-400 mb-8 max-w-sm mx-auto">
-                  Escaneie o QR Code para permitir que o Mevo envie mensagens automaticas para suas funcionarias.
+                  Conecte seu WhatsApp para enviar mensagens automaticas para suas funcionarias.
                 </p>
 
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-8 ${
-                  whatsappStatus.status === 'connected'
+                  whatsappStatus.connected
                     ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                    : whatsappStatus.status === 'connecting'
+                    : qrCode
                     ? 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-400'
                     : 'bg-red-500/10 border border-red-500/20 text-red-400'
                 }`}>
-                  * {whatsappStatus.status === 'connected' ? 'Conectado' : whatsappStatus.status === 'connecting' ? 'Conectando...' : 'Desconectado'}
+                  {whatsappStatus.connected ? `Conectado: ${whatsappStatus.phone || ''}` : qrCode ? 'Aguardando escaneamento...' : 'Desconectado'}
                 </div>
 
-                {whatsappStatus.status === 'connected' ? (
+                {whatsappStatus.connected ? (
                   <div className="w-64 h-64 mx-auto border border-emerald-500/20 rounded-xl flex flex-col items-center justify-center bg-emerald-500/5 mb-6">
                     <ShieldCheck size={48} className="text-emerald-400 mb-4" />
                     <span className="text-sm text-emerald-400 font-medium">WhatsApp Conectado!</span>
-                    <span className="text-xs text-slate-500 mt-2">Pronto para enviar mensagens</span>
+                    <span className="text-xs text-slate-500 mt-2">{whatsappStatus.phone}</span>
+                    <span className="text-xs text-slate-600 mt-1">Pronto para enviar mensagens</span>
                   </div>
                 ) : qrCode ? (
                   <div className="w-64 h-64 mx-auto rounded-xl overflow-hidden mb-6 bg-white p-2">
-                    <img src={qrCode} alt="QR Code WhatsApp" className="w-full h-full" />
+                    <img src={`data:image/png;base64,${qrCode}`} alt="QR Code WhatsApp" className="w-full h-full" />
                   </div>
                 ) : (
                   <div className="w-64 h-64 mx-auto border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center bg-black/20 mb-6">
-                    <div className="w-8 h-8 border-2 border-slate-600 border-t-slate-400 rounded-full animate-spin mb-3"></div>
-                    <span className="text-xs text-slate-500 font-mono">Aguardando QR Code...</span>
+                    <Smartphone size={48} className="text-slate-600 mb-4" />
+                    <span className="text-sm text-slate-500">Clique no botao abaixo</span>
+                    <span className="text-xs text-slate-600 mt-1">para conectar seu WhatsApp</span>
                   </div>
                 )}
 
-                <p className="text-xs text-slate-600 mb-6">
-                  Integracao via whatsapp-web.js
-                </p>
-
-                {whatsappStatus.status === 'connected' && (
-                  <Button onClick={() => setIsTestModalOpen(true)} variant="secondary">
-                    <Send size={16} className="mr-2" /> Testar Envio
-                  </Button>
-                )}
+                <div className="flex justify-center gap-3">
+                  {whatsappStatus.connected ? (
+                    <>
+                      <Button onClick={() => setIsTestModalOpen(true)} variant="secondary">
+                        <Send size={16} className="mr-2" /> Testar Envio
+                      </Button>
+                      <Button onClick={handleDisconnectWhatsApp} variant="secondary" className="text-red-400 hover:text-red-300">
+                        <LogOut size={16} className="mr-2" /> Desconectar
+                      </Button>
+                    </>
+                  ) : qrCode ? (
+                    <Button onClick={() => setQrCode(null)} variant="secondary">
+                      Cancelar
+                    </Button>
+                  ) : (
+                    <Button onClick={handleConnectWhatsApp} disabled={qrLoading}>
+                      {qrLoading ? (
+                        <>
+                          <RefreshCw size={16} className="mr-2 animate-spin" /> Gerando QR Code...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle size={16} className="mr-2" /> Conectar WhatsApp
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           )}

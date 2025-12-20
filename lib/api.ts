@@ -47,8 +47,23 @@ export interface Settings {
 }
 
 export interface WhatsAppStatus {
-  status: 'connected' | 'disconnected' | 'connecting';
-  hasQR: boolean;
+  configured: boolean;
+  connected: boolean;
+  phone?: string;
+  connectedAt?: string;
+  instance?: string;
+  state?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface WhatsAppQRResponse {
+  connected: boolean;
+  qr?: string;
+  code?: string;
+  pairingCode?: string;
+  phone?: string;
+  message?: string;
 }
 
 export interface ApiHealth {
@@ -181,12 +196,16 @@ export async function getWhatsAppStatus(): Promise<WhatsAppStatus> {
   return apiFetch<WhatsAppStatus>('/whatsapp/status');
 }
 
-export async function getWhatsAppQR(): Promise<{ qr: string }> {
-  return apiFetch<{ qr: string }>('/whatsapp/qr');
+export async function getWhatsAppQR(): Promise<WhatsAppQRResponse> {
+  return apiFetch<WhatsAppQRResponse>('/whatsapp/qr');
 }
 
-export async function disconnectWhatsApp(): Promise<void> {
-  await apiFetch<void>('/whatsapp/disconnect', { method: 'POST' });
+export async function disconnectWhatsApp(): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>('/whatsapp/disconnect', { method: 'POST' });
+}
+
+export async function reconnectWhatsApp(): Promise<WhatsAppQRResponse> {
+  return apiFetch<WhatsAppQRResponse>('/whatsapp/reconnect', { method: 'POST' });
 }
 
 export async function testWhatsApp(phone: string, message: string): Promise<{ success: boolean; message: string }> {
