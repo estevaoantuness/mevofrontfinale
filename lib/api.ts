@@ -220,4 +220,100 @@ export async function getHealth(): Promise<ApiHealth> {
   return apiFetch<ApiHealth>('/health');
 }
 
+// Billing Types
+export interface BillingPlan {
+  id: string;
+  name: string;
+  description: string;
+  propertyLimit: number;
+  features: string[];
+  isPopular: boolean;
+  trial: { days: number; requiresPaymentMethod: boolean } | null;
+  pricing: {
+    monthly: { amount: number; display: string };
+    yearly: { amount: number; display: string; yearlyTotal: number };
+  };
+  savings: { savingsPercent: number; savingsAmount: number };
+}
+
+export interface Subscription {
+  id?: string;
+  planId: string;
+  planName: string;
+  status: 'active' | 'trialing' | 'canceled' | 'past_due' | 'inactive';
+  billingInterval?: 'monthly' | 'yearly';
+  propertyLimit: number;
+  propertyCount: number;
+  propertyUsagePercent?: number;
+  trialEndsAt?: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
+  hasStripeSubscription?: boolean;
+}
+
+export interface Invoice {
+  id: string;
+  amount: number;
+  amountFormatted: string;
+  currency: string;
+  status: string;
+  periodStart: string;
+  periodEnd: string;
+  invoiceUrl?: string;
+  invoicePdf?: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface UsageStats {
+  properties: {
+    used: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+  };
+  reservationsThisMonth: number;
+  messagesThisMonth: number;
+  currentPlan: string;
+}
+
+// Billing API
+export async function getPlans(): Promise<BillingPlan[]> {
+  return apiFetch<BillingPlan[]>('/billing/plans');
+}
+
+export async function getSubscription(): Promise<Subscription> {
+  return apiFetch<Subscription>('/billing/subscription');
+}
+
+export async function createCheckout(planId: string, interval: 'monthly' | 'yearly'): Promise<{ checkoutUrl: string; sessionId: string }> {
+  return apiFetch<{ checkoutUrl: string; sessionId: string }>('/billing/checkout', {
+    method: 'POST',
+    body: JSON.stringify({ planId, interval }),
+  });
+}
+
+export async function openBillingPortal(): Promise<{ portalUrl: string }> {
+  return apiFetch<{ portalUrl: string }>('/billing/portal', { method: 'POST' });
+}
+
+export async function cancelSubscription(immediately = false): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/billing/cancel', {
+    method: 'POST',
+    body: JSON.stringify({ immediately }),
+  });
+}
+
+export async function reactivateSubscription(): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/billing/reactivate', { method: 'POST' });
+}
+
+export async function getInvoices(): Promise<Invoice[]> {
+  return apiFetch<Invoice[]>('/billing/invoices');
+}
+
+export async function getUsage(): Promise<UsageStats> {
+  return apiFetch<UsageStats>('/billing/usage');
+}
+
 export { API_URL };

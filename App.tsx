@@ -5,6 +5,7 @@ import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
+import { CheckoutSuccess } from './pages/CheckoutSuccess';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -85,6 +86,18 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/checkout/success"
+        element={
+          <ProtectedRoute>
+            <CheckoutSuccess onGoToDashboard={() => navigate('/dashboard')} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Checkout cancel - redirect to dashboard */}
+      <Route path="/checkout/cancel" element={<Navigate to="/dashboard" replace />} />
 
       {/* 404 - Redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />

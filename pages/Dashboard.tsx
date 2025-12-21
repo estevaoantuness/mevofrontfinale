@@ -12,12 +12,14 @@ import {
   RefreshCw,
   Settings,
   Send,
-  ExternalLink
+  ExternalLink,
+  CreditCard
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { BillingTab } from '../components/dashboard/BillingTab';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse } from '../lib/api';
 
@@ -262,6 +264,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="overview" icon={LayoutGrid} label="Visao Geral" />
           <NavItem id="properties" icon={Home} label="Meus Imoveis" />
           <NavItem id="whatsapp" icon={MessageCircle} label="Conexao WhatsApp" />
+          <NavItem id="billing" icon={CreditCard} label="Assinatura" />
           <NavItem id="settings" icon={Settings} label="Configuracoes" />
         </nav>
 
@@ -302,6 +305,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'overview' && 'Visao Geral'}
             {activeTab === 'properties' && 'Gerenciar Imoveis'}
             {activeTab === 'whatsapp' && 'Conexao WhatsApp'}
+            {activeTab === 'billing' && 'Assinatura'}
             {activeTab === 'settings' && 'Configuracoes'}
           </h2>
 
@@ -511,6 +515,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB: BILLING */}
+          {activeTab === 'billing' && (
+            <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <BillingTab />
             </div>
           )}
 
