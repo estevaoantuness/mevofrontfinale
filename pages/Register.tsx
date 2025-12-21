@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import * as api from '../lib/api';
+import { useAuth } from '../lib/AuthContext';
 
 interface RegisterPageProps {
   onRegisterSuccess: () => void;
@@ -10,6 +10,7 @@ interface RegisterPageProps {
 }
 
 export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPageProps) => {
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,7 +43,7 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
     }
 
     try {
-      await api.register(name, email, password);
+      await register(name, email, password);
       onRegisterSuccess();
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta');

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import * as api from '../lib/api';
+import { useAuth } from '../lib/AuthContext';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
@@ -11,6 +11,7 @@ interface LoginPageProps {
 }
 
 export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageProps) => {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,10 +23,10 @@ export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageP
     setError('');
 
     try {
-      await api.login(email, password);
+      await login(email, password);
       onLoginSuccess();
     } catch (err: any) {
-      setError(err.message || 'Credenciais invalidas. Tente admin@mevo.app / admin');
+      setError(err.message || 'Credenciais invalidas');
       setLoading(false);
     }
   };
