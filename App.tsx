@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
@@ -46,19 +46,20 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <Routes>
-      <Route path="/" element={<LandingPage onLogin={() => { }} onRegister={() => { }} />} />
+      <Route path="/" element={<LandingPage onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} />} />
 
       <Route
         path="/login"
         element={
           <PublicRoute>
             <LoginPage
-              onLoginSuccess={() => { }}
-              onBack={() => { }}
-              onGoToRegister={() => { }}
+              onLoginSuccess={() => navigate('/dashboard')}
+              onBack={() => navigate('/')}
+              onGoToRegister={() => navigate('/register')}
             />
           </PublicRoute>
         }
@@ -69,8 +70,8 @@ function AppRoutes() {
         element={
           <PublicRoute>
             <RegisterPage
-              onRegisterSuccess={() => { }}
-              onGoToLogin={() => { }}
+              onRegisterSuccess={() => navigate('/dashboard')}
+              onGoToLogin={() => navigate('/login')}
             />
           </PublicRoute>
         }
