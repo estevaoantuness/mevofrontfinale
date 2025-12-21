@@ -82,7 +82,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard onLogout={logout} />
+            <Dashboard onLogout={logout} onGoToLanding={() => navigate('/')} />
           </ProtectedRoute>
         }
       />
