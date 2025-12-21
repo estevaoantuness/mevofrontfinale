@@ -12,6 +12,9 @@ RUN npm install --legacy-peer-deps
 # Copy source code
 COPY . .
 
+# Set API URL for build
+ENV VITE_API_URL=https://mevo-backend-production.up.railway.app/api
+
 # Build the app
 RUN npm run build
 
