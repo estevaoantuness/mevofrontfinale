@@ -83,7 +83,7 @@ interface PricingSectionProps {
 }
 
 export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) => {
-  const [isYearly, setIsYearly] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
 
   const handleSelectPlan = (planId: string) => {
     if (onSelectPlan) {
@@ -106,29 +106,32 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
 
         {/* Toggle */}
         <div className="flex items-center justify-center gap-4 mb-12">
-          <span className={`text-sm font-medium ${!isYearly ? 'text-white' : 'text-slate-500'}`}>
+          <span
+            className={`text-sm font-medium cursor-pointer ${!isYearly ? 'text-white' : 'text-slate-500'}`}
+            onClick={() => setIsYearly(false)}
+          >
             Mensal
           </span>
           <button
             onClick={() => setIsYearly(!isYearly)}
-            className={`relative w-14 h-7 rounded-full transition-colors ${
-              isYearly ? 'bg-blue-600' : 'bg-slate-700'
-            }`}
+            className="relative w-12 h-6 rounded-full transition-colors bg-blue-600"
+            aria-label="Alternar entre mensal e anual"
           >
             <span
-              className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                isYearly ? 'translate-x-8' : 'translate-x-1'
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 ease-in-out ${
+                isYearly ? 'translate-x-6' : 'translate-x-0'
               }`}
             />
           </button>
-          <span className={`text-sm font-medium ${isYearly ? 'text-white' : 'text-slate-500'}`}>
+          <span
+            className={`text-sm font-medium cursor-pointer ${isYearly ? 'text-white' : 'text-slate-500'}`}
+            onClick={() => setIsYearly(true)}
+          >
             Anual
           </span>
-          {isYearly && (
-            <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
-              Economize ate 27%
-            </span>
-          )}
+          <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+            Economize ate 27%
+          </span>
         </div>
 
         {/* Pricing Cards */}

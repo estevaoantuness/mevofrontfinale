@@ -56,7 +56,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [testLoading, setTestLoading] = useState(false);
 
   // Settings State
-  const [messageTemplate, setMessageTemplate] = useState('Olá (nome da funcionária), tudo bem? Hoje tem checkout no (nome do imóvel). Pode preparar a limpeza? Obrigado!');
+  const [messageTemplate, setMessageTemplate] = useState('Olá (nome do responsável), tudo bem? Hoje tem checkout no (nome do imóvel). Pode preparar a limpeza? Obrigado!');
   const [sendTime, setSendTime] = useState('08:00');
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -387,7 +387,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-medium text-white">Meus Imoveis</h3>
-                  <p className="text-sm text-slate-500">Gerencie suas conexoes iCal e faxineiras</p>
+                  <p className="text-sm text-slate-500">Gerencie suas conexoes iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => setIsModalOpen(true)}>
                   <Plus size={16} className="mr-2" /> Adicionar Imovel
@@ -399,7 +399,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <thead>
                     <tr className="border-b border-white/5 bg-white/[0.02]">
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imovel</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Funcionaria</th>
+                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Responsavel</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Telefone</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Calendarios</th>
                       <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acoes</th>
@@ -482,7 +482,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
                 <h3 className="text-xl font-medium text-white mb-2">Conexao WhatsApp</h3>
                 <p className="text-sm text-slate-400 mb-8 max-w-sm mx-auto">
-                  Conecte seu WhatsApp para enviar mensagens automaticas para suas funcionarias.
+                  Conecte seu WhatsApp para enviar mensagens automaticas para sua equipe de limpeza.
                 </p>
 
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-8 ${
@@ -568,7 +568,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2">Mensagem para funcionarias</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-2">Mensagem para equipe de limpeza</label>
                     <textarea
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-none"
                       rows={5}
@@ -577,7 +577,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       onChange={e => setMessageTemplate(e.target.value)}
                     />
                     <p className="mt-2 text-xs text-slate-500">
-                      Use <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome da funcionária)</code> e <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do imóvel)</code> para personalizar
+                      Use <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do responsável)</code> e <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do imóvel)</code> para personalizar
                     </p>
                   </div>
 
@@ -609,7 +609,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 <h4 className="text-sm font-medium text-slate-300 mb-3">Preview da mensagem</h4>
                 <div className="bg-white/5 rounded-lg p-4 text-sm text-slate-400">
                   {messageTemplate
-                    .replace('(nome da funcionária)', 'Maria')
+                    .replace('(nome do responsável)', 'Maria')
                     .replace('(nome do imóvel)', 'Loft Centro 402')}
                 </div>
               </div>
@@ -634,7 +634,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           />
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Nome da Funcionaria"
+              label="Nome do Responsavel"
               placeholder="Ex: Maria"
               required
               value={newProp.employee_name}
@@ -684,7 +684,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Nome da Funcionaria"
+                label="Nome do Responsavel"
                 placeholder="Ex: Maria"
                 required
                 value={editProp.employee_name}

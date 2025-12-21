@@ -57,7 +57,7 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32 max-w-6xl w-full z-10">
           {[
             { icon: Calendar, title: 'Sincronia iCal', desc: 'Conecte Airbnb, Booking e VRBO em um so lugar. Atualizacao em tempo real.' },
-            { icon: MessageCircle, title: 'Avisos Automaticos', desc: 'O Mevo avisa a faxineira todo dia as 08:00. Zero intervencao humana.' },
+            { icon: MessageCircle, title: 'Avisos Automaticos', desc: 'O Mevo avisa sua equipe de limpeza todo dia as 08:00. Zero intervencao humana.' },
             { icon: LayoutGrid, title: 'Painel Unificado', desc: 'Gerencie multiplos imoveis e status de limpeza em uma interface limpa.' },
             { icon: Zap, title: 'Automacoes Inteligentes', desc: 'Check-in, checkout, limpeza e reviews automatizados. Configure uma vez.' },
             { icon: Shield, title: 'Seguro e Confiavel', desc: 'Seus dados protegidos com criptografia. Uptime de 99.9% garantido.' },
@@ -89,7 +89,7 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: '1', title: 'Conecte seus calendarios', desc: 'Cole os links iCal do Airbnb, Booking ou VRBO. Sincronizacao instantanea.' },
-              { step: '2', title: 'Configure sua equipe', desc: 'Cadastre suas faxineiras com nome e WhatsApp. Pronto para receber avisos.' },
+              { step: '2', title: 'Configure sua equipe', desc: 'Cadastre sua equipe de limpeza com nome e WhatsApp. Pronto para receber avisos.' },
               { step: '3', title: 'Relaxe e acompanhe', desc: 'O Mevo envia avisos automaticos. Voce so acompanha pelo painel.' }
             ].map((item, i) => (
               <div key={i} className="text-center">
@@ -123,7 +123,7 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
             {[
               { name: 'Marina S.', role: 'Superhost - SP', quote: 'O Mevo mudou minha vida. Antes eu passava horas coordenando limpezas, agora e tudo automatico.' },
               { name: 'Roberto C.', role: '8 imoveis - RJ', quote: 'Gerencio 8 apartamentos sozinho gracas ao Mevo. A sincronia de calendarios e perfeita.' },
-              { name: 'Ana Paula M.', role: 'Superhost - SC', quote: 'Minhas faxineiras adoram receber os avisos no WhatsApp. Nunca mais tive problemas com checkout.' }
+              { name: 'Ana Paula M.', role: 'Superhost - SC', quote: 'Minha equipe de limpeza adora receber os avisos no WhatsApp. Nunca mais tive problemas com checkout.' }
             ].map((testimonial, i) => (
               <div key={i} className="p-8 rounded-xl bg-[#0B0C15] border border-white/10">
                 <p className="text-slate-300 mb-6 italic">"{testimonial.quote}"</p>
