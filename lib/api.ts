@@ -316,4 +316,68 @@ export async function getUsage(): Promise<UsageStats> {
   return apiFetch<UsageStats>('/billing/usage');
 }
 
+// Profile Types
+export interface Profile {
+  id: number;
+  email: string;
+  name: string;
+  phone?: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  whatsappConnected: boolean;
+  whatsappPhone?: string;
+  subscription?: {
+    planId: string;
+    planName: string;
+    status: string;
+    propertyLimit: number;
+    trialEndsAt?: string;
+    currentPeriodEnd?: string;
+    features: string[];
+  };
+  stats: {
+    properties: number;
+    guests: number;
+    reservations: number;
+    whatsappInstances: number;
+  };
+}
+
+export interface ProfileStats {
+  properties: { count: number; limit: number; percentage: number };
+  reservations: { active: number; upcomingCheckins: number };
+  guests: { total: number };
+  messages: { thisMonth: number; thisWeek: number };
+  subscription: {
+    plan: string;
+    status: string;
+    trialEndsAt?: string;
+    daysRemaining?: number;
+  };
+}
+
+// Profile API
+export async function getProfile(): Promise<Profile> {
+  return apiFetch<Profile>('/profile');
+}
+
+export async function updateProfile(data: { name?: string; phone?: string }): Promise<Profile> {
+  return apiFetch<Profile>('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getProfileStats(): Promise<ProfileStats> {
+  return apiFetch<ProfileStats>('/profile/stats');
+}
+
+export async function deleteAccount(confirmation: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/profile', {
+    method: 'DELETE',
+    body: JSON.stringify({ confirmation }),
+  });
+}
+
 export { API_URL };

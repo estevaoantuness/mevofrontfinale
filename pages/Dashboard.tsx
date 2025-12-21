@@ -13,15 +13,18 @@ import {
   Settings,
   Send,
   ExternalLink,
-  CreditCard
+  CreditCard,
+  User,
+  AlertTriangle
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
+import { ProfileTab } from '../components/dashboard/ProfileTab';
 import * as api from '../lib/api';
-import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse } from '../lib/api';
+import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -37,6 +40,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
 
   // New Property Form State
   const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });
@@ -64,12 +68,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   const fetchData = async () => {
     try {
-      const [propsData, statsData] = await Promise.all([
+      const [propsData, statsData, subData] = await Promise.all([
         api.getProperties(),
-        api.getStats()
+        api.getStats(),
+        api.getSubscription().catch(() => null)
       ]);
       setProperties(propsData);
       setStats(statsData);
+      if (subData) setSubscription(subData);
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
@@ -265,6 +271,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="properties" icon={Home} label="Meus Imoveis" />
           <NavItem id="whatsapp" icon={MessageCircle} label="Conexao WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
+          <NavItem id="profile" icon={User} label="Meu Perfil" />
           <NavItem id="settings" icon={Settings} label="Configuracoes" />
         </nav>
 
@@ -306,6 +313,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'properties' && 'Gerenciar Imoveis'}
             {activeTab === 'whatsapp' && 'Conexao WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
+            {activeTab === 'profile' && 'Meu Perfil'}
             {activeTab === 'settings' && 'Configuracoes'}
           </h2>
 
@@ -316,6 +324,26 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 relative">
+          {/* Trial Warning Banner */}
+          {subscription?.status === 'trialing' && subscription?.trialEndsAt && (
+            <div className="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                <div>
+                  <p className="text-yellow-400 font-medium">
+                    Seu trial termina em {Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} dias
+                  </p>
+                  <p className="text-sm text-yellow-400/70">
+                    Faca upgrade para continuar usando todas as funcionalidades.
+                  </p>
+                </div>
+              </div>
+              <Button variant="primary" onClick={() => setActiveTab('billing')}>
+                Fazer Upgrade
+              </Button>
+            </div>
+          )}
+
           {/* TAB: OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -522,6 +550,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {activeTab === 'billing' && (
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               <BillingTab />
+            </div>
+          )}
+
+          {/* TAB: PROFILE */}
+          {activeTab === 'profile' && (
+            <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ProfileTab onLogout={onLogout} />
             </div>
           )}
 
