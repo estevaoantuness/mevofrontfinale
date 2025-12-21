@@ -23,6 +23,7 @@ import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
+import { useAuth } from '../lib/AuthContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
 
@@ -32,6 +33,7 @@ interface DashboardProps {
 }
 
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [properties, setProperties] = useState<Property[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -261,7 +263,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       {/* Sidebar */}
       <aside className="w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex flex-col">
         <div className="h-14 flex items-center px-6 border-b border-white/5">
-          <Logo size="text-lg" />
+          <Logo size="text-lg" onClick={onGoToLanding} />
           <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">PRO</span>
         </div>
 
@@ -278,11 +280,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         <div className="p-4 border-t border-white/5">
           <div className="flex items-center mb-4 px-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
-              AD
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="ml-3 overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">Admin</p>
-              <p className="text-xs text-slate-500 truncate">admin@mevo.app</p>
+              <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuario'}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email || ''}</p>
             </div>
           </div>
           <div className="space-y-1">
