@@ -9,9 +9,15 @@ export default {
             colors: {
                 // Mevo brand colors
                 'mevo': {
+                    // Dark mode
                     'dark': '#050509',
                     'darker': '#080911',
                     'card': '#0B0C15',
+                    // Light mode
+                    'light': '#F8FAFC',
+                    'lighter': '#F1F5F9',
+                    'card-light': '#FFFFFF',
+                    // Shared
                     'primary': '#3B82F6',
                     'accent': '#06B6D4',
                 }

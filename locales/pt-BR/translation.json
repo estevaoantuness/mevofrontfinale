@@ -1,0 +1,564 @@
+{
+  "brand": {
+    "name": "mevo.ia",
+    "tagline": "Automacao para anfitrioes exigentes"
+  },
+  "nav": {
+    "login": "Fazer Login",
+    "register": "Criar Conta Gratis",
+    "myProperties": "Meus Imoveis",
+    "myProfile": "Meu Perfil",
+    "logout": "Sair",
+    "backToHome": "Voltar para Home"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Gestao Automatizada de Imoveis",
+      "title": "A Gestao do Seu Airbnb,",
+      "titleGradient": "Elevada a Perfeicao.",
+      "subtitle": "Automatize a limpeza com WhatsApp e sincronize calendarios. Nunca mais esqueca um checkout."
+    },
+    "cta": {
+      "createAccount": "Criar Minha Conta",
+      "login": "Fazer Login",
+      "startFree": "Comecar Gratis Agora",
+      "viewPlans": "Ver Planos"
+    },
+    "features": {
+      "icalSync": {
+        "title": "Sincronia iCal",
+        "desc": "Conecte Airbnb, Booking e VRBO em um so lugar. Atualizacao em tempo real."
+      },
+      "autoNotify": {
+        "title": "Avisos Automaticos",
+        "desc": "O Mevo avisa sua equipe de limpeza todo dia as 08:00. Zero intervencao humana."
+      },
+      "dashboard": {
+        "title": "Painel Unificado",
+        "desc": "Gerencie multiplos imoveis e status de limpeza em uma interface limpa."
+      },
+      "automations": {
+        "title": "Automacoes Inteligentes",
+        "desc": "Check-in, checkout, limpeza e reviews automatizados. Configure uma vez."
+      },
+      "security": {
+        "title": "Seguro e Confiavel",
+        "desc": "Seus dados protegidos com criptografia. Uptime de 99.9% garantido."
+      },
+      "saveTime": {
+        "title": "Economize Tempo",
+        "desc": "Reduza 80% do tempo gasto com gestao manual. Foque no que importa."
+      }
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Comece a automatizar em 3 passos simples",
+      "step1": {
+        "title": "Conecte seus calendarios",
+        "desc": "Cole os links iCal do Airbnb, Booking ou VRBO. Sincronizacao instantanea."
+      },
+      "step2": {
+        "title": "Configure sua equipe",
+        "desc": "Cadastre sua equipe de limpeza com nome e WhatsApp. Pronto para receber avisos."
+      },
+      "step3": {
+        "title": "Relaxe e acompanhe",
+        "desc": "O Mevo envia avisos automaticos. Voce so acompanha pelo painel."
+      }
+    },
+    "testimonials": {
+      "title": "O que dizem nossos clientes",
+      "testimonial1": {
+        "name": "Marina S.",
+        "role": "Superhost - SP",
+        "quote": "O Mevo mudou minha vida. Antes eu passava horas coordenando limpezas, agora e tudo automatico."
+      },
+      "testimonial2": {
+        "name": "Roberto C.",
+        "role": "8 imoveis - RJ",
+        "quote": "Gerencio 8 apartamentos sozinho gracas ao Mevo. A sincronia de calendarios e perfeita."
+      },
+      "testimonial3": {
+        "name": "Ana Paula M.",
+        "role": "Superhost - SC",
+        "quote": "Minha equipe de limpeza adora receber os avisos no WhatsApp. Nunca mais tive problemas com checkout."
+      }
+    },
+    "faq": {
+      "title": "Perguntas frequentes",
+      "q1": {
+        "question": "Preciso instalar algum aplicativo?",
+        "answer": "Nao! O Mevo funciona 100% pelo navegador. Basta fazer login e comecar a usar."
+      },
+      "q2": {
+        "question": "Funciona com Booking.com e VRBO?",
+        "answer": "Sim! Integramos via iCal com Airbnb, Booking.com, VRBO e qualquer plataforma que suporte calendario iCal."
+      },
+      "q3": {
+        "question": "Posso cancelar a qualquer momento?",
+        "answer": "Claro! Sem fidelidade, sem multas. Cancele quando quiser pelo painel."
+      },
+      "q4": {
+        "question": "Como funciona o trial de 10 dias?",
+        "answer": "O plano Pro oferece 10 dias gratis sem precisar de cartao. Teste todas as funcionalidades antes de decidir."
+      },
+      "q5": {
+        "question": "Meus dados estao seguros?",
+        "answer": "Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados nunca sao compartilhados."
+      }
+    },
+    "finalCta": {
+      "title": "Pronto para automatizar?",
+      "subtitle": "Junte-se a centenas de anfitrioes que ja economizam tempo com o Mevo. Comece gratis hoje mesmo."
+    },
+    "footer": {
+      "copyright": "mevo.ia - Automacao para anfitrioes exigentes."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar na sua conta",
+      "subtitle": "Acesse o painel do Mevo",
+      "email": "Email",
+      "password": "Senha",
+      "forgotPassword": "Esqueceu sua senha?",
+      "submit": "Fazer Login",
+      "submitting": "Entrando...",
+      "noAccount": "Ainda nao tem conta?",
+      "createAccount": "Criar conta gratis"
+    },
+    "register": {
+      "title": "Crie sua conta gratis",
+      "subtitle": "Comece agora - e gratis!",
+      "name": "Nome completo",
+      "namePlaceholder": "Seu nome",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Minimo 6 caracteres",
+      "confirmPassword": "Confirmar senha",
+      "confirmPasswordPlaceholder": "Digite a senha novamente",
+      "submit": "Criar Minha Conta",
+      "submitting": "Criando conta...",
+      "hasAccount": "Ja tem uma conta?",
+      "login": "Fazer login"
+    },
+    "forgotPassword": {
+      "title": "Recuperar senha",
+      "subtitle": "Digite seu email para receber o link",
+      "email": "Email",
+      "submit": "Enviar link",
+      "submitting": "Enviando...",
+      "success": "Email enviado! Verifique sua caixa de entrada.",
+      "backToLogin": "Voltar para login"
+    },
+    "resetPassword": {
+      "title": "Criar nova senha",
+      "subtitle": "Digite sua nova senha",
+      "password": "Nova senha",
+      "confirmPassword": "Confirmar nova senha",
+      "submit": "Redefinir senha",
+      "submitting": "Redefinindo...",
+      "success": "Senha alterada com sucesso!",
+      "goToLogin": "Ir para login"
+    },
+    "verifyEmail": {
+      "title": "Verificando email...",
+      "success": "Email verificado com sucesso!",
+      "error": "Link invalido ou expirado",
+      "goToDashboard": "Ir para o painel"
+    }
+  },
+  "pricing": {
+    "title": "Precos simples e transparentes",
+    "subtitle": "Escolha o plano ideal para o tamanho do seu negocio. Cancele quando quiser.",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "saveUp": "Economize ate 27%",
+    "perMonth": "/mes",
+    "orYearly": "ou R${{price}}/mes no anual",
+    "freeTrial": "{{days}} dias gratis",
+    "mostPopular": "Mais Popular",
+    "selectPlan": "Escolher Plano",
+    "startTrial": "Comecar Trial Gratis",
+    "contactSales": "Falar com Vendas",
+    "moneyBack": "Garantia de 7 dias. Nao gostou? Devolvemos seu dinheiro.",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Para quem esta comecando",
+        "features": {
+          "properties": "Ate 3 propriedades",
+          "ical": "Sync iCal (Airbnb/Booking/VRBO)",
+          "automations": "Automacoes basicas",
+          "users": "1 usuario",
+          "templates": "Templates com placeholders",
+          "whatsapp": "Integracao WhatsApp",
+          "support": "Suporte por email"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Para anfitrioes profissionais",
+        "features": {
+          "properties": "Ate 10 propriedades",
+          "includesStarter": "Tudo do Starter",
+          "ical": "Multi-canais iCal avancados",
+          "webhooks": "Webhooks para integracoes",
+          "priority": "Prioridade de fila",
+          "logs": "Logs completos",
+          "support": "Suporte prioritario"
+        }
+      },
+      "agency": {
+        "name": "Agency",
+        "description": "Para gestores de multiplas propriedades",
+        "features": {
+          "properties": "Ate 30 propriedades",
+          "includesPro": "Tudo do Pro",
+          "users": "Multiplos usuarios e permissoes",
+          "audit": "Auditoria e logs avancados",
+          "sla": "Suporte prioritario (SLA)",
+          "api": "API completa",
+          "whiteLabel": "White-label",
+          "manager": "Gerente de conta dedicado"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "overview": "Visao Geral",
+      "properties": "Imoveis",
+      "guests": "Hospedes",
+      "templates": "Templates",
+      "logs": "Logs",
+      "settings": "Configuracoes",
+      "billing": "Cobranca",
+      "profile": "Perfil",
+      "logout": "Sair"
+    },
+    "overview": {
+      "title": "Visao Geral",
+      "totalProperties": "Total de Imoveis",
+      "activeReservations": "Reservas Ativas",
+      "checkinsToday": "Check-ins Hoje",
+      "checkoutsToday": "Checkouts Hoje"
+    },
+    "calendar": {
+      "title": "Calendario",
+      "noSubscription": {
+        "title": "Calendario Sincronizado",
+        "description": "Ative o trial gratuito ou assine um plano para visualizar check-ins e checkouts automaticamente sincronizados com Airbnb, Booking e VRBO.",
+        "cta": "Ativar Trial Gratuito"
+      },
+      "filters": {
+        "all": "Todos",
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "cleaning": "Limpeza"
+      },
+      "events": {
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "cleaning": "Limpeza"
+      },
+      "noEvents": "Nenhum evento para este periodo"
+    },
+    "properties": {
+      "title": "Imoveis",
+      "add": "Adicionar Imovel",
+      "empty": "Nenhum imovel cadastrado",
+      "emptyDesc": "Adicione seu primeiro imovel para comecar",
+      "form": {
+        "name": "Nome do imovel",
+        "address": "Endereco",
+        "icalUrl": "URL do calendario iCal",
+        "icalPlaceholder": "https://airbnb.com/calendar/ical/...",
+        "responsibleName": "Nome do responsavel pela limpeza",
+        "responsiblePhone": "WhatsApp do responsavel",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "card": {
+        "lastSync": "Ultima sinc:",
+        "reservations": "reservas",
+        "edit": "Editar",
+        "delete": "Excluir"
+      }
+    },
+    "guests": {
+      "title": "Hospedes",
+      "add": "Adicionar Hospede",
+      "empty": "Nenhum hospede cadastrado",
+      "emptyDesc": "Hospedes aparecerao aqui quando houver reservas",
+      "form": {
+        "name": "Nome do hospede",
+        "email": "Email",
+        "phone": "Telefone",
+        "property": "Imovel",
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "notes": "Observacoes",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      }
+    },
+    "templates": {
+      "title": "Templates de Mensagem",
+      "add": "Novo Template",
+      "empty": "Nenhum template cadastrado",
+      "emptyDesc": "Crie templates para automatizar suas mensagens",
+      "form": {
+        "name": "Nome do template",
+        "type": "Tipo",
+        "types": {
+          "checkin": "Check-in",
+          "checkout": "Checkout",
+          "cleaning": "Limpeza",
+          "review": "Avaliacao",
+          "custom": "Personalizado"
+        },
+        "message": "Mensagem",
+        "placeholders": "Placeholders disponiveis",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "placeholders": {
+        "guestName": "Nome do hospede",
+        "propertyName": "Nome do imovel",
+        "checkinDate": "Data de check-in",
+        "checkoutDate": "Data de checkout",
+        "checkinTime": "Horario de check-in",
+        "checkoutTime": "Horario de checkout"
+      }
+    },
+    "logs": {
+      "title": "Logs de Atividade",
+      "empty": "Nenhum log disponivel",
+      "emptyDesc": "Os logs de atividade aparecerao aqui",
+      "filters": {
+        "all": "Todos",
+        "message": "Mensagens",
+        "sync": "Sincronizacao",
+        "error": "Erros"
+      },
+      "types": {
+        "message_sent": "Mensagem enviada",
+        "sync_completed": "Sincronizacao concluida",
+        "sync_failed": "Falha na sincronizacao",
+        "property_created": "Imovel criado",
+        "property_updated": "Imovel atualizado",
+        "reservation_created": "Reserva criada"
+      }
+    },
+    "settings": {
+      "title": "Configuracoes",
+      "subtitle": "Ajuste o comportamento do sistema",
+      "save": "Salvar Configuracoes",
+      "saving": "Salvando...",
+      "saved": "Salvo!",
+      "sections": {
+        "defaultTimes": {
+          "title": "Horarios Padrao",
+          "subtitle": "Defina os horarios padrao para check-in e checkout",
+          "checkin": "Check-in Padrao",
+          "checkout": "Checkout Padrao",
+          "cleaningBuffer": "Buffer de Limpeza",
+          "minutes": "min"
+        },
+        "notifications": {
+          "title": "Notificacoes",
+          "subtitle": "Configure quando as notificacoes sao enviadas",
+          "checkinReminder": "Lembrete de Check-in",
+          "hoursBefore": "horas antes",
+          "reviewRequest": "Pedir Review Apos",
+          "days": "dias",
+          "quietHours": "Horario de Silencio (nao enviar mensagens)",
+          "until": "ate"
+        },
+        "automation": {
+          "title": "Automacao",
+          "subtitle": "Ative ou desative funcionalidades automaticas",
+          "autoCreateGuests": "Criar hospedes automaticamente de reservas",
+          "autoSendWelcome": "Enviar mensagem de boas-vindas automaticamente",
+          "autoSendReminders": "Enviar lembretes de check-in automaticamente"
+        },
+        "cleaningMessage": {
+          "title": "Mensagem para Equipe de Limpeza",
+          "template": "Template da mensagem",
+          "templatePlaceholder": "Digite o template da mensagem...",
+          "templateHelp": "Use {{responsibleName}} e {{propertyName}} para personalizar",
+          "sendTime": "Horario de envio",
+          "preview": "Preview:"
+        }
+      }
+    },
+    "billing": {
+      "title": "Cobranca",
+      "currentPlan": "Plano Atual",
+      "noPlan": "Sem plano ativo",
+      "status": {
+        "active": "Ativo",
+        "trialing": "Em trial",
+        "past_due": "Pagamento pendente",
+        "canceled": "Cancelado",
+        "paused": "Pausado"
+      },
+      "trialEnds": "Trial termina em",
+      "nextBilling": "Proxima cobranca",
+      "changePlan": "Trocar Plano",
+      "cancelPlan": "Cancelar Plano",
+      "manageBilling": "Gerenciar Cobranca",
+      "usage": {
+        "title": "Uso do Plano",
+        "properties": "Imoveis",
+        "of": "de"
+      }
+    },
+    "profile": {
+      "title": "Meu Perfil",
+      "personalInfo": "Informacoes Pessoais",
+      "name": "Nome",
+      "email": "Email",
+      "phone": "Telefone",
+      "save": "Salvar Alteracoes",
+      "changePassword": {
+        "title": "Alterar Senha",
+        "current": "Senha atual",
+        "new": "Nova senha",
+        "confirm": "Confirmar nova senha",
+        "submit": "Alterar Senha"
+      },
+      "deleteAccount": {
+        "title": "Excluir Conta",
+        "description": "Esta acao e irreversivel. Todos os seus dados serao excluidos permanentemente.",
+        "button": "Excluir Minha Conta",
+        "confirm": "Digite 'EXCLUIR' para confirmar"
+      }
+    }
+  },
+  "checkout": {
+    "title": "Finalizar Compra",
+    "plan": "Plano selecionado",
+    "interval": {
+      "monthly": "Cobranca mensal",
+      "yearly": "Cobranca anual"
+    },
+    "total": "Total",
+    "perMonth": "/mes",
+    "startTrial": "Comecar Trial Gratis",
+    "trialInfo": "{{days}} dias gratis, depois R${{price}}/mes",
+    "subscribe": "Assinar Agora",
+    "processing": "Processando...",
+    "securePayment": "Pagamento seguro via Stripe",
+    "trialSuccess": {
+      "title": "Trial ativado!",
+      "description": "Aproveite {{days}} dias gratis do plano {{plan}}",
+      "redirecting": "Redirecionando..."
+    }
+  },
+  "modals": {
+    "confirm": {
+      "title": "Confirmar acao",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    },
+    "delete": {
+      "title": "Excluir {{item}}?",
+      "description": "Esta acao nao pode ser desfeita.",
+      "cancel": "Cancelar",
+      "delete": "Excluir"
+    },
+    "subscriptionRequired": {
+      "title": "Assinatura Necessaria",
+      "description": "Esta funcionalidade requer um plano ativo.",
+      "viewPlans": "Ver Planos",
+      "startTrial": "Comecar Trial"
+    },
+    "emailVerification": {
+      "title": "Verifique seu email",
+      "description": "Enviamos um link de verificacao para {{email}}",
+      "resend": "Reenviar email",
+      "resending": "Enviando...",
+      "resent": "Email reenviado!"
+    }
+  },
+  "errors": {
+    "generic": "Ocorreu um erro. Tente novamente.",
+    "network": "Erro de conexao. Verifique sua internet.",
+    "unauthorized": "Sessao expirada. Faca login novamente.",
+    "notFound": "Recurso nao encontrado.",
+    "validation": {
+      "required": "Este campo e obrigatorio",
+      "email": "Email invalido",
+      "minLength": "Minimo de {{min}} caracteres",
+      "maxLength": "Maximo de {{max}} caracteres",
+      "passwordMatch": "As senhas nao coincidem",
+      "phone": "Telefone invalido"
+    },
+    "auth": {
+      "invalidCredentials": "Email ou senha incorretos",
+      "userNotFound": "Usuario nao encontrado",
+      "emailExists": "Este email ja esta cadastrado",
+      "weakPassword": "A senha deve ter pelo menos 6 caracteres",
+      "tokenExpired": "Link expirado. Solicite um novo.",
+      "tokenInvalid": "Link invalido. Solicite um novo.",
+      "emailNotVerified": "Confirme seu email para continuar"
+    },
+    "subscription": {
+      "required": "Assinatura necessaria",
+      "inactive": "Assinatura inativa. Renove para continuar.",
+      "propertyLimit": "Limite de imoveis atingido. Faca upgrade do plano.",
+      "freeLimit": "Limite gratuito atingido. Ative o trial ou assine.",
+      "trialAlreadyUsed": "Voce ja utilizou o periodo de teste",
+      "featureNotAvailable": "Recurso nao disponivel no seu plano atual"
+    },
+    "property": {
+      "notFound": "Imovel nao encontrado",
+      "icalInvalid": "URL do calendario iCal invalida",
+      "syncFailed": "Falha ao sincronizar calendario"
+    },
+    "whatsapp": {
+      "notConnected": "WhatsApp nao conectado",
+      "sendFailed": "Falha ao enviar mensagem"
+    }
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Proximo",
+    "previous": "Anterior",
+    "loading": "Carregando...",
+    "success": "Sucesso!",
+    "error": "Erro",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpar",
+    "all": "Todos",
+    "none": "Nenhum",
+    "yes": "Sim",
+    "no": "Nao",
+    "or": "ou",
+    "and": "e",
+    "of": "de",
+    "to": "ate",
+    "from": "de"
+  },
+  "time": {
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "tomorrow": "Amanha",
+    "days": "dias",
+    "hours": "horas",
+    "minutes": "minutos",
+    "ago": "atras",
+    "in": "em"
+  }
+}

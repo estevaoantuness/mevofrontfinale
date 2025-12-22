@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { CheckoutModal } from '../components/billing/CheckoutModal';
 import { useAuth } from '../lib/AuthContext';
+import { useTheme } from '../lib/ThemeContext';
+import { useTranslatedError } from '../hooks/useTranslatedError';
 
 // Planos para o CheckoutModal
 const PLANS_DATA = {
@@ -18,7 +23,10 @@ interface RegisterPageProps {
 }
 
 export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPageProps) => {
+  const { t } = useTranslation();
+  const { isDark } = useTheme();
   const { register } = useAuth();
+  const { translateError } = useTranslatedError();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,21 +44,21 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
     setLoading(true);
     setError('');
 
-    // Validacoes
+    // Validations
     if (!name || !email || !password || !confirmPassword) {
-      setError('Preencha todos os campos');
+      setError(t('errors.validation.required'));
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem');
+      setError(t('errors.validation.passwordMatch'));
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('A senha deve ter no minimo 6 caracteres');
+      setError(t('errors.auth.weakPassword'));
       setLoading(false);
       return;
     }
@@ -58,7 +66,7 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
     try {
       await register(name, email, password);
 
-      // Verificar se há plano pendente (selecionado na landing page)
+      // Check for pending plan (selected on landing page)
       const pendingPlan = localStorage.getItem('mevo_pending_plan');
       if (pendingPlan) {
         const { planId, interval } = JSON.parse(pendingPlan);
@@ -73,72 +81,78 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
 
       onRegisterSuccess();
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar conta');
+      setError(translateError(err));
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050509] p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#050509] to-[#050509] -z-10" />
+    <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden ${isDark ? 'bg-[#050509]' : 'bg-[#F8FAFC]'}`}>
+      {/* Language/Theme Controls */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <LanguageSwitcher compact />
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-sm bg-[#0B0C15] border border-white/10 rounded-2xl p-8 shadow-2xl">
+      <div className={`absolute inset-0 -z-10 ${isDark ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#050509] to-[#050509]' : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-[#F8FAFC] to-[#F8FAFC]'}`} />
+
+      <div className={`w-full max-w-sm border rounded-2xl p-8 shadow-2xl ${isDark ? 'bg-[#0B0C15] border-white/10' : 'bg-white border-slate-200'}`}>
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center"><Logo /></div>
-          <h2 className="text-xl font-medium text-white mb-2">Crie sua conta gratis</h2>
-          <p className="text-sm text-slate-500">Comece agora - e gratis!</p>
+          <h2 className={`text-xl font-medium mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('auth.register.title')}</h2>
+          <p className="text-sm text-slate-500">{t('auth.register.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Nome completo"
+            label={t('auth.register.name')}
             type="text"
-            placeholder="Seu nome"
+            placeholder={t('auth.register.namePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
           <Input
-            label="Email"
+            label={t('auth.register.email')}
             type="email"
-            placeholder="seu@email.com"
+            placeholder={t('auth.register.emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <Input
-            label="Senha"
+            label={t('auth.register.password')}
             type="password"
-            placeholder="Minimo 6 caracteres"
+            placeholder={t('auth.register.passwordPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
           <Input
-            label="Confirmar senha"
+            label={t('auth.register.confirmPassword')}
             type="password"
-            placeholder="Digite a senha novamente"
+            placeholder={t('auth.register.confirmPasswordPlaceholder')}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
+            <div className={`p-3 rounded-lg text-xs text-center ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
               {error}
             </div>
           )}
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? 'Criando conta...' : 'Criar Minha Conta'}
+            {loading ? t('auth.register.submitting') : t('auth.register.submit')}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-500">
-            Ja tem uma conta?{' '}
+            {t('auth.register.hasAccount')}{' '}
             <button onClick={onGoToLogin} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
-              Fazer login
+              {t('auth.register.login')}
             </button>
           </p>
         </div>

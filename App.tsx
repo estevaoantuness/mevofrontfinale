@@ -1,13 +1,16 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { ThemeProvider } from './lib/ThemeContext';
+import './lib/i18n'; // Initialize i18n
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
-import { ForgotPasswordPage } from './pages/ForgotPassword';
-import { ResetPasswordPage } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
+import { VerifyEmailPage } from './pages/VerifyEmail';
+import { ForgotPasswordPage } from './pages/ForgotPassword';
+import { ResetPasswordPage } from './pages/ResetPassword';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -47,21 +50,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Reset Password Wrapper to extract token from URL
-function ResetPasswordWrapper() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const token = searchParams.get('token') || '';
-
-  return (
-    <ResetPasswordPage
-      token={token}
-      onGoToLogin={() => navigate('/forgot-password')}
-      onBack={() => navigate('/')}
-    />
-  );
-}
-
 function AppRoutes() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -85,18 +73,6 @@ function AppRoutes() {
       />
 
       <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage
-              onRegisterSuccess={() => navigate('/dashboard')}
-              onGoToLogin={() => navigate('/login')}
-            />
-          </PublicRoute>
-        }
-      />
-
-      <Route
         path="/forgot-password"
         element={
           <PublicRoute>
@@ -112,7 +88,21 @@ function AppRoutes() {
         path="/reset-password"
         element={
           <PublicRoute>
-            <ResetPasswordWrapper />
+            <ResetPasswordPage
+              onGoToLogin={() => navigate('/login')}
+            />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage
+              onRegisterSuccess={() => navigate('/dashboard')}
+              onGoToLogin={() => navigate('/login')}
+            />
           </PublicRoute>
         }
       />
@@ -138,6 +128,17 @@ function AppRoutes() {
       {/* Checkout cancel - redirect to dashboard */}
       <Route path="/checkout/cancel" element={<Navigate to="/dashboard" replace />} />
 
+      {/* Email Verification - accessible without auth */}
+      <Route
+        path="/verify-email"
+        element={
+          <VerifyEmailPage
+            onGoToDashboard={() => navigate('/dashboard')}
+            onGoToLogin={() => navigate('/login')}
+          />
+        }
+      />
+
       {/* 404 - Redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -146,10 +147,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

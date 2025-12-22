@@ -27,23 +27,85 @@
       }
     </script>
 
-    <!-- Global Styles -->
+    <!-- Global Styles & Theme Variables -->
     <style>
+      /* Theme CSS Variables */
+      :root {
+        /* Dark mode (default) */
+        --bg-main: #050509;
+        --bg-secondary: #080911;
+        --bg-card: #0B0C15;
+        --bg-input: rgba(255, 255, 255, 0.05);
+        --bg-hover: rgba(255, 255, 255, 0.08);
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-default: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(255, 255, 255, 0.15);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        --error-bg: rgba(239, 68, 68, 0.1);
+        --error-text: #f87171;
+        --error-border: rgba(239, 68, 68, 0.2);
+        --success-bg: rgba(34, 197, 94, 0.1);
+        --success-text: #4ade80;
+        --success-border: rgba(34, 197, 94, 0.2);
+        --warning-bg: rgba(234, 179, 8, 0.1);
+        --warning-text: #fbbf24;
+        --warning-border: rgba(234, 179, 8, 0.2);
+      }
+
+      [data-theme="light"] {
+        /* Light mode */
+        --bg-main: #F8FAFC;
+        --bg-secondary: #F1F5F9;
+        --bg-card: #FFFFFF;
+        --bg-input: #F1F5F9;
+        --bg-hover: #E2E8F0;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --border-default: #E2E8F0;
+        --border-hover: #CBD5E1;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --error-bg: #FEF2F2;
+        --error-text: #DC2626;
+        --error-border: #FECACA;
+        --success-bg: #F0FDF4;
+        --success-text: #16A34A;
+        --success-border: #BBF7D0;
+        --warning-bg: #FFFBEB;
+        --warning-text: #D97706;
+        --warning-border: #FDE68A;
+      }
+
       body {
         font-family: 'Geist', system-ui, -apple-system, sans-serif;
-        background: #000000;
-        color: #ffffff;
+        background: var(--bg-main);
+        color: var(--text-primary);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
       ::selection {
-        background: rgba(221, 123, 187, 0.3);
-        color: white;
+        background: rgba(59, 130, 246, 0.3);
+        color: var(--text-primary);
       }
+
+      /* Theme utility classes */
+      .theme-bg-main { background-color: var(--bg-main); }
+      .theme-bg-secondary { background-color: var(--bg-secondary); }
+      .theme-bg-card { background-color: var(--bg-card); }
+      .theme-bg-input { background-color: var(--bg-input); }
+      .theme-bg-hover:hover { background-color: var(--bg-hover); }
+      .theme-text-primary { color: var(--text-primary); }
+      .theme-text-secondary { color: var(--text-secondary); }
+      .theme-text-muted { color: var(--text-muted); }
+      .theme-border { border-color: var(--border-default); }
+      .theme-border-hover:hover { border-color: var(--border-hover); }
     </style>
 
     <!-- Import Map for dependencies -->

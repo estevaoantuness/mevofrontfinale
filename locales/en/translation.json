@@ -1,0 +1,564 @@
+{
+  "brand": {
+    "name": "mevo.ai",
+    "tagline": "Automation for demanding hosts"
+  },
+  "nav": {
+    "login": "Sign In",
+    "register": "Create Free Account",
+    "myProperties": "My Properties",
+    "myProfile": "My Profile",
+    "logout": "Sign Out",
+    "backToHome": "Back to Home"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Automated Property Management",
+      "title": "Your Airbnb Management,",
+      "titleGradient": "Elevated to Perfection.",
+      "subtitle": "Automate cleaning with WhatsApp and sync calendars. Never miss a checkout again."
+    },
+    "cta": {
+      "createAccount": "Create My Account",
+      "login": "Sign In",
+      "startFree": "Start Free Now",
+      "viewPlans": "View Plans"
+    },
+    "features": {
+      "icalSync": {
+        "title": "iCal Sync",
+        "desc": "Connect Airbnb, Booking and VRBO in one place. Real-time updates."
+      },
+      "autoNotify": {
+        "title": "Auto Notifications",
+        "desc": "Mevo notifies your cleaning team every day at 08:00. Zero human intervention."
+      },
+      "dashboard": {
+        "title": "Unified Dashboard",
+        "desc": "Manage multiple properties and cleaning status in a clean interface."
+      },
+      "automations": {
+        "title": "Smart Automations",
+        "desc": "Check-in, checkout, cleaning and reviews automated. Set up once."
+      },
+      "security": {
+        "title": "Secure & Reliable",
+        "desc": "Your data protected with encryption. 99.9% uptime guaranteed."
+      },
+      "saveTime": {
+        "title": "Save Time",
+        "desc": "Reduce 80% of time spent on manual management. Focus on what matters."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Start automating in 3 simple steps",
+      "step1": {
+        "title": "Connect your calendars",
+        "desc": "Paste iCal links from Airbnb, Booking or VRBO. Instant sync."
+      },
+      "step2": {
+        "title": "Set up your team",
+        "desc": "Add your cleaning team with name and WhatsApp. Ready to receive alerts."
+      },
+      "step3": {
+        "title": "Relax and monitor",
+        "desc": "Mevo sends automatic alerts. You just monitor from the dashboard."
+      }
+    },
+    "testimonials": {
+      "title": "What our customers say",
+      "testimonial1": {
+        "name": "Marina S.",
+        "role": "Superhost - SP",
+        "quote": "Mevo changed my life. I used to spend hours coordinating cleanings, now it's all automatic."
+      },
+      "testimonial2": {
+        "name": "Roberto C.",
+        "role": "8 properties - RJ",
+        "quote": "I manage 8 apartments by myself thanks to Mevo. The calendar sync is perfect."
+      },
+      "testimonial3": {
+        "name": "Ana Paula M.",
+        "role": "Superhost - SC",
+        "quote": "My cleaning team loves receiving alerts on WhatsApp. Never had checkout issues again."
+      }
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "q1": {
+        "question": "Do I need to install any app?",
+        "answer": "No! Mevo works 100% in your browser. Just log in and start using."
+      },
+      "q2": {
+        "question": "Does it work with Booking.com and VRBO?",
+        "answer": "Yes! We integrate via iCal with Airbnb, Booking.com, VRBO and any platform that supports iCal calendars."
+      },
+      "q3": {
+        "question": "Can I cancel anytime?",
+        "answer": "Of course! No contracts, no penalties. Cancel whenever you want from the dashboard."
+      },
+      "q4": {
+        "question": "How does the 10-day trial work?",
+        "answer": "The Pro plan offers 10 free days without requiring a credit card. Test all features before deciding."
+      },
+      "q5": {
+        "question": "Is my data secure?",
+        "answer": "Yes! We use end-to-end encryption and secure servers. Your data is never shared."
+      }
+    },
+    "finalCta": {
+      "title": "Ready to automate?",
+      "subtitle": "Join hundreds of hosts already saving time with Mevo. Start free today."
+    },
+    "footer": {
+      "copyright": "mevo.ai - Automation for demanding hosts."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Access Mevo dashboard",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create free account"
+    },
+    "register": {
+      "title": "Create your free account",
+      "subtitle": "Start now - it's free!",
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Enter password again",
+      "submit": "Create My Account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter your email to receive the link",
+      "email": "Email",
+      "submit": "Send link",
+      "submitting": "Sending...",
+      "success": "Email sent! Check your inbox.",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Create new password",
+      "subtitle": "Enter your new password",
+      "password": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
+      "success": "Password changed successfully!",
+      "goToLogin": "Go to login"
+    },
+    "verifyEmail": {
+      "title": "Verifying email...",
+      "success": "Email verified successfully!",
+      "error": "Invalid or expired link",
+      "goToDashboard": "Go to dashboard"
+    }
+  },
+  "pricing": {
+    "title": "Simple and transparent pricing",
+    "subtitle": "Choose the ideal plan for your business size. Cancel anytime.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "saveUp": "Save up to 27%",
+    "perMonth": "/month",
+    "orYearly": "or ${{price}}/month yearly",
+    "freeTrial": "{{days}} days free",
+    "mostPopular": "Most Popular",
+    "selectPlan": "Select Plan",
+    "startTrial": "Start Free Trial",
+    "contactSales": "Contact Sales",
+    "moneyBack": "7-day guarantee. Not satisfied? We'll refund your money.",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "For those just starting",
+        "features": {
+          "properties": "Up to 3 properties",
+          "ical": "iCal Sync (Airbnb/Booking/VRBO)",
+          "automations": "Basic automations",
+          "users": "1 user",
+          "templates": "Templates with placeholders",
+          "whatsapp": "WhatsApp integration",
+          "support": "Email support"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For professional hosts",
+        "features": {
+          "properties": "Up to 10 properties",
+          "includesStarter": "Everything in Starter",
+          "ical": "Advanced multi-channel iCal",
+          "webhooks": "Webhooks for integrations",
+          "priority": "Queue priority",
+          "logs": "Full logs",
+          "support": "Priority support"
+        }
+      },
+      "agency": {
+        "name": "Agency",
+        "description": "For multi-property managers",
+        "features": {
+          "properties": "Up to 30 properties",
+          "includesPro": "Everything in Pro",
+          "users": "Multiple users and permissions",
+          "audit": "Audit and advanced logs",
+          "sla": "Priority support (SLA)",
+          "api": "Full API",
+          "whiteLabel": "White-label",
+          "manager": "Dedicated account manager"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "overview": "Overview",
+      "properties": "Properties",
+      "guests": "Guests",
+      "templates": "Templates",
+      "logs": "Logs",
+      "settings": "Settings",
+      "billing": "Billing",
+      "profile": "Profile",
+      "logout": "Sign Out"
+    },
+    "overview": {
+      "title": "Overview",
+      "totalProperties": "Total Properties",
+      "activeReservations": "Active Reservations",
+      "checkinsToday": "Check-ins Today",
+      "checkoutsToday": "Checkouts Today"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "noSubscription": {
+        "title": "Synced Calendar",
+        "description": "Activate the free trial or subscribe to a plan to view check-ins and checkouts automatically synced with Airbnb, Booking and VRBO.",
+        "cta": "Start Free Trial"
+      },
+      "filters": {
+        "all": "All",
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "cleaning": "Cleaning"
+      },
+      "events": {
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "cleaning": "Cleaning"
+      },
+      "noEvents": "No events for this period"
+    },
+    "properties": {
+      "title": "Properties",
+      "add": "Add Property",
+      "empty": "No properties registered",
+      "emptyDesc": "Add your first property to get started",
+      "form": {
+        "name": "Property name",
+        "address": "Address",
+        "icalUrl": "iCal calendar URL",
+        "icalPlaceholder": "https://airbnb.com/calendar/ical/...",
+        "responsibleName": "Cleaning responsible name",
+        "responsiblePhone": "Responsible's WhatsApp",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "card": {
+        "lastSync": "Last sync:",
+        "reservations": "reservations",
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "guests": {
+      "title": "Guests",
+      "add": "Add Guest",
+      "empty": "No guests registered",
+      "emptyDesc": "Guests will appear here when there are reservations",
+      "form": {
+        "name": "Guest name",
+        "email": "Email",
+        "phone": "Phone",
+        "property": "Property",
+        "checkin": "Check-in",
+        "checkout": "Checkout",
+        "notes": "Notes",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "templates": {
+      "title": "Message Templates",
+      "add": "New Template",
+      "empty": "No templates registered",
+      "emptyDesc": "Create templates to automate your messages",
+      "form": {
+        "name": "Template name",
+        "type": "Type",
+        "types": {
+          "checkin": "Check-in",
+          "checkout": "Checkout",
+          "cleaning": "Cleaning",
+          "review": "Review",
+          "custom": "Custom"
+        },
+        "message": "Message",
+        "placeholders": "Available placeholders",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "placeholders": {
+        "guestName": "Guest name",
+        "propertyName": "Property name",
+        "checkinDate": "Check-in date",
+        "checkoutDate": "Checkout date",
+        "checkinTime": "Check-in time",
+        "checkoutTime": "Checkout time"
+      }
+    },
+    "logs": {
+      "title": "Activity Logs",
+      "empty": "No logs available",
+      "emptyDesc": "Activity logs will appear here",
+      "filters": {
+        "all": "All",
+        "message": "Messages",
+        "sync": "Sync",
+        "error": "Errors"
+      },
+      "types": {
+        "message_sent": "Message sent",
+        "sync_completed": "Sync completed",
+        "sync_failed": "Sync failed",
+        "property_created": "Property created",
+        "property_updated": "Property updated",
+        "reservation_created": "Reservation created"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Adjust system behavior",
+      "save": "Save Settings",
+      "saving": "Saving...",
+      "saved": "Saved!",
+      "sections": {
+        "defaultTimes": {
+          "title": "Default Times",
+          "subtitle": "Set default times for check-in and checkout",
+          "checkin": "Default Check-in",
+          "checkout": "Default Checkout",
+          "cleaningBuffer": "Cleaning Buffer",
+          "minutes": "min"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "subtitle": "Configure when notifications are sent",
+          "checkinReminder": "Check-in Reminder",
+          "hoursBefore": "hours before",
+          "reviewRequest": "Request Review After",
+          "days": "days",
+          "quietHours": "Quiet Hours (don't send messages)",
+          "until": "until"
+        },
+        "automation": {
+          "title": "Automation",
+          "subtitle": "Enable or disable automatic features",
+          "autoCreateGuests": "Auto-create guests from reservations",
+          "autoSendWelcome": "Auto-send welcome message",
+          "autoSendReminders": "Auto-send check-in reminders"
+        },
+        "cleaningMessage": {
+          "title": "Cleaning Team Message",
+          "template": "Message template",
+          "templatePlaceholder": "Enter message template...",
+          "templateHelp": "Use {{responsibleName}} and {{propertyName}} to customize",
+          "sendTime": "Send time",
+          "preview": "Preview:"
+        }
+      }
+    },
+    "billing": {
+      "title": "Billing",
+      "currentPlan": "Current Plan",
+      "noPlan": "No active plan",
+      "status": {
+        "active": "Active",
+        "trialing": "Trial",
+        "past_due": "Payment due",
+        "canceled": "Canceled",
+        "paused": "Paused"
+      },
+      "trialEnds": "Trial ends in",
+      "nextBilling": "Next billing",
+      "changePlan": "Change Plan",
+      "cancelPlan": "Cancel Plan",
+      "manageBilling": "Manage Billing",
+      "usage": {
+        "title": "Plan Usage",
+        "properties": "Properties",
+        "of": "of"
+      }
+    },
+    "profile": {
+      "title": "My Profile",
+      "personalInfo": "Personal Information",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "save": "Save Changes",
+      "changePassword": {
+        "title": "Change Password",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Confirm new password",
+        "submit": "Change Password"
+      },
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "This action is irreversible. All your data will be permanently deleted.",
+        "button": "Delete My Account",
+        "confirm": "Type 'DELETE' to confirm"
+      }
+    }
+  },
+  "checkout": {
+    "title": "Complete Purchase",
+    "plan": "Selected plan",
+    "interval": {
+      "monthly": "Monthly billing",
+      "yearly": "Yearly billing"
+    },
+    "total": "Total",
+    "perMonth": "/month",
+    "startTrial": "Start Free Trial",
+    "trialInfo": "{{days}} days free, then ${{price}}/month",
+    "subscribe": "Subscribe Now",
+    "processing": "Processing...",
+    "securePayment": "Secure payment via Stripe",
+    "trialSuccess": {
+      "title": "Trial activated!",
+      "description": "Enjoy {{days}} free days of the {{plan}} plan",
+      "redirecting": "Redirecting..."
+    }
+  },
+  "modals": {
+    "confirm": {
+      "title": "Confirm action",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "delete": {
+      "title": "Delete {{item}}?",
+      "description": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "subscriptionRequired": {
+      "title": "Subscription Required",
+      "description": "This feature requires an active plan.",
+      "viewPlans": "View Plans",
+      "startTrial": "Start Trial"
+    },
+    "emailVerification": {
+      "title": "Verify your email",
+      "description": "We sent a verification link to {{email}}",
+      "resend": "Resend email",
+      "resending": "Sending...",
+      "resent": "Email resent!"
+    }
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "network": "Connection error. Check your internet.",
+    "unauthorized": "Session expired. Please sign in again.",
+    "notFound": "Resource not found.",
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email",
+      "minLength": "Minimum {{min}} characters",
+      "maxLength": "Maximum {{max}} characters",
+      "passwordMatch": "Passwords do not match",
+      "phone": "Invalid phone number"
+    },
+    "auth": {
+      "invalidCredentials": "Invalid email or password",
+      "userNotFound": "User not found",
+      "emailExists": "This email is already registered",
+      "weakPassword": "Password must be at least 6 characters",
+      "tokenExpired": "Link expired. Request a new one.",
+      "tokenInvalid": "Invalid link. Request a new one.",
+      "emailNotVerified": "Please verify your email to continue"
+    },
+    "subscription": {
+      "required": "Subscription required",
+      "inactive": "Subscription inactive. Renew to continue.",
+      "propertyLimit": "Property limit reached. Upgrade your plan.",
+      "freeLimit": "Free limit reached. Start a trial or subscribe.",
+      "trialAlreadyUsed": "You've already used the trial period",
+      "featureNotAvailable": "Feature not available on your current plan"
+    },
+    "property": {
+      "notFound": "Property not found",
+      "icalInvalid": "Invalid iCal calendar URL",
+      "syncFailed": "Failed to sync calendar"
+    },
+    "whatsapp": {
+      "notConnected": "WhatsApp not connected",
+      "sendFailed": "Failed to send message"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "loading": "Loading...",
+    "success": "Success!",
+    "error": "Error",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "of": "of",
+    "to": "to",
+    "from": "from"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "minutes",
+    "ago": "ago",
+    "in": "in"
+  }
+}
