@@ -41,6 +41,46 @@ export interface MessageLog {
   status: string;
 }
 
+export interface Guest {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface Reservation {
+  id: number;
+  propertyId: number;
+  guestId?: number;
+  checkinDate: string;
+  checkoutDate: string;
+  checkinTime?: string;
+  checkoutTime?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  source?: string;
+  externalId?: string;
+  notes?: string;
+  totalAmount?: number;
+  property?: { id: number; name: string };
+  guest?: Guest;
+  createdAt: string;
+}
+
+export interface ReservationsResponse {
+  reservations: Reservation[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface TodayReservations {
+  checkins: Reservation[];
+  checkouts: Reservation[];
+}
+
 export interface Settings {
   message_template: string;
   send_time: string;
@@ -181,6 +221,35 @@ export async function getLogs(): Promise<MessageLog[]> {
 
 export async function runWorker(): Promise<void> {
   await apiFetch<void>('/dashboard/run-worker', { method: 'POST' });
+}
+
+// Reservations
+export async function getReservations(params?: {
+  propertyId?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<ReservationsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.propertyId) searchParams.append('propertyId', params.propertyId.toString());
+  if (params?.startDate) searchParams.append('startDate', params.startDate);
+  if (params?.endDate) searchParams.append('endDate', params.endDate);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  if (params?.offset) searchParams.append('offset', params.offset.toString());
+
+  const query = searchParams.toString();
+  return apiFetch<ReservationsResponse>(`/reservations${query ? `?${query}` : ''}`);
+}
+
+export async function getReservationsToday(): Promise<TodayReservations> {
+  return apiFetch<TodayReservations>('/reservations/today');
+}
+
+export async function getReservationsUpcoming(): Promise<Reservation[]> {
+  return apiFetch<Reservation[]>('/reservations/upcoming');
 }
 
 // Settings

@@ -24,6 +24,7 @@ import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
+import { CalendarView } from '../components/dashboard/CalendarView';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useAuth } from '../lib/AuthContext';
@@ -405,36 +406,24 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: OVERVIEW */}
           {activeTab === 'overview' && (
-            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {[
-                  { label: 'Imoveis Ativos', val: stats.totalProperties },
-                  { label: 'Mensagens Hoje', val: stats.messagesToday },
-                  { label: 'Mensagens no Mes', val: stats.messagesThisMonth }
-                ].map((stat, i) => (
-                  <div key={i} className="bg-[#0B0C15] border border-white/5 p-6 rounded-xl hover:border-white/10 transition-colors">
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">{stat.label}</p>
-                    <p className="text-3xl font-semibold text-white">{stat.val}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="max-w-6xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Calendário de Reservas */}
+              <CalendarView properties={properties} stats={stats} />
 
-              <div className="bg-[#0B0C15]/50 border border-white/5 rounded-xl p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-slate-300 font-medium mb-1">Executar Worker Manualmente</h3>
-                    <p className="text-slate-500 text-sm">Processa checkouts e envia mensagens agora (sem esperar 08:00)</p>
+              {/* Ações Rápidas */}
+              <div className="mt-6 bg-[#0B0C15]/50 border border-white/5 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-white/[0.02] rounded-lg">
+                      <div className={`w-2 h-2 rounded-full ${whatsappStatus.connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <span className="text-sm text-slate-400">
+                        WhatsApp: {whatsappStatus.connected ? `Conectado (${whatsappStatus.phone || 'verificando...'})` : 'Desconectado'}
+                      </span>
+                    </div>
                   </div>
                   <Button onClick={handleRunWorker} variant="secondary">
-                    <RefreshCw size={16} className="mr-2" /> Executar Agora
+                    <RefreshCw size={16} className="mr-2" /> Executar Worker
                   </Button>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-lg">
-                  <div className={`w-2 h-2 rounded-full ${whatsappStatus.connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                  <span className="text-sm text-slate-400">
-                    WhatsApp: {whatsappStatus.connected ? `Conectado (${whatsappStatus.phone || 'verificando...'})` : 'Desconectado'}
-                  </span>
                 </div>
               </div>
             </div>
