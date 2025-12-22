@@ -187,6 +187,25 @@ export async function updateMe(data: { name?: string; email?: string; password?:
   });
 }
 
+// Password Reset
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}
+
+export async function verifyResetToken(token: string): Promise<{ valid: boolean; error?: string }> {
+  return apiFetch<{ valid: boolean; error?: string }>(`/auth/verify-reset-token?token=${token}`);
+}
+
 // Properties
 export async function getProperties(): Promise<Property[]> {
   return apiFetch<Property[]>('/properties');
@@ -450,6 +469,97 @@ export async function deleteAccount(confirmation: string): Promise<{ message: st
   return apiFetch<{ message: string }>('/profile', {
     method: 'DELETE',
     body: JSON.stringify({ confirmation }),
+  });
+}
+
+// Message Templates Types
+export interface MessageTemplate {
+  id: number;
+  name: string;
+  type: string;
+  channel: string;
+  subject?: string;
+  content: string;
+  isActive: boolean;
+  userId?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TemplateType {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface TemplatePlaceholder {
+  placeholder: string;
+  description: string;
+}
+
+// Message Templates API
+export async function getTemplates(params?: { type?: string; channel?: string; isActive?: boolean }): Promise<MessageTemplate[]> {
+  const searchParams = new URLSearchParams();
+  if (params?.type) searchParams.append('type', params.type);
+  if (params?.channel) searchParams.append('channel', params.channel);
+  if (params?.isActive !== undefined) searchParams.append('isActive', params.isActive.toString());
+
+  const query = searchParams.toString();
+  return apiFetch<MessageTemplate[]>(`/templates${query ? `?${query}` : ''}`);
+}
+
+export async function getTemplateTypes(): Promise<TemplateType[]> {
+  return apiFetch<TemplateType[]>('/templates/types');
+}
+
+export async function getTemplatePlaceholders(): Promise<TemplatePlaceholder[]> {
+  return apiFetch<TemplatePlaceholder[]>('/templates/placeholders');
+}
+
+export async function getTemplate(id: number): Promise<MessageTemplate> {
+  return apiFetch<MessageTemplate>(`/templates/${id}`);
+}
+
+export async function createTemplate(data: {
+  name: string;
+  type: string;
+  content: string;
+  channel?: string;
+  subject?: string;
+  isActive?: boolean;
+}): Promise<MessageTemplate> {
+  return apiFetch<MessageTemplate>('/templates', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateTemplate(id: number, data: Partial<{
+  name: string;
+  type: string;
+  content: string;
+  channel: string;
+  subject: string;
+  isActive: boolean;
+}>): Promise<MessageTemplate> {
+  return apiFetch<MessageTemplate>(`/templates/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTemplate(id: number): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/templates/${id}`, { method: 'DELETE' });
+}
+
+export async function duplicateTemplate(id: number): Promise<MessageTemplate> {
+  return apiFetch<MessageTemplate>(`/templates/${id}/duplicate`, { method: 'POST' });
+}
+
+export async function previewTemplate(id: number, data?: Record<string, unknown>): Promise<{ subject?: string; content: string }> {
+  return apiFetch<{ subject?: string; content: string }>(`/templates/${id}/preview`, {
+    method: 'POST',
+    body: JSON.stringify({ data }),
   });
 }
 

@@ -29,6 +29,10 @@ import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
 import { LogsTab } from '../components/dashboard/LogsTab';
 import { ReservationsTab } from '../components/dashboard/ReservationsTab';
+import { SettingsTab } from '../components/dashboard/SettingsTab';
+import { MobileHeader } from '../components/dashboard/MobileHeader';
+import { MobileNav } from '../components/dashboard/MobileNav';
+import { OnboardingModal } from '../components/onboarding/OnboardingModal';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useAuth } from '../lib/AuthContext';
@@ -88,10 +92,24 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   // Worker Loading State
   const [workerLoading, setWorkerLoading] = useState(false);
 
+  // Mobile Menu State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Onboarding State
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   // Fetch data on mount (includes WhatsApp status)
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Check if should show onboarding
+  useEffect(() => {
+    const onboardingCompleted = localStorage.getItem('mevo_onboarding_completed');
+    if (!onboardingCompleted && properties.length === 0 && !whatsappStatus.connected && !loading) {
+      setShowOnboarding(true);
+    }
+  }, [properties, whatsappStatus, loading]);
 
   const fetchData = async () => {
     try {
@@ -285,13 +303,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     }
   };
 
-  // Fetch settings when tab changes
-  useEffect(() => {
-    if (activeTab === 'settings') {
-      fetchSettings();
-    }
-  }, [activeTab]);
-
   const handleRunWorker = async () => {
     setWorkerLoading(true);
     try {
@@ -321,9 +332,27 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   );
 
   return (
-    <div className="flex h-screen bg-[#050509] text-slate-300 font-sans overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex flex-col">
+    <div className="flex flex-col md:flex-row h-screen bg-[#050509] text-slate-300 font-sans overflow-hidden">
+      {/* Mobile Header - Only visible on mobile */}
+      <MobileHeader
+        onMenuClick={() => setMobileMenuOpen(true)}
+        userName={user?.name}
+      />
+
+      {/* Mobile Navigation Drawer */}
+      <MobileNav
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={onLogout}
+        onGoToLanding={onGoToLanding}
+        userName={user?.name}
+        userEmail={user?.email}
+      />
+
+      {/* Sidebar - Hidden on mobile */}
+      <aside className="hidden md:flex w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex-col">
         <div className="h-14 flex items-center px-6 border-b border-white/5">
           <Logo size="text-lg" onClick={onGoToLanding} />
           <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">PRO</span>
@@ -643,57 +672,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
-            <div className="max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-8">
-                <h3 className="text-lg font-medium text-white mb-6">Template de Mensagem</h3>
-
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2">Mensagem para equipe de limpeza</label>
-                    <textarea
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-none"
-                      rows={5}
-                      placeholder="Digite o template da mensagem..."
-                      value={messageTemplate}
-                      onChange={e => setMessageTemplate(e.target.value)}
-                    />
-                    <p className="mt-2 text-xs text-slate-500">
-                      Use <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do responsável)</code> e <code className="px-1 py-0.5 bg-white/5 rounded text-blue-400">(nome do imóvel)</code> para personalizar
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-2">Horario de envio</label>
-                    <input
-                      type="time"
-                      className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
-                      value={sendTime}
-                      onChange={e => setSendTime(e.target.value)}
-                    />
-                    <p className="mt-2 text-xs text-slate-500">
-                      Horario em que as mensagens serao enviadas automaticamente
-                    </p>
-                  </div>
-
-                  <div className="pt-4 flex items-center gap-4">
-                    <Button onClick={handleSaveSettings} disabled={settingsLoading}>
-                      {settingsLoading ? 'Salvando...' : 'Salvar Configuracoes'}
-                    </Button>
-                    {settingsSaved && (
-                      <span className="text-sm text-emerald-400">Configuracoes salvas!</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 bg-[#0B0C15]/50 border border-white/5 rounded-xl p-6">
-                <h4 className="text-sm font-medium text-slate-300 mb-3">Preview da mensagem</h4>
-                <div className="bg-white/5 rounded-lg p-4 text-sm text-slate-400">
-                  {messageTemplate
-                    .replace('(nome do responsável)', 'Maria')
-                    .replace('(nome do imóvel)', 'Loft Centro 402')}
-                </div>
-              </div>
+            <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <SettingsTab />
             </div>
           )}
         </div>
@@ -878,6 +858,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         currentPlan={subscriptionModal.currentPlan}
         currentLimit={subscriptionModal.currentLimit}
         propertyCount={subscriptionModal.propertyCount}
+      />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => {
+          fetchData();
+          setShowOnboarding(false);
+        }}
       />
 
       {/* Worker Loading Overlay */}

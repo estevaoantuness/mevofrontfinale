@@ -1,9 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
+import { ForgotPasswordPage } from './pages/ForgotPassword';
+import { ResetPasswordPage } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
 
@@ -45,6 +47,21 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Reset Password Wrapper to extract token from URL
+function ResetPasswordWrapper() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get('token') || '';
+
+  return (
+    <ResetPasswordPage
+      token={token}
+      onGoToLogin={() => navigate('/forgot-password')}
+      onBack={() => navigate('/')}
+    />
+  );
+}
+
 function AppRoutes() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -61,6 +78,7 @@ function AppRoutes() {
               onLoginSuccess={() => navigate('/dashboard')}
               onBack={() => navigate('/')}
               onGoToRegister={() => navigate('/register')}
+              onGoToForgotPassword={() => navigate('/forgot-password')}
             />
           </PublicRoute>
         }
@@ -74,6 +92,27 @@ function AppRoutes() {
               onRegisterSuccess={() => navigate('/dashboard')}
               onGoToLogin={() => navigate('/login')}
             />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage
+              onBack={() => navigate('/')}
+              onGoToLogin={() => navigate('/login')}
+            />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPasswordWrapper />
           </PublicRoute>
         }
       />

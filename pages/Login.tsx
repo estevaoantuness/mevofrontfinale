@@ -8,9 +8,10 @@ interface LoginPageProps {
   onLoginSuccess: () => void;
   onBack: () => void;
   onGoToRegister?: () => void;
+  onGoToForgotPassword?: () => void;
 }
 
-export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageProps) => {
+export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister, onGoToForgotPassword }: LoginPageProps) => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,14 +52,25 @@ export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister }: LoginPageP
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Input
-            label="Senha"
-            type="password"
-            placeholder="******"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div>
+            <Input
+              label="Senha"
+              type="password"
+              placeholder="******"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            {onGoToForgotPassword && (
+              <button
+                type="button"
+                onClick={onGoToForgotPassword}
+                className="mt-2 text-xs text-slate-500 hover:text-blue-400 transition-colors"
+              >
+                Esqueceu sua senha?
+              </button>
+            )}
+          </div>
 
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
