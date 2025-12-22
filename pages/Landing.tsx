@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, MessageCircle, LayoutGrid, Zap, Shield, Clock } from 'lucide-react';
+import { Calendar, MessageCircle, LayoutGrid, Zap, Shield, Clock, Building2, User, ChevronDown } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { PricingSection } from '../components/pricing/PricingSection';
@@ -18,10 +18,12 @@ const PLANS_DATA = {
 interface LandingPageProps {
   onLogin: () => void;
   onRegister?: () => void;
+  onDashboard?: () => void;
 }
 
-export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
-  const { isAuthenticated } = useAuth();
+export const LandingPage = ({ onLogin, onRegister, onDashboard }: LandingPageProps) => {
+  const { isAuthenticated, user } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [checkoutModal, setCheckoutModal] = useState<{
     isOpen: boolean;
     plan: typeof PLANS_DATA.starter | null;
@@ -47,9 +49,69 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
       <nav className="fixed top-0 w-full z-40 border-b border-white/5 bg-[#050509]/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Logo />
-          <div className="flex gap-4">
-            <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Fazer Login</Button>
-            <Button variant="primary" onClick={onRegister || onLogin}>Criar Conta Gratis</Button>
+          <div className="flex gap-4 items-center">
+            {isAuthenticated && user ? (
+              <>
+                {/* Botão Meus Imóveis */}
+                <Button
+                  variant="primary"
+                  onClick={onDashboard}
+                  className="flex items-center gap-2"
+                >
+                  <Building2 size={18} />
+                  <span className="hidden sm:inline">Meus Imoveis</span>
+                </Button>
+
+                {/* Menu do Usuário */}
+                <div className="relative">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {user.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <span className="hidden sm:inline text-white text-sm font-medium max-w-[120px] truncate">
+                      {user.name?.split(' ')[0] || 'Usuario'}
+                    </span>
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown */}
+                  {userMenuOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setUserMenuOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-48 py-2 bg-[#0B0C15] border border-white/10 rounded-xl shadow-xl z-50">
+                        <button
+                          onClick={() => { onDashboard?.(); setUserMenuOpen(false); }}
+                          className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Building2 size={16} />
+                          Meus Imoveis
+                        </button>
+                        <button
+                          onClick={() => { onDashboard?.(); setUserMenuOpen(false); }}
+                          className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <User size={16} />
+                          Meu Perfil
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Fazer Login</Button>
+                <Button variant="primary" onClick={onRegister || onLogin}>Criar Conta Gratis</Button>
+              </>
+            )}
           </div>
         </div>
       </nav>
