@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Calendar, Trash2, Loader2, AlertTriangle, Check } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Trash2, Loader2, AlertTriangle, Check, Sun, Moon, Globe } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { getProfile, updateProfile, deleteAccount, Profile } from '../../lib/api';
+import { getProfile, updateProfile, deleteAccount, getPreferences, updatePreferences, Profile, UserPreferences } from '../../lib/api';
+import { useTheme } from '../../lib/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileTabProps {
   onLogout: () => void;
 }
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
+  const { theme, setTheme } = useTheme();
+  const { i18n } = useTranslation();
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -18,6 +23,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
   // Form state
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+
+  // Preferences state
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefsSaved, setPrefsSaved] = useState(false);
 
   // Delete state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -56,6 +65,34 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
       setError(err.message || 'Erro ao salvar');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleThemeChange = async (newTheme: 'dark' | 'light') => {
+    setSavingPrefs(true);
+    try {
+      setTheme(newTheme);
+      await updatePreferences({ theme: newTheme });
+      setPrefsSaved(true);
+      setTimeout(() => setPrefsSaved(false), 2000);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar preferências');
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
+  const handleLanguageChange = async (newLang: 'pt-BR' | 'en' | 'es-419') => {
+    setSavingPrefs(true);
+    try {
+      i18n.changeLanguage(newLang);
+      await updatePreferences({ language: newLang });
+      setPrefsSaved(true);
+      setTimeout(() => setPrefsSaved(false), 2000);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar preferências');
+    } finally {
+      setSavingPrefs(false);
     }
   };
 
@@ -146,7 +183,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
 
       {/* Account Info */}
       <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Informacoes da Conta</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Informações da Conta</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-3 p-4 bg-[#050509] rounded-lg">
@@ -169,6 +206,77 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
                     })
                   : '-'}
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preferences */}
+      <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Preferências</h3>
+          {prefsSaved && (
+            <span className="text-sm text-green-400 flex items-center gap-1">
+              <Check size={16} />
+              Salvo!
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Theme Selection */}
+          <div>
+            <label className="block text-sm text-slate-400 mb-3">Tema</label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleThemeChange('dark')}
+                disabled={savingPrefs}
+                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                  theme === 'dark'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                    : 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                <Moon size={20} />
+                <span className="font-medium">Dark</span>
+              </button>
+              <button
+                onClick={() => handleThemeChange('light')}
+                disabled={savingPrefs}
+                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                  theme === 'light'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                    : 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                <Sun size={20} />
+                <span className="font-medium">Light</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Language Selection */}
+          <div>
+            <label className="block text-sm text-slate-400 mb-3">Idioma</label>
+            <div className="flex gap-2">
+              {[
+                { code: 'pt-BR', label: '(pt-br)' },
+                { code: 'en', label: '(en)' },
+                { code: 'es-419', label: '(es)' }
+              ].map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code as 'pt-BR' | 'en' | 'es-419')}
+                  disabled={savingPrefs}
+                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                    i18n.language === lang.code
+                      ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                      : 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                  }`}
+                >
+                  <span className="font-medium">{lang.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </div>

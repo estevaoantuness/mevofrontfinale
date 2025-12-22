@@ -36,6 +36,8 @@ import { SettingsTab } from '../components/dashboard/SettingsTab';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { EmailVerificationModal } from '../components/billing/EmailVerificationModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useAuth } from '../lib/AuthContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
@@ -90,6 +92,19 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   // Email Verification Modal State
   const [emailVerificationModalOpen, setEmailVerificationModalOpen] = useState(false);
+
+  // Get plan badge text based on subscription status
+  const getPlanBadge = (): { text: string; color: string } => {
+    if (!subscription) return { text: 'Free', color: 'slate' };
+    if (subscription.status === 'trialing') return { text: 'Free Trial', color: 'purple' };
+    if (subscription.status === 'active' && subscription.planId) {
+      const planName = subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1);
+      return { text: planName, color: 'blue' };
+    }
+    return { text: 'Free', color: 'slate' };
+  };
+
+  const planBadge = getPlanBadge();
 
   // Fetch data on mount (includes WhatsApp status)
   useEffect(() => {
@@ -297,7 +312,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       <aside className="w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex flex-col">
         <div className="h-14 flex items-center px-6 border-b border-white/5">
           <Logo size="text-lg" onClick={onGoToLanding} />
-          <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">PRO</span>
+          <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+            planBadge.color === 'purple'
+              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+              : planBadge.color === 'blue'
+              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+              : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+          }`}>
+            {planBadge.text}
+          </span>
         </div>
 
         <nav className="flex-1 p-3">
@@ -382,9 +405,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'settings' && 'Configurações'}
           </h2>
 
-          <div className="flex items-center space-x-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-            <span className="text-xs text-slate-500 font-medium">System Operational</span>
+          <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <div className="flex items-center space-x-2 pl-4 border-l border-white/10">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+              <span className="text-xs text-slate-500 font-medium">Online</span>
+            </div>
           </div>
         </header>
 

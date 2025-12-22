@@ -475,6 +475,23 @@ export async function deleteAccount(confirmation: string): Promise<{ message: st
   });
 }
 
+// User Preferences
+export interface UserPreferences {
+  theme: 'dark' | 'light';
+  language: 'pt-BR' | 'en' | 'es-419';
+}
+
+export async function getPreferences(): Promise<UserPreferences> {
+  return apiFetch<UserPreferences>('/profile/preferences');
+}
+
+export async function updatePreferences(data: Partial<UserPreferences>): Promise<UserPreferences> {
+  return apiFetch<UserPreferences>('/profile/preferences', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 // Email Verification Types
 export interface VerificationStatus {
   verified: boolean;
