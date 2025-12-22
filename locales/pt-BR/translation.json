@@ -27,6 +27,10 @@
       "manageProperties": "Gerenciar Imóveis",
       "viewReservations": "Ver Reservas"
     },
+    "loading": {
+      "title": "Carregando...",
+      "subtitle": "Preparando seu painel"
+    },
     "features": {
       "icalSync": {
         "title": "Sincronia iCal",

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Calendar, MessageCircle, LayoutGrid, Zap, Shield, Clock, Building2, User, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { PricingSection } from '../components/pricing/PricingSection';
 import { CheckoutModal } from '../components/billing/CheckoutModal';
 import { useAuth } from '../lib/AuthContext';
@@ -31,11 +32,27 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
   const { isDark } = useTheme();
   const { isAuthenticated, user } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [checkoutModal, setCheckoutModal] = useState<{
     isOpen: boolean;
     plan: typeof PLANS_DATA.starter | null;
     interval: 'monthly' | 'yearly';
   }>({ isOpen: false, plan: null, interval: 'yearly' });
+
+  // Navegação com transição de loading de 1.5 segundos
+  const handleNavigateToDashboard = useCallback(() => {
+    setIsNavigating(true);
+    setTimeout(() => {
+      onDashboard?.();
+    }, 1500);
+  }, [onDashboard]);
+
+  const handleNavigateToProfile = useCallback(() => {
+    setIsNavigating(true);
+    setTimeout(() => {
+      onProfile?.();
+    }, 1500);
+  }, [onProfile]);
 
   const handleSelectPlan = (planId: string, interval: 'monthly' | 'yearly') => {
     const plan = PLANS_DATA[planId as keyof typeof PLANS_DATA];
@@ -66,7 +83,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
               <>
                 <Button
                   variant="primary"
-                  onClick={onDashboard}
+                  onClick={handleNavigateToDashboard}
                   className="flex items-center gap-2"
                 >
                   <Building2 size={18} />
@@ -97,14 +114,14 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
                       />
                       <div className={`absolute right-0 mt-2 w-48 py-2 border rounded-xl shadow-xl z-50 ${isDark ? 'bg-[#0B0C15] border-white/10' : 'bg-white border-slate-200'}`}>
                         <button
-                          onClick={() => { onDashboard?.(); setUserMenuOpen(false); }}
+                          onClick={() => { handleNavigateToDashboard(); setUserMenuOpen(false); }}
                           className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 ${isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'}`}
                         >
                           <Building2 size={16} />
                           {t('nav.myProperties')}
                         </button>
                         <button
-                          onClick={() => { onProfile?.(); setUserMenuOpen(false); }}
+                          onClick={() => { handleNavigateToProfile(); setUserMenuOpen(false); }}
                           className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 ${isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'}`}
                         >
                           <User size={16} />
@@ -146,7 +163,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
         <div className="flex flex-col sm:flex-row gap-4 z-10">
           {isAuthenticated ? (
             <>
-              <Button variant="primary" className="h-12 px-8 text-base" onClick={onDashboard}>
+              <Button variant="primary" className="h-12 px-8 text-base" onClick={handleNavigateToDashboard}>
                 <Building2 size={20} className="mr-2" />
                 {t('landing.cta.manageProperties')}
               </Button>
@@ -292,7 +309,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
               <>
-                <Button variant="primary" className="h-14 px-10 text-lg" onClick={onDashboard}>
+                <Button variant="primary" className="h-14 px-10 text-lg" onClick={handleNavigateToDashboard}>
                   <Building2 size={22} className="mr-2" />
                   {t('landing.cta.goToDashboard')}
                 </Button>
@@ -327,6 +344,13 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
           interval={checkoutModal.interval}
         />
       )}
+
+      {/* Loading Overlay para transição */}
+      <LoadingOverlay
+        isVisible={isNavigating}
+        title={t('landing.loading.title', 'Carregando...')}
+        subtitle={t('landing.loading.subtitle', 'Preparando seu painel')}
+      />
     </div>
   );
 };

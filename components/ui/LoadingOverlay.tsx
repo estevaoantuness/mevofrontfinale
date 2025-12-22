@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../lib/ThemeContext';
 
 interface LoadingOverlayProps {
   isVisible: boolean;
@@ -12,6 +13,8 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   title = 'Carregando...',
   subtitle
 }) => {
+  const { isDark } = useTheme();
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -20,7 +23,11 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-gradient-to-br from-[#050509] via-blue-900/30 to-[#050509]"
+          className={`fixed inset-0 z-[200] flex items-center justify-center ${
+            isDark
+              ? 'bg-gradient-to-br from-[#050509] via-blue-900/30 to-[#050509]'
+              : 'bg-gradient-to-br from-white via-blue-50 to-white'
+          }`}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -31,15 +38,15 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
           >
             {/* Spinner */}
             <div className="relative w-16 h-16 mx-auto">
-              <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+              <div className={`absolute inset-0 border-4 rounded-full ${isDark ? 'border-blue-500/20' : 'border-blue-200'}`}></div>
               <div className="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
             </div>
 
             {/* Texts */}
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-white">{title}</h3>
+              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
               {subtitle && (
-                <p className="text-sm text-slate-400">{subtitle}</p>
+                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{subtitle}</p>
               )}
             </div>
           </motion.div>
