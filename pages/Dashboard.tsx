@@ -23,6 +23,7 @@ import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
+import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { useAuth } from '../lib/AuthContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
@@ -62,6 +63,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [sendTime, setSendTime] = useState('08:00');
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  // Subscription Required Modal State
+  const [subscriptionModal, setSubscriptionModal] = useState<{
+    isOpen: boolean;
+    reason: 'no_subscription' | 'limit_reached';
+    currentPlan?: string;
+    currentLimit?: number;
+    propertyCount?: number;
+  }>({ isOpen: false, reason: 'no_subscription' });
 
   // Fetch data on mount
   useEffect(() => {
@@ -145,7 +155,31 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });
       setIsModalOpen(false);
     } catch (err: any) {
-      alert(err.message);
+      // Verificar se é erro de assinatura/limite
+      const errorCode = err.code || err.response?.data?.code;
+      const errorData = err.response?.data || {};
+
+      if (errorCode === 'SUBSCRIPTION_REQUIRED') {
+        // Usuário não tem assinatura - mostrar modal de trial
+        setIsModalOpen(false); // Fecha o modal de criar imóvel mas mantém os dados
+        setSubscriptionModal({
+          isOpen: true,
+          reason: 'no_subscription'
+        });
+      } else if (errorCode === 'PROPERTY_LIMIT_REACHED') {
+        // Limite de propriedades atingido - mostrar modal de upgrade
+        setIsModalOpen(false);
+        setSubscriptionModal({
+          isOpen: true,
+          reason: 'limit_reached',
+          currentPlan: errorData.currentPlan,
+          currentLimit: errorData.limit,
+          propertyCount: errorData.currentCount
+        });
+      } else {
+        // Outro erro - mostrar mensagem
+        alert(err.message || 'Erro ao criar imovel');
+      }
     }
   };
 
@@ -757,6 +791,22 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           </div>
         </form>
       </Modal>
+
+      {/* Subscription Required Modal */}
+      <SubscriptionRequiredModal
+        isOpen={subscriptionModal.isOpen}
+        onClose={() => {
+          setSubscriptionModal({ ...subscriptionModal, isOpen: false });
+          // Reabre o modal de criar imóvel para o usuário continuar
+          if (newProp.name) {
+            setIsModalOpen(true);
+          }
+        }}
+        reason={subscriptionModal.reason}
+        currentPlan={subscriptionModal.currentPlan}
+        currentLimit={subscriptionModal.currentLimit}
+        propertyCount={subscriptionModal.propertyCount}
+      />
     </div>
   );
 };

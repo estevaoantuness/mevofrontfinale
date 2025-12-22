@@ -99,7 +99,11 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   const data = JSON.parse(text);
 
   if (!response.ok) {
-    throw new Error(data.error || 'Erro na requisicao');
+    // Criar erro com dados adicionais para o frontend tratar
+    const error = new Error(data.error || 'Erro na requisicao') as Error & { code?: string; response?: { data: typeof data } };
+    error.code = data.code;
+    error.response = { data };
+    throw error;
   }
 
   return data as T;
