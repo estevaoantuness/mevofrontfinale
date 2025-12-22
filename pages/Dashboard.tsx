@@ -15,10 +15,12 @@ import {
   ExternalLink,
   CreditCard,
   User,
+  Users,
   AlertTriangle,
   Check,
-  Calendar,
-  History
+  AlertCircle,
+  Mail,
+  FileText
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -27,13 +29,12 @@ import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
+import { TemplatesTab } from '../components/dashboard/TemplatesTab';
 import { LogsTab } from '../components/dashboard/LogsTab';
-import { ReservationsTab } from '../components/dashboard/ReservationsTab';
+import { GuestsTab } from '../components/dashboard/GuestsTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
-import { MobileHeader } from '../components/dashboard/MobileHeader';
-import { MobileNav } from '../components/dashboard/MobileNav';
-import { OnboardingModal } from '../components/onboarding/OnboardingModal';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
+import { EmailVerificationModal } from '../components/billing/EmailVerificationModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useAuth } from '../lib/AuthContext';
 import * as api from '../lib/api';
@@ -69,11 +70,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [testMessage, setTestMessage] = useState('Ola! Esta e uma mensagem de teste do Mevo.');
   const [testLoading, setTestLoading] = useState(false);
 
-  // Settings State
-  const [messageTemplate, setMessageTemplate] = useState('Olá (nome do responsável), tudo bem? Hoje tem checkout no (nome do imóvel). Pode preparar a limpeza? Obrigado!');
-  const [sendTime, setSendTime] = useState('08:00');
-  const [settingsLoading, setSettingsLoading] = useState(false);
-  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // Subscription Required Modal State
   const [subscriptionModal, setSubscriptionModal] = useState<{
@@ -92,24 +88,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   // Worker Loading State
   const [workerLoading, setWorkerLoading] = useState(false);
 
-  // Mobile Menu State
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Onboarding State
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  // Email Verification Modal State
+  const [emailVerificationModalOpen, setEmailVerificationModalOpen] = useState(false);
 
   // Fetch data on mount (includes WhatsApp status)
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Check if should show onboarding
-  useEffect(() => {
-    const onboardingCompleted = localStorage.getItem('mevo_onboarding_completed');
-    if (!onboardingCompleted && properties.length === 0 && !whatsappStatus.connected && !loading) {
-      setShowOnboarding(true);
-    }
-  }, [properties, whatsappStatus, loading]);
 
   const fetchData = async () => {
     try {
@@ -201,8 +186,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       const errorCode = err.code || err.response?.data?.code;
       const errorData = err.response?.data || {};
 
-      if (errorCode === 'SUBSCRIPTION_REQUIRED') {
-        // Usuário não tem assinatura - mostrar modal de trial
+      if (errorCode === 'SUBSCRIPTION_REQUIRED' || errorCode === 'FREE_LIMIT_REACHED') {
+        // Usuário não tem assinatura ou atingiu limite grátis - mostrar modal de trial
         setIsModalOpen(false); // Fecha o modal de criar imóvel mas mantém os dados
         setSubscriptionModal({
           isOpen: true,
@@ -278,31 +263,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     }
   };
 
-  const fetchSettings = async () => {
-    try {
-      const settings = await api.getSettings();
-      if (settings.message_template) setMessageTemplate(settings.message_template);
-      if (settings.send_time) setSendTime(settings.send_time);
-    } catch (err) {
-      console.error('Erro ao buscar configuracoes:', err);
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    setSettingsLoading(true);
-    setSettingsSaved(false);
-    try {
-      await api.updateSetting('message_template', messageTemplate);
-      await api.updateSetting('send_time', sendTime);
-      setSettingsSaved(true);
-      setTimeout(() => setSettingsSaved(false), 3000);
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
-
   const handleRunWorker = async () => {
     setWorkerLoading(true);
     try {
@@ -332,27 +292,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   );
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#050509] text-slate-300 font-sans overflow-hidden">
-      {/* Mobile Header - Only visible on mobile */}
-      <MobileHeader
-        onMenuClick={() => setMobileMenuOpen(true)}
-        userName={user?.name}
-      />
-
-      {/* Mobile Navigation Drawer */}
-      <MobileNav
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onLogout={onLogout}
-        onGoToLanding={onGoToLanding}
-        userName={user?.name}
-        userEmail={user?.email}
-      />
-
-      {/* Sidebar - Hidden on mobile */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex-col">
+    <div className="flex h-screen bg-[#050509] text-slate-300 font-sans overflow-hidden">
+      {/* Sidebar */}
+      <aside className="w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex flex-col">
         <div className="h-14 flex items-center px-6 border-b border-white/5">
           <Logo size="text-lg" onClick={onGoToLanding} />
           <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">PRO</span>
@@ -361,19 +303,44 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         <nav className="flex-1 p-3">
           <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Menu</div>
           <NavItem id="overview" icon={LayoutGrid} label="Visao Geral" />
-          <NavItem id="reservations" icon={Calendar} label="Reservas" />
-          <NavItem id="logs" icon={History} label="Historico" />
           <NavItem id="properties" icon={Home} label="Meus Imoveis" />
-          <NavItem id="whatsapp" icon={MessageCircle} label="Conexao WhatsApp" />
+          <NavItem id="guests" icon={Users} label="Hospedes" />
+          <NavItem id="templates" icon={MessageCircle} label="Templates" />
+          <NavItem id="logs" icon={FileText} label="Logs" />
+          <NavItem id="whatsapp" icon={Smartphone} label="Conexao WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
           <NavItem id="settings" icon={Settings} label="Configuracoes" />
         </nav>
 
         <div className="p-4 border-t border-white/5">
+          {/* Email Verification Warning */}
+          {user && !user.emailVerified && (
+            <button
+              onClick={() => setEmailVerificationModalOpen(true)}
+              className="w-full mb-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/15 transition-colors text-left"
+            >
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-yellow-400 font-medium">Email nao verificado</p>
+                  <p className="text-[10px] text-yellow-400/70 truncate">Clique para confirmar</p>
+                </div>
+              </div>
+            </button>
+          )}
+
           <div className="flex items-center mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              {/* Email verification badge on avatar */}
+              {user && !user.emailVerified && (
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-500 border-2 border-[#080911] flex items-center justify-center">
+                  <span className="sr-only">Email nao verificado</span>
+                </div>
+              )}
             </div>
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuario'}</p>
@@ -405,9 +372,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         <header className="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-[#050509]/50 backdrop-blur-sm z-10">
           <h2 className="text-sm font-medium text-slate-200">
             {activeTab === 'overview' && 'Visao Geral'}
-            {activeTab === 'reservations' && 'Reservas'}
-            {activeTab === 'logs' && 'Historico de Mensagens'}
             {activeTab === 'properties' && 'Gerenciar Imoveis'}
+            {activeTab === 'guests' && 'Gestao de Hospedes'}
+            {activeTab === 'templates' && 'Templates de Mensagens'}
+            {activeTab === 'logs' && 'Logs de Mensagens'}
             {activeTab === 'whatsapp' && 'Conexao WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
             {activeTab === 'profile' && 'Meu Perfil'}
@@ -445,7 +413,12 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {activeTab === 'overview' && (
             <div className="max-w-6xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Calendário de Reservas */}
-              <CalendarView properties={properties} stats={stats} />
+              <CalendarView
+                properties={properties}
+                stats={stats}
+                subscription={subscription}
+                onActivateTrial={() => setActiveTab('billing')}
+              />
 
               {/* Ações Rápidas */}
               <div className="mt-6 bg-[#0B0C15]/50 border border-white/5 rounded-xl p-6">
@@ -463,20 +436,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* TAB: RESERVATIONS */}
-          {activeTab === 'reservations' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <ReservationsTab properties={properties} />
-            </div>
-          )}
-
-          {/* TAB: LOGS */}
-          {activeTab === 'logs' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <LogsTab properties={properties} />
             </div>
           )}
 
@@ -576,6 +535,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             </div>
           )}
 
+          {/* TAB: GUESTS */}
+          {activeTab === 'guests' && (
+            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <GuestsTab />
+            </div>
+          )}
+
           {/* TAB: WHATSAPP */}
           {activeTab === 'whatsapp' && (
             <div className="max-w-2xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -656,6 +622,20 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             </div>
           )}
 
+          {/* TAB: TEMPLATES */}
+          {activeTab === 'templates' && (
+            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <TemplatesTab />
+            </div>
+          )}
+
+          {/* TAB: LOGS */}
+          {activeTab === 'logs' && (
+            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <LogsTab />
+            </div>
+          )}
+
           {/* TAB: BILLING */}
           {activeTab === 'billing' && (
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -672,9 +652,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
-            <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <SettingsTab />
-            </div>
+            <SettingsTab />
           )}
         </div>
       </main>
@@ -858,15 +836,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         currentPlan={subscriptionModal.currentPlan}
         currentLimit={subscriptionModal.currentLimit}
         propertyCount={subscriptionModal.propertyCount}
-      />
-
-      {/* Onboarding Modal */}
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={() => {
+        user={user}
+        onRefreshUser={() => {
           fetchData();
-          setShowOnboarding(false);
+        }}
+        onSuccess={() => {
+          // Trial ativado com sucesso - recarregar dados
+          fetchData();
         }}
       />
 
@@ -875,6 +851,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         isVisible={workerLoading}
         title="Executando Worker"
         subtitle="Processando checkouts e enviando mensagens..."
+      />
+
+      {/* Email Verification Modal */}
+      <EmailVerificationModal
+        isOpen={emailVerificationModalOpen}
+        onClose={() => setEmailVerificationModalOpen(false)}
+        userEmail={user?.email || ''}
+        onEmailSent={() => {
+          // Optionally refresh user data after email is sent
+        }}
       />
     </div>
   );

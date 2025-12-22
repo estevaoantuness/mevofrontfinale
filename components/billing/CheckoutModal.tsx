@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Loader2, CreditCard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { X, Check, Loader2, CreditCard, Mail, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { createCheckout } from '../../lib/api';
+import { createCheckout, getVerificationStatus, sendVerificationEmail, activateTrial } from '../../lib/api';
 
 interface Plan {
   id: string;
@@ -31,22 +31,90 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState('');
 
+  // Email verification state
+  const [checkingEmail, setCheckingEmail] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  // Check email verification status when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      checkEmailVerification();
+    }
+  }, [isOpen]);
+
+  const checkEmailVerification = async () => {
+    setCheckingEmail(true);
+    try {
+      const status = await getVerificationStatus();
+      setEmailVerified(status.verified);
+    } catch (err) {
+      console.error('Error checking email verification:', err);
+      setEmailVerified(false);
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
+
+  const handleSendVerification = async () => {
+    setSendingVerification(true);
+    setError('');
+    try {
+      await sendVerificationEmail();
+      setVerificationSent(true);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao enviar email de verificacao');
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const price = interval === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
 
+  // State for trial success
+  const [trialSuccess, setTrialSuccess] = useState(false);
+
   const handleCheckout = async () => {
+    // Double-check email verification before proceeding
+    if (!emailVerified) {
+      setError('Voce precisa verificar seu email antes de continuar');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const { checkoutUrl } = await createCheckout(plan.id, interval);
-      setRedirecting(true);
-      setTimeout(() => {
-        window.location.href = checkoutUrl;
-      }, 800);
+      // If plan has trial, activate trial directly (no Stripe)
+      if (plan.hasTrial) {
+        const result = await activateTrial();
+        if (result.success) {
+          setTrialSuccess(true);
+          // Close modal after 2 seconds
+          setTimeout(() => {
+            onClose();
+            window.location.reload(); // Refresh to show updated subscription
+          }, 2000);
+        }
+      } else {
+        // No trial - go to Stripe checkout
+        const { checkoutUrl } = await createCheckout(plan.id, interval);
+        setRedirecting(true);
+        setTimeout(() => {
+          window.location.href = checkoutUrl;
+        }, 800);
+      }
     } catch (err: any) {
-      setError(err.message || 'Erro ao iniciar pagamento');
+      const errorCode = err.code || err.response?.data?.code;
+      if (errorCode === 'EMAIL_NOT_VERIFIED') {
+        setEmailVerified(false);
+        setError('Voce precisa verificar seu email antes de continuar');
+      } else {
+        setError(err.message || 'Erro ao iniciar pagamento');
+      }
       setLoading(false);
     }
   };
@@ -151,23 +219,71 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
         {/* Actions */}
         <div className="space-y-3">
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={handleCheckout}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Redirecionando...
-              </>
-            ) : plan.hasTrial ? (
-              'Comecar Trial Gratis'
-            ) : (
-              'Ir para Pagamento'
-            )}
-          </Button>
+          {checkingEmail ? (
+            <div className="flex items-center justify-center py-3">
+              <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+            </div>
+          ) : !emailVerified ? (
+            // Email not verified - show verification button
+            <>
+              {!verificationSent ? (
+                <Button
+                  variant="primary"
+                  className="w-full bg-yellow-600 hover:bg-yellow-500"
+                  onClick={handleSendVerification}
+                  disabled={sendingVerification}
+                >
+                  {sendingVerification ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      Email nao verificado - Clique para verificar
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+                  <Mail className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                  <p className="text-green-400 font-medium">Email enviado!</p>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Verifique sua caixa de entrada e clique no link de confirmacao.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setVerificationSent(false);
+                      checkEmailVerification();
+                    }}
+                    className="mt-3 text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Ja verifiquei, continuar
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            // Email verified - show checkout button
+            <Button
+              variant="primary"
+              className="w-full"
+              onClick={handleCheckout}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Redirecionando...
+                </>
+              ) : plan.hasTrial ? (
+                'Comecar Trial Gratis'
+              ) : (
+                'Ir para Pagamento'
+              )}
+            </Button>
+          )}
           <button
             onClick={onClose}
             className="w-full py-2 text-sm text-slate-400 hover:text-white transition-colors"

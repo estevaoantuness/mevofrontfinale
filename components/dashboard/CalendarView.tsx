@@ -7,12 +7,14 @@ import {
   Download,
   Home,
   Search,
-  X
+  X,
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import * as api from '../../lib/api';
-import type { Reservation, Property, DashboardStats, TodayReservations } from '../../lib/api';
+import type { Reservation, Property, DashboardStats, TodayReservations, Subscription } from '../../lib/api';
 
 // Cores para cada imóvel (gera automaticamente baseado no ID)
 const PROPERTY_COLORS = [
@@ -35,6 +37,8 @@ const MONTHS = [
 interface CalendarViewProps {
   properties: Property[];
   stats: DashboardStats;
+  subscription: Subscription | null;
+  onActivateTrial?: () => void;
 }
 
 interface DayReservation {
@@ -44,7 +48,7 @@ interface DayReservation {
   propertyName: string;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
@@ -54,10 +58,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Buscar reservas do mês atual
+  // Verificar se usuário tem acesso ao calendário sincronizado
+  const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
+
+  // Buscar reservas do mês atual (apenas se tiver acesso)
   useEffect(() => {
-    fetchReservations();
-  }, [currentDate, filterPropertyId]);
+    if (hasCalendarAccess) {
+      fetchReservations();
+    } else {
+      setLoading(false);
+    }
+  }, [currentDate, filterPropertyId, hasCalendarAccess]);
 
   const fetchReservations = async () => {
     setLoading(true);
@@ -194,6 +205,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
 
   return (
     <div className="space-y-6">
+      {/* Banner para não-assinantes */}
+      {!hasCalendarAccess && (
+        <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <Lock size={24} className="text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">
+                  Calendario Sincronizado
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Visualize seus check-ins e check-outs automaticamente sincronizados do Airbnb e Booking.
+                  Disponivel no plano <span className="text-blue-400 font-medium">Starter</span> ou <span className="text-purple-400 font-medium">Trial Gratuito</span>.
+                </p>
+              </div>
+            </div>
+            {onActivateTrial && (
+              <Button onClick={onActivateTrial} className="flex-shrink-0">
+                <Sparkles size={16} className="mr-2" />
+                Ativar Trial Gratis
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header do Calendário */}
       <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
@@ -222,61 +261,63 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
             </Button>
           </div>
 
-          {/* Filtros e Ações */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Buscar imovel..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48"
-              />
-            </div>
+          {/* Filtros e Ações - apenas para assinantes */}
+          {hasCalendarAccess && (
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Buscar imovel..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48"
+                />
+              </div>
 
-            <div className="relative">
-              <Button
-                variant="secondary"
-                onClick={() => setShowFilters(!showFilters)}
-                className="text-sm"
-              >
-                <Filter size={16} className="mr-2" />
-                Filtrar
-                {filterPropertyId && (
-                  <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full" />
-                )}
-              </Button>
+              <div className="relative">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="text-sm"
+                >
+                  <Filter size={16} className="mr-2" />
+                  Filtrar
+                  {filterPropertyId && (
+                    <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full" />
+                  )}
+                </Button>
 
-              {showFilters && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowFilters(false)} />
-                  <div className="absolute right-0 mt-2 w-64 bg-[#0B0C15] border border-white/10 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
-                    <button
-                      onClick={() => { setFilterPropertyId(null); setShowFilters(false); }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                        !filterPropertyId ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
-                      }`}
-                    >
-                      Todos os imoveis
-                    </button>
-                    {filteredProperties.map((property, index) => (
+                {showFilters && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowFilters(false)} />
+                    <div className="absolute right-0 mt-2 w-64 bg-[#0B0C15] border border-white/10 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
                       <button
-                        key={property.id}
-                        onClick={() => { setFilterPropertyId(property.id); setShowFilters(false); }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-                          filterPropertyId === property.id ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
+                        onClick={() => { setFilterPropertyId(null); setShowFilters(false); }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                          !filterPropertyId ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
                         }`}
                       >
-                        <div className={`w-3 h-3 rounded ${PROPERTY_COLORS[index % PROPERTY_COLORS.length].bg}`} />
-                        {property.name}
+                        Todos os imoveis
                       </button>
-                    ))}
-                  </div>
-                </>
-              )}
+                      {filteredProperties.map((property, index) => (
+                        <button
+                          key={property.id}
+                          onClick={() => { setFilterPropertyId(property.id); setShowFilters(false); }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+                            filterPropertyId === property.id ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
+                          }`}
+                        >
+                          <div className={`w-3 h-3 rounded ${PROPERTY_COLORS[index % PROPERTY_COLORS.length].bg}`} />
+                          {property.name}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Grade do Calendário */}
@@ -293,16 +334,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
           {/* Dias do mês */}
           <div className="grid grid-cols-7">
             {calendarDays.map((date, index) => {
-              const dayReservations = getDayReservations(date);
+              const dayReservations = hasCalendarAccess ? getDayReservations(date) : [];
               const today = isToday(date);
 
               return (
                 <div
                   key={index}
-                  onClick={() => date && dayReservations.length > 0 && setSelectedDay(date)}
+                  onClick={() => hasCalendarAccess && date && dayReservations.length > 0 && setSelectedDay(date)}
                   className={`
                     min-h-[100px] p-2 border-b border-r border-white/5 transition-colors
-                    ${date ? 'hover:bg-white/[0.02] cursor-pointer' : 'bg-white/[0.01]'}
+                    ${date ? (hasCalendarAccess ? 'hover:bg-white/[0.02] cursor-pointer' : '') : 'bg-white/[0.01]'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
                   `}
@@ -312,27 +353,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
                       <div className={`text-sm font-medium mb-1 ${today ? 'text-blue-400' : 'text-slate-400'}`}>
                         {date.getDate()}
                       </div>
-                      <div className="space-y-1">
-                        {dayReservations.slice(0, 3).map((dayRes, idx) => (
-                          <div
-                            key={`${dayRes.reservation.id}-${dayRes.type}-${idx}`}
-                            className={`
-                              text-[10px] px-1.5 py-0.5 rounded truncate
-                              ${dayRes.color.bg} ${dayRes.color.text} border ${dayRes.color.border}
-                            `}
-                            title={`${dayRes.propertyName} - ${dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}`}
-                          >
-                            {dayRes.type === 'checkin' && '▶ '}
-                            {dayRes.type === 'checkout' && '◀ '}
-                            {dayRes.propertyName.length > 10 ? dayRes.propertyName.substring(0, 10) + '...' : dayRes.propertyName}
-                          </div>
-                        ))}
-                        {dayReservations.length > 3 && (
-                          <div className="text-[10px] text-slate-500 px-1.5">
-                            +{dayReservations.length - 3} mais
-                          </div>
-                        )}
-                      </div>
+                      {hasCalendarAccess ? (
+                        <div className="space-y-1">
+                          {dayReservations.slice(0, 3).map((dayRes, idx) => (
+                            <div
+                              key={`${dayRes.reservation.id}-${dayRes.type}-${idx}`}
+                              className={`
+                                text-[10px] px-1.5 py-0.5 rounded truncate
+                                ${dayRes.color.bg} ${dayRes.color.text} border ${dayRes.color.border}
+                              `}
+                              title={`${dayRes.propertyName} - ${dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}`}
+                            >
+                              {dayRes.type === 'checkin' && '▶ '}
+                              {dayRes.type === 'checkout' && '◀ '}
+                              {dayRes.propertyName.length > 10 ? dayRes.propertyName.substring(0, 10) + '...' : dayRes.propertyName}
+                            </div>
+                          ))}
+                          {dayReservations.length > 3 && (
+                            <div className="text-[10px] text-slate-500 px-1.5">
+                              +{dayReservations.length - 3} mais
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
                     </>
                   )}
                 </div>
@@ -379,7 +422,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
               <span className="text-red-400 font-bold text-sm">OUT</span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">{todayData?.checkouts.length || 0}</p>
+              <p className="text-2xl font-semibold text-white">
+                {hasCalendarAccess ? (todayData?.checkouts.length || 0) : '-'}
+              </p>
               <p className="text-xs text-slate-500">Checkouts Hoje</p>
             </div>
           </div>
@@ -391,7 +436,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
               <span className="text-emerald-400 font-bold text-sm">IN</span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">{todayData?.checkins.length || 0}</p>
+              <p className="text-2xl font-semibold text-white">
+                {hasCalendarAccess ? (todayData?.checkins.length || 0) : '-'}
+              </p>
               <p className="text-xs text-slate-500">Check-ins Hoje</p>
             </div>
           </div>
@@ -400,10 +447,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
         <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <span className="text-purple-400 font-bold text-lg">{stats.messagesThisMonth}</span>
+              <span className="text-purple-400 font-bold text-lg">
+                {hasCalendarAccess ? stats.messagesThisMonth : '-'}
+              </span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">{stats.messagesThisMonth}</p>
+              <p className="text-2xl font-semibold text-white">
+                {hasCalendarAccess ? stats.messagesThisMonth : '-'}
+              </p>
               <p className="text-xs text-slate-500">Msgs Este Mes</p>
             </div>
           </div>

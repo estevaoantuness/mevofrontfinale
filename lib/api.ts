@@ -7,6 +7,8 @@ export interface User {
   name: string;
   role: string;
   createdAt?: string;
+  emailVerified?: boolean;
+  emailVerifiedAt?: string;
 }
 
 export interface Property {
@@ -82,8 +84,28 @@ export interface TodayReservations {
 }
 
 export interface Settings {
-  message_template: string;
-  send_time: string;
+  // Mensagens (legado)
+  message_template?: string;
+  send_time?: string;
+
+  // Horarios Padrao
+  default_checkin_time?: string;
+  default_checkout_time?: string;
+  cleaning_buffer_minutes?: string;
+
+  // Notificacoes
+  checkin_reminder_hours?: string;
+  review_request_days?: string;
+  quiet_hours_start?: string;
+  quiet_hours_end?: string;
+
+  // Automacao
+  auto_create_guests?: string;
+  auto_send_welcome?: string;
+  auto_send_reminders?: string;
+
+  // Allow any string key
+  [key: string]: string | undefined;
 }
 
 export interface WhatsAppStatus {
@@ -185,25 +207,6 @@ export async function updateMe(data: { name?: string; email?: string; password?:
     method: 'PUT',
     body: JSON.stringify(data),
   });
-}
-
-// Password Reset
-export async function forgotPassword(email: string): Promise<{ message: string }> {
-  return apiFetch<{ message: string }>('/auth/forgot-password', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
-  });
-}
-
-export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
-  return apiFetch<{ message: string }>('/auth/reset-password', {
-    method: 'POST',
-    body: JSON.stringify({ token, password }),
-  });
-}
-
-export async function verifyResetToken(token: string): Promise<{ valid: boolean; error?: string }> {
-  return apiFetch<{ valid: boolean; error?: string }>(`/auth/verify-reset-token?token=${token}`);
 }
 
 // Properties
@@ -472,6 +475,64 @@ export async function deleteAccount(confirmation: string): Promise<{ message: st
   });
 }
 
+// Email Verification Types
+export interface VerificationStatus {
+  verified: boolean;
+  verifiedAt?: string;
+  email: string;
+}
+
+export interface TrialActivationResponse {
+  success: boolean;
+  message: string;
+  subscription: {
+    id: number;
+    planId: string;
+    planName: string;
+    status: string;
+    propertyLimit: number;
+    trialEndsAt: string;
+    daysRemaining: number;
+  };
+}
+
+// Email Verification API
+export async function sendVerificationEmail(): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/send-verification', { method: 'POST' });
+}
+
+export async function verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>(`/auth/verify-email?token=${token}`);
+}
+
+export async function getVerificationStatus(): Promise<VerificationStatus> {
+  return apiFetch<VerificationStatus>('/auth/verification-status');
+}
+
+// Trial API
+export async function activateTrial(): Promise<TrialActivationResponse> {
+  return apiFetch<TrialActivationResponse>('/billing/activate-trial', { method: 'POST' });
+}
+
+// Password Reset API
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}
+
+export async function verifyResetToken(token: string): Promise<{ valid: boolean; error?: string }> {
+  return apiFetch<{ valid: boolean; error?: string }>(`/auth/verify-reset-token?token=${token}`);
+}
+
 // Message Templates Types
 export interface MessageTemplate {
   id: number;
@@ -481,9 +542,8 @@ export interface MessageTemplate {
   subject?: string;
   content: string;
   isActive: boolean;
-  userId?: number;
   createdAt: string;
-  updatedAt: string;
+  userId?: number;
 }
 
 export interface TemplateType {
@@ -492,7 +552,7 @@ export interface TemplateType {
   description: string;
 }
 
-export interface TemplatePlaceholder {
+export interface Placeholder {
   placeholder: string;
   description: string;
 }
@@ -502,8 +562,7 @@ export async function getTemplates(params?: { type?: string; channel?: string; i
   const searchParams = new URLSearchParams();
   if (params?.type) searchParams.append('type', params.type);
   if (params?.channel) searchParams.append('channel', params.channel);
-  if (params?.isActive !== undefined) searchParams.append('isActive', params.isActive.toString());
-
+  if (params?.isActive !== undefined) searchParams.append('isActive', String(params.isActive));
   const query = searchParams.toString();
   return apiFetch<MessageTemplate[]>(`/templates${query ? `?${query}` : ''}`);
 }
@@ -512,55 +571,166 @@ export async function getTemplateTypes(): Promise<TemplateType[]> {
   return apiFetch<TemplateType[]>('/templates/types');
 }
 
-export async function getTemplatePlaceholders(): Promise<TemplatePlaceholder[]> {
-  return apiFetch<TemplatePlaceholder[]>('/templates/placeholders');
+export async function getPlaceholders(): Promise<Placeholder[]> {
+  return apiFetch<Placeholder[]>('/templates/placeholders');
 }
 
-export async function getTemplate(id: number): Promise<MessageTemplate> {
-  return apiFetch<MessageTemplate>(`/templates/${id}`);
-}
-
-export async function createTemplate(data: {
-  name: string;
-  type: string;
-  content: string;
-  channel?: string;
-  subject?: string;
-  isActive?: boolean;
-}): Promise<MessageTemplate> {
+export async function createTemplate(data: Partial<MessageTemplate>): Promise<MessageTemplate> {
   return apiFetch<MessageTemplate>('/templates', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
-export async function updateTemplate(id: number, data: Partial<{
-  name: string;
-  type: string;
-  content: string;
-  channel: string;
-  subject: string;
-  isActive: boolean;
-}>): Promise<MessageTemplate> {
+export async function updateTemplate(id: number, data: Partial<MessageTemplate>): Promise<MessageTemplate> {
   return apiFetch<MessageTemplate>(`/templates/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
 }
 
-export async function deleteTemplate(id: number): Promise<{ message: string }> {
-  return apiFetch<{ message: string }>(`/templates/${id}`, { method: 'DELETE' });
+export async function deleteTemplate(id: number): Promise<void> {
+  await apiFetch<void>(`/templates/${id}`, { method: 'DELETE' });
+}
+
+export async function previewTemplate(id: number, data?: object): Promise<{ subject?: string; content: string }> {
+  return apiFetch<{ subject?: string; content: string }>(`/templates/${id}/preview`, {
+    method: 'POST',
+    body: JSON.stringify({ data }),
+  });
 }
 
 export async function duplicateTemplate(id: number): Promise<MessageTemplate> {
   return apiFetch<MessageTemplate>(`/templates/${id}/duplicate`, { method: 'POST' });
 }
 
-export async function previewTemplate(id: number, data?: Record<string, unknown>): Promise<{ subject?: string; content: string }> {
-  return apiFetch<{ subject?: string; content: string }>(`/templates/${id}/preview`, {
+// Notification Logs Types
+export interface NotificationLog {
+  id: number;
+  type: string;
+  channel: string;
+  recipient: string;
+  subject?: string;
+  message: string;
+  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  errorMessage?: string;
+  sentAt?: string;
+  createdAt: string;
+}
+
+export interface NotificationStats {
+  totalSent: number;
+  sentToday: number;
+  sentThisMonth: number;
+  failedThisMonth: number;
+  byChannel: Record<string, number>;
+  byType: Record<string, number>;
+}
+
+export interface NotificationLogsResponse {
+  notifications: NotificationLog[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+// Notification Logs API
+export async function getNotificationLogs(params?: {
+  type?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<NotificationLogsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.type) searchParams.append('type', params.type);
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  if (params?.offset) searchParams.append('offset', params.offset.toString());
+  const query = searchParams.toString();
+  return apiFetch<NotificationLogsResponse>(`/automation/notifications${query ? `?${query}` : ''}`);
+}
+
+export async function getNotificationStats(): Promise<NotificationStats> {
+  return apiFetch<NotificationStats>('/automation/notifications/stats');
+}
+
+// Guests Types
+export interface GuestFull {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  document?: string;
+  documentType?: string;
+  nationality?: string;
+  notes?: string;
+  preferredLanguage?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  reservations?: Reservation[];
+}
+
+export interface GuestsResponse {
+  guests: GuestFull[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface GuestReservationsResponse {
+  reservations: Reservation[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+// Guests API
+export async function getGuests(params?: {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<GuestsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.search) searchParams.append('search', params.search);
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  if (params?.offset) searchParams.append('offset', params.offset.toString());
+  const query = searchParams.toString();
+  return apiFetch<GuestsResponse>(`/guests${query ? `?${query}` : ''}`);
+}
+
+export async function getGuest(id: number): Promise<GuestFull> {
+  return apiFetch<GuestFull>(`/guests/${id}`);
+}
+
+export async function createGuest(data: Partial<GuestFull>): Promise<GuestFull> {
+  return apiFetch<GuestFull>('/guests', {
     method: 'POST',
-    body: JSON.stringify({ data }),
+    body: JSON.stringify(data),
   });
+}
+
+export async function updateGuest(id: number, data: Partial<GuestFull>): Promise<GuestFull> {
+  return apiFetch<GuestFull>(`/guests/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteGuest(id: number): Promise<void> {
+  await apiFetch<void>(`/guests/${id}`, { method: 'DELETE' });
+}
+
+export async function getGuestReservations(id: number, params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<GuestReservationsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  if (params?.offset) searchParams.append('offset', params.offset.toString());
+  const query = searchParams.toString();
+  return apiFetch<GuestReservationsResponse>(`/guests/${id}/reservations${query ? `?${query}` : ''}`);
 }
 
 export { API_URL };
