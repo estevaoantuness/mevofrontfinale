@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, MessageCircle, LayoutGrid, Zap, Shield, Clock } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { PricingSection } from '../components/pricing/PricingSection';
+import { CheckoutModal } from '../components/billing/CheckoutModal';
+import { useAuth } from '../lib/AuthContext';
 
 const BRAND_TEXT_GRADIENT = 'bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] to-[#22D3EE]';
+
+// Planos para o CheckoutModal
+const PLANS_DATA = {
+  starter: { id: 'starter', name: 'Starter', monthlyPrice: 67, yearlyPrice: 49, features: ['Ate 3 propriedades', 'Sync iCal', 'Automacoes basicas', 'Integracao WhatsApp'], hasTrial: false },
+  pro: { id: 'pro', name: 'Pro', monthlyPrice: 197, yearlyPrice: 149, features: ['Ate 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritario'], hasTrial: true, trialDays: 10 },
+  agency: { id: 'agency', name: 'Agency', monthlyPrice: 379, yearlyPrice: 289, features: ['Ate 30 propriedades', 'Tudo do Pro', 'Multi-usuarios', 'API completa'], hasTrial: false }
+};
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -12,6 +21,26 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
+  const { isAuthenticated } = useAuth();
+  const [checkoutModal, setCheckoutModal] = useState<{
+    isOpen: boolean;
+    plan: typeof PLANS_DATA.starter | null;
+    interval: 'monthly' | 'yearly';
+  }>({ isOpen: false, plan: null, interval: 'yearly' });
+
+  const handleSelectPlan = (planId: string, interval: 'monthly' | 'yearly') => {
+    const plan = PLANS_DATA[planId as keyof typeof PLANS_DATA];
+    if (!plan) return;
+
+    if (isAuthenticated) {
+      // Usuario logado - abre checkout direto
+      setCheckoutModal({ isOpen: true, plan, interval });
+    } else {
+      // Usuario nao logado - salva plano e redireciona para registro
+      localStorage.setItem('mevo_pending_plan', JSON.stringify({ planId, interval }));
+      onRegister?.();
+    }
+  };
   return (
     <div className="min-h-screen bg-[#050509] text-slate-300 font-sans selection:bg-blue-500/30">
       {/* Navbar */}
@@ -105,10 +134,7 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
       </section>
 
       {/* Pricing Section */}
-      <PricingSection onSelectPlan={(planId, interval) => {
-        console.log('Selected plan:', planId, interval);
-        onRegister?.();
-      }} />
+      <PricingSection onSelectPlan={handleSelectPlan} />
 
       {/* Testimonials Section */}
       <section className="py-24 px-6 bg-[#020205]">
@@ -151,7 +177,7 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
               { q: 'Preciso instalar algum aplicativo?', a: 'Nao! O Mevo funciona 100% pelo navegador. Basta fazer login e comecar a usar.' },
               { q: 'Funciona com Booking.com e VRBO?', a: 'Sim! Integramos via iCal com Airbnb, Booking.com, VRBO e qualquer plataforma que suporte calendario iCal.' },
               { q: 'Posso cancelar a qualquer momento?', a: 'Claro! Sem fidelidade, sem multas. Cancele quando quiser pelo painel.' },
-              { q: 'Como funciona o trial de 14 dias?', a: 'O plano Pro oferece 14 dias gratis sem precisar de cartao. Teste todas as funcionalidades antes de decidir.' },
+              { q: 'Como funciona o trial de 10 dias?', a: 'O plano Pro oferece 10 dias gratis sem precisar de cartao. Teste todas as funcionalidades antes de decidir.' },
               { q: 'Meus dados estao seguros?', a: 'Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados nunca sao compartilhados.' }
             ].map((faq, i) => (
               <details key={i} className="group p-6 rounded-xl bg-[#0B0C15] border border-white/10">
@@ -194,6 +220,16 @@ export const LandingPage = ({ onLogin, onRegister }: LandingPageProps) => {
       <footer className="border-t border-white/5 py-12 bg-[#020205] text-center">
         <p className="text-slate-600 text-sm">&copy; {new Date().getFullYear()} mevo.ai - Automacao para anfitrioes exigentes.</p>
       </footer>
+
+      {/* Checkout Modal */}
+      {checkoutModal.plan && (
+        <CheckoutModal
+          isOpen={checkoutModal.isOpen}
+          onClose={() => setCheckoutModal({ isOpen: false, plan: null, interval: 'yearly' })}
+          plan={checkoutModal.plan}
+          interval={checkoutModal.interval}
+        />
+      )}
     </div>
   );
 };

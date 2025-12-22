@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { CheckoutModal } from '../components/billing/CheckoutModal';
 import { useAuth } from '../lib/AuthContext';
+
+// Planos para o CheckoutModal
+const PLANS_DATA = {
+  starter: { id: 'starter', name: 'Starter', monthlyPrice: 67, yearlyPrice: 49, features: ['Ate 3 propriedades', 'Sync iCal', 'Automacoes basicas', 'Integracao WhatsApp'], hasTrial: false },
+  pro: { id: 'pro', name: 'Pro', monthlyPrice: 197, yearlyPrice: 149, features: ['Ate 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritario'], hasTrial: true, trialDays: 10 },
+  agency: { id: 'agency', name: 'Agency', monthlyPrice: 379, yearlyPrice: 289, features: ['Ate 30 propriedades', 'Tudo do Pro', 'Multi-usuarios', 'API completa'], hasTrial: false }
+};
 
 interface RegisterPageProps {
   onRegisterSuccess: () => void;
@@ -17,6 +25,11 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkoutModal, setCheckoutModal] = useState<{
+    isOpen: boolean;
+    plan: typeof PLANS_DATA.starter | null;
+    interval: 'monthly' | 'yearly';
+  }>({ isOpen: false, plan: null, interval: 'yearly' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +57,20 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
 
     try {
       await register(name, email, password);
+
+      // Verificar se há plano pendente (selecionado na landing page)
+      const pendingPlan = localStorage.getItem('mevo_pending_plan');
+      if (pendingPlan) {
+        const { planId, interval } = JSON.parse(pendingPlan);
+        const plan = PLANS_DATA[planId as keyof typeof PLANS_DATA];
+        if (plan) {
+          localStorage.removeItem('mevo_pending_plan');
+          setCheckoutModal({ isOpen: true, plan, interval });
+          setLoading(false);
+          return;
+        }
+      }
+
       onRegisterSuccess();
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta');
@@ -116,6 +143,19 @@ export const RegisterPage = ({ onRegisterSuccess, onGoToLogin }: RegisterPagePro
           </p>
         </div>
       </div>
+
+      {/* Checkout Modal (após registro com plano pendente) */}
+      {checkoutModal.plan && (
+        <CheckoutModal
+          isOpen={checkoutModal.isOpen}
+          onClose={() => {
+            setCheckoutModal({ isOpen: false, plan: null, interval: 'yearly' });
+            onRegisterSuccess();
+          }}
+          plan={checkoutModal.plan}
+          interval={checkoutModal.interval}
+        />
+      )}
     </div>
   );
 };

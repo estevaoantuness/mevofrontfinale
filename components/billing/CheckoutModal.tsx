@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Check, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Check, Loader2, CreditCard } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { createCheckout } from '../../lib/api';
 
@@ -27,12 +28,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   interval
 }) => {
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
   const price = interval === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
-  const yearlyTotal = plan.yearlyPrice * 12;
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -40,23 +41,60 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     try {
       const { checkoutUrl } = await createCheckout(plan.id, interval);
-      window.location.href = checkoutUrl;
+      setRedirecting(true);
+      setTimeout(() => {
+        window.location.href = checkoutUrl;
+      }, 800);
     } catch (err: any) {
       setError(err.message || 'Erro ao iniciar pagamento');
       setLoading(false);
     }
   };
 
+  // Full-screen redirect overlay
+  if (redirecting) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 z-[200] flex items-center justify-center bg-gradient-to-br from-[#050509] via-blue-900/30 to-[#050509]"
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center space-y-4"
+        >
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+            <CreditCard className="absolute inset-0 m-auto w-6 h-6 text-blue-400" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-white">Redirecionando para pagamento</h3>
+            <p className="text-sm text-slate-400">Voce sera redirecionado para o Stripe...</p>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-[#0B0C15] border border-white/10 rounded-2xl p-8 shadow-2xl">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="relative w-full max-w-md bg-[#0B0C15] border border-white/10 rounded-2xl p-8 shadow-2xl">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -82,11 +120,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <span className="text-4xl font-bold text-white">{price}</span>
             <span className="text-slate-400">/mes</span>
           </div>
-          {interval === 'yearly' && (
-            <p className="text-center text-sm text-slate-500">
-              Cobrado R${yearlyTotal}/ano
-            </p>
-          )}
           {plan.hasTrial && (
             <div className="mt-4 text-center">
               <span className="inline-block px-3 py-1.5 text-sm font-medium bg-purple-500/20 text-purple-400 rounded-lg">
@@ -147,7 +180,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <p className="mt-6 text-center text-xs text-slate-500">
           Pagamento seguro via Stripe. Cancele quando quiser.
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

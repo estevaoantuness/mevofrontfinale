@@ -54,7 +54,7 @@ const PLANS: PricingPlan[] = [
     ],
     isPopular: true,
     hasTrial: true,
-    trialDays: 14
+    trialDays: 10
   },
   {
     id: 'agency',
@@ -169,11 +169,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   </span>
                   <span className="text-slate-400">/mes</span>
                 </div>
-                {isYearly && (
-                  <p className="text-sm text-slate-500 mt-2">
-                    Cobrado R${plan.yearlyPrice * 12}/ano
-                  </p>
-                )}
                 {!isYearly && plan.yearlyPrice < plan.monthlyPrice && (
                   <p className="text-sm text-green-400 mt-2">
                     ou R${plan.yearlyPrice}/mes no anual

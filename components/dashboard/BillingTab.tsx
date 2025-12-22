@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Download, ExternalLink, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { CreditCard, Download, ExternalLink, AlertTriangle, Check, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { CheckoutModal } from '../billing/CheckoutModal';
 import {
   getSubscription,
   getInvoices,
@@ -12,6 +13,39 @@ import {
   UsageStats
 } from '../../lib/api';
 
+// Planos disponíveis
+const PLANS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    monthlyPrice: 67,
+    yearlyPrice: 49,
+    propertyLimit: 3,
+    features: ['Ate 3 propriedades', 'Sync iCal', 'Automacoes basicas', 'Integracao WhatsApp'],
+    hasTrial: false
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    monthlyPrice: 197,
+    yearlyPrice: 149,
+    propertyLimit: 10,
+    features: ['Ate 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritario'],
+    isPopular: true,
+    hasTrial: true,
+    trialDays: 10
+  },
+  {
+    id: 'agency',
+    name: 'Agency',
+    monthlyPrice: 379,
+    yearlyPrice: 289,
+    propertyLimit: 30,
+    features: ['Ate 30 propriedades', 'Tudo do Pro', 'Multi-usuarios', 'API completa'],
+    hasTrial: false
+  }
+];
+
 export const BillingTab: React.FC = () => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -20,6 +54,12 @@ export const BillingTab: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
+  const [checkoutModal, setCheckoutModal] = useState<{ isOpen: boolean; plan: typeof PLANS[0] | null; interval: 'monthly' | 'yearly' }>({
+    isOpen: false,
+    plan: null,
+    interval: 'yearly'
+  });
 
   useEffect(() => {
     loadData();
@@ -65,6 +105,18 @@ export const BillingTab: React.FC = () => {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const openCheckout = (plan: typeof PLANS[0]) => {
+    setCheckoutModal({
+      isOpen: true,
+      plan,
+      interval: isYearly ? 'yearly' : 'monthly'
+    });
+  };
+
+  const closeCheckout = () => {
+    setCheckoutModal({ isOpen: false, plan: null, interval: 'yearly' });
   };
 
   const getStatusBadge = (status: string) => {
@@ -118,16 +170,18 @@ export const BillingTab: React.FC = () => {
               {getStatusBadge(subscription?.status || 'inactive')}
             </div>
           </div>
-          <Button variant="secondary" onClick={handleOpenPortal} disabled={actionLoading === 'portal'}>
-            {actionLoading === 'portal' ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4 mr-2" />
-                Gerenciar
-              </>
-            )}
-          </Button>
+          {subscription?.hasStripeSubscription && (
+            <Button variant="secondary" onClick={handleOpenPortal} disabled={actionLoading === 'portal'}>
+              {actionLoading === 'portal' ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Gerenciar
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {subscription?.currentPeriodEnd && (
@@ -270,6 +324,89 @@ export const BillingTab: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Upgrade / Choose Plan Section */}
+      {(!subscription?.hasStripeSubscription || subscription?.status === 'canceled') && (
+        <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-blue-400" />
+            <h3 className="text-lg font-semibold text-white">Escolha seu Plano</h3>
+          </div>
+          <p className="text-sm text-slate-400 mb-6">
+            Desbloqueie todo o potencial do Mevo com um plano premium.
+          </p>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-slate-500'}`}>Mensal</span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className="relative w-11 h-6 rounded-full bg-blue-600 transition-colors"
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-5' : ''}`} />
+            </button>
+            <span className={`text-sm ${isYearly ? 'text-white' : 'text-slate-500'}`}>Anual</span>
+            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">-27%</span>
+          </div>
+
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative p-4 rounded-xl border ${
+                  plan.isPopular
+                    ? 'border-blue-500/50 bg-blue-500/5'
+                    : 'border-white/10 bg-[#050509]'
+                }`}
+              >
+                {plan.isPopular && (
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 text-xs font-medium bg-blue-600 text-white rounded-full">
+                    Popular
+                  </span>
+                )}
+                <h4 className="text-white font-semibold mb-1">{plan.name}</h4>
+                <div className="flex items-baseline gap-1 mb-3">
+                  <span className="text-2xl font-bold text-white">
+                    R${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                  </span>
+                  <span className="text-slate-400 text-sm">/mes</span>
+                </div>
+                {plan.hasTrial && (
+                  <span className="inline-block mb-3 px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded">
+                    {plan.trialDays} dias gratis
+                  </span>
+                )}
+                <ul className="space-y-1.5 mb-4">
+                  {plan.features.slice(0, 3).map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-slate-400">
+                      <Check className="w-3 h-3 text-green-400" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant={plan.isPopular ? 'primary' : 'secondary'}
+                  className="w-full text-sm"
+                  onClick={() => openCheckout(plan)}
+                >
+                  {plan.hasTrial ? 'Comecar Trial' : 'Assinar'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Checkout Modal */}
+      {checkoutModal.plan && (
+        <CheckoutModal
+          isOpen={checkoutModal.isOpen}
+          onClose={closeCheckout}
+          plan={checkoutModal.plan}
+          interval={checkoutModal.interval}
+        />
       )}
     </div>
   );

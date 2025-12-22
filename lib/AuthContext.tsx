@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as api from './api';
 import type { User } from './api';
+import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    authTransition: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -17,6 +19,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [authTransition, setAuthTransition] = useState(false);
 
     // Check if user is already logged in on mount
     useEffect(() => {
@@ -39,11 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (email: string, password: string) => {
         const { user: userData } = await api.login(email, password);
         setUser(userData);
+        setAuthTransition(true);
+        setTimeout(() => setAuthTransition(false), 2000);
     };
 
     const register = async (name: string, email: string, password: string) => {
         const { user: userData } = await api.register(name, email, password);
         setUser(userData);
+        setAuthTransition(true);
+        setTimeout(() => setAuthTransition(false), 2000);
     };
 
     const logout = () => {
@@ -62,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 user,
                 isLoading,
                 isAuthenticated: !!user,
+                authTransition,
                 login,
                 register,
                 logout,
@@ -69,6 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }}
         >
             {children}
+            <LoadingOverlay
+                isVisible={authTransition}
+                title="Entrando na sua conta"
+                subtitle="Sincronizando suas preferencias..."
+            />
         </AuthContext.Provider>
     );
 }
