@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Check
- } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useTheme } from '../../lib/ThemeContext';
 
 interface PricingPlan {
   id: string;
@@ -84,6 +84,7 @@ interface PricingSectionProps {
 
 export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) => {
   const [isYearly, setIsYearly] = useState(true);
+  const { isDark } = useTheme();
 
   const handleSelectPlan = (planId: string) => {
     if (onSelectPlan) {
@@ -96,10 +97,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Preços simples e transparentes
           </h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             Escolha o plano ideal para o tamanho do seu negócio. Cancele quando quiser.
           </p>
         </div>
@@ -107,7 +108,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         {/* Toggle */}
         <div className="flex items-center justify-center gap-4 mb-12">
           <span
-            className={`text-sm font-medium cursor-pointer ${!isYearly ? 'text-white' : 'text-slate-500'}`}
+            className={`text-sm font-medium cursor-pointer ${!isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}
             onClick={() => setIsYearly(false)}
           >
             Mensal
@@ -124,12 +125,12 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
             />
           </button>
           <span
-            className={`text-sm font-medium cursor-pointer ${isYearly ? 'text-white' : 'text-slate-500'}`}
+            className={`text-sm font-medium cursor-pointer ${isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}
             onClick={() => setIsYearly(true)}
           >
             Anual
           </span>
-          <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+          <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-500/20 text-green-500 rounded-full">
             Economize até 27%
           </span>
         </div>
@@ -141,8 +142,12 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
               key={plan.id}
               className={`relative rounded-2xl p-8 ${
                 plan.isPopular
-                  ? 'bg-gradient-to-b from-blue-600/20 to-[#0B0C15] border-2 border-blue-500/50'
-                  : 'bg-[#0B0C15] border border-white/10'
+                  ? isDark
+                    ? 'bg-gradient-to-b from-blue-600/20 to-[#0B0C15] border-2 border-blue-500/50'
+                    : 'bg-white border-2 border-blue-500 shadow-xl'
+                  : isDark
+                    ? 'bg-[#0B0C15] border border-white/10'
+                    : 'bg-white border border-slate-200 shadow-lg'
               }`}
             >
               {/* Popular Badge */}
@@ -156,21 +161,21 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
 
               {/* Plan Header */}
               <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
-                <p className="text-sm text-slate-400">{plan.description}</p>
+                <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h3>
+                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{plan.description}</p>
               </div>
 
               {/* Price */}
               <div className="text-center mb-8">
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-slate-400 text-lg">R$</span>
-                  <span className="text-5xl font-bold text-white">
+                  <span className={`text-lg ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>R$</span>
+                  <span className={`text-5xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-slate-400">/mês</span>
+                  <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>/mês</span>
                 </div>
                 {!isYearly && plan.yearlyPrice < plan.monthlyPrice && (
-                  <p className="text-sm text-green-400 mt-2">
+                  <p className="text-sm text-green-500 mt-2">
                     ou R${plan.yearlyPrice}/mês no anual
                   </p>
                 )}
@@ -179,7 +184,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
               {/* Trial Badge */}
               {plan.hasTrial && (
                 <div className="text-center mb-6">
-                  <span className="inline-block px-3 py-1.5 text-sm font-medium bg-purple-500/20 text-purple-400 rounded-lg">
+                  <span className="inline-block px-3 py-1.5 text-sm font-medium bg-pink-500 text-white rounded-lg">
                     {plan.trialDays} dias grátis
                   </span>
                 </div>
@@ -189,8 +194,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-300">{feature}</span>
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -208,7 +213,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         </div>
 
         {/* Money-back guarantee */}
-        <p className="text-center text-sm text-slate-500 mt-12">
+        <p className={`text-center text-sm mt-12 ${isDark ? 'text-slate-500' : 'text-slate-600'}`}>
           Garantia de 7 dias. Não gostou? Devolvemos seu dinheiro.
         </p>
       </div>

@@ -51,6 +51,7 @@ interface DayReservation {
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial, onSelectPlan }) => {
+  const { isDark } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
@@ -254,23 +255,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
       )}
 
       {/* Header do Calendário */}
-      <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-6">
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           {/* Navegação do Mês */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={goToPreviousMonth}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'}`}
               >
                 <ChevronLeft size={20} className="text-slate-400" />
               </button>
-              <h2 className="text-xl font-semibold text-white min-w-[200px] text-center">
+              <h2 className={`text-xl font-semibold min-w-[200px] text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
               <button
                 onClick={goToNextMonth}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'}`}
               >
                 <ChevronRight size={20} className="text-slate-400" />
               </button>
@@ -291,7 +292,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                   placeholder="Buscar imóvel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48"
+                  className={`pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48 ${
+                    isDark
+                      ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                  }`}
                 />
               </div>
 
@@ -311,11 +316,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 {showFilters && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowFilters(false)} />
-                    <div className="absolute right-0 mt-2 w-64 bg-[#0B0C15] border border-white/10 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto">
+                    <div className={`absolute right-0 mt-2 w-64 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto ${
+                      isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'
+                    }`}>
                       <button
                         onClick={() => { setFilterPropertyId(null); setShowFilters(false); }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                          !filterPropertyId ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
+                          !filterPropertyId
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'
                         }`}
                       >
                         Todos os imóveis
@@ -325,7 +334,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                           key={property.id}
                           onClick={() => { setFilterPropertyId(property.id); setShowFilters(false); }}
                           className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-                            filterPropertyId === property.id ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
+                            filterPropertyId === property.id
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'
                           }`}
                         >
                           <div className={`w-3 h-3 rounded ${PROPERTY_COLORS[index % PROPERTY_COLORS.length].bg}`} />
@@ -341,11 +352,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         </div>
 
         {/* Grade do Calendário */}
-        <div className="border border-white/5 rounded-xl overflow-hidden">
+        <div className={`rounded-xl overflow-hidden ${isDark ? 'border border-white/5' : 'border border-slate-200'}`}>
           {/* Header dos dias da semana */}
-          <div className="grid grid-cols-7 bg-white/[0.02]">
+          <div className={`grid grid-cols-7 ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
             {WEEKDAYS.map((day) => (
-              <div key={day} className="py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-white/5">
+              <div key={day} className={`py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
                 {day}
               </div>
             ))}
@@ -362,8 +373,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                   key={index}
                   onClick={() => hasCalendarAccess && date && dayReservations.length > 0 && setSelectedDay(date)}
                   className={`
-                    min-h-[100px] p-2 border-b border-r border-white/5 transition-colors
-                    ${date ? (hasCalendarAccess ? 'hover:bg-white/[0.02] cursor-pointer' : '') : 'bg-white/[0.01]'}
+                    min-h-[100px] p-2 border-b border-r transition-colors
+                    ${isDark ? 'border-white/5' : 'border-slate-200'}
+                    ${date ? (hasCalendarAccess ? (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
                   `}
@@ -405,7 +417,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         </div>
 
         {/* Legenda */}
-        <div className="flex items-center gap-6 mt-4 pt-4 border-t border-white/5">
+        <div className={`flex items-center gap-6 mt-4 pt-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <span className="text-xs text-slate-500">Legenda:</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-emerald-400 font-bold">IN</span>
@@ -424,25 +436,25 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
+        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
               <Home size={20} className="text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">{stats.totalProperties}</p>
+              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalProperties}</p>
               <p className="text-xs text-slate-500">Imóveis Ativos</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
+        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
               <span className="text-red-400 font-bold text-sm">OUT</span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">
+              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? (todayData?.checkouts.length || 0) : '-'}
               </p>
               <p className="text-xs text-slate-500">Checkouts Hoje</p>
@@ -450,13 +462,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           </div>
         </div>
 
-        <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
+        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
               <span className="text-emerald-400 font-bold text-sm">IN</span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">
+              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? (todayData?.checkins.length || 0) : '-'}
               </p>
               <p className="text-xs text-slate-500">Check-ins Hoje</p>
@@ -464,7 +476,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           </div>
         </div>
 
-        <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
+        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
               <span className="text-purple-400 font-bold text-lg">
@@ -472,7 +484,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               </span>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-white">
+              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? stats.messagesThisMonth : '-'}
               </p>
               <p className="text-xs text-slate-500">Msgs Este Mês</p>
