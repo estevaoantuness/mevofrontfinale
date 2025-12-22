@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, LanguageCode } from '../../lib/i18n';
 
@@ -38,11 +39,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-sm text-slate-400 hover:text-slate-200 transition-colors font-medium"
+        className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors"
         aria-label="Change language"
         aria-expanded={isOpen}
       >
-        {currentLang.label}
+        <Globe size={16} />
+        <span className="font-mono text-xs uppercase">{currentLang.label}</span>
       </button>
 
       {isOpen && (
@@ -51,14 +53,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             <button
               key={lang.code}
               onClick={() => handleChange(lang.code as LanguageCode)}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+              className={`w-full text-left px-3 py-2.5 text-sm transition-colors flex items-center justify-between ${
                 lang.code === i18n.language
                   ? 'bg-blue-500/10 text-blue-400'
                   : 'theme-text-secondary hover:theme-bg-hover'
               }`}
             >
-              <span className="font-medium">{lang.label}</span>
-              <span className="ml-2 text-xs opacity-60">{lang.name}</span>
+              <span className="font-mono text-xs uppercase">{lang.label}</span>
+              <span className="text-xs opacity-50">{lang.name}</span>
             </button>
           ))}
         </div>

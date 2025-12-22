@@ -8,9 +8,9 @@ import es419 from '../locales/es-419/translation.json';
 
 // Supported languages - clean labels
 export const LANGUAGES = [
-  { code: 'pt-BR', label: '(pt-br)', name: 'Português' },
-  { code: 'en', label: '(en)', name: 'English' },
-  { code: 'es-419', label: '(es)', name: 'Español' }
+  { code: 'pt-BR', label: 'pt', name: 'Português' },
+  { code: 'en', label: 'en', name: 'English' },
+  { code: 'es-419', label: 'es', name: 'Español' }
 ] as const;
 
 export type LanguageCode = typeof LANGUAGES[number]['code'];
