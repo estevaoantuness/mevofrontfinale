@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Download, ExternalLink, AlertTriangle, Check, Loader2, Sparkles } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { CheckoutModal } from '../billing/CheckoutModal';
 import {
@@ -47,6 +48,7 @@ const PLANS = [
 ];
 
 export const BillingTab: React.FC = () => {
+  const location = useLocation();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [usage, setUsage] = useState<UsageStats | null>(null);
@@ -55,6 +57,7 @@ export const BillingTab: React.FC = () => {
   const [error, setError] = useState('');
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isYearly, setIsYearly] = useState(true);
+  const [highlightPlan, setHighlightPlan] = useState<string | null>(null);
   const [checkoutModal, setCheckoutModal] = useState<{ isOpen: boolean; plan: typeof PLANS[0] | null; interval: 'monthly' | 'yearly' }>({
     isOpen: false,
     plan: null,
@@ -64,6 +67,28 @@ export const BillingTab: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const plan = params.get('plan');
+    if (!plan || !['starter', 'pro', 'agency'].includes(plan)) return;
+
+    setHighlightPlan(plan);
+    const scrollToPlan = () => {
+      const element = document.getElementById(`plan-card-${plan}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    const scrollTimer = setTimeout(scrollToPlan, 150);
+    const clearTimer = setTimeout(() => setHighlightPlan(null), 3000);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearTimer);
+    };
+  }, [location.search]);
 
   const loadData = async () => {
     try {
@@ -355,11 +380,12 @@ export const BillingTab: React.FC = () => {
             {PLANS.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative p-4 rounded-xl border ${
+                id={`plan-card-${plan.id}`}
+                className={`relative p-4 rounded-xl border transition-all ${
                   plan.isPopular
                     ? 'border-blue-500/50 bg-blue-500/5'
                     : 'border-white/10 bg-[#050509]'
-                }`}
+                } ${highlightPlan === plan.id ? 'ring-2 ring-blue-500/70 shadow-[0_0_0_4px_rgba(59,130,246,0.15)] scale-[1.01]' : ''}`}
               >
                 {plan.isPopular && (
                   <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 text-xs font-medium bg-blue-600 text-white rounded-full">

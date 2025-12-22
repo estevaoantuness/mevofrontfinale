@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
   Home,
@@ -40,6 +40,7 @@ import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useAuth } from '../lib/AuthContext';
+import { useTheme } from '../lib/ThemeContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
 
@@ -50,7 +51,9 @@ interface DashboardProps {
 
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const allowedTabs = useMemo(
     () => new Set(['overview', 'properties', 'guests', 'templates', 'logs', 'whatsapp', 'billing', 'profile', 'settings']),
     []
@@ -64,6 +67,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [qrLoading, setQrLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+
+  const handleSelectPlan = (planId: 'starter' | 'pro') => {
+    navigate(`/dashboard?tab=billing&plan=${planId}`);
+    setActiveTab('billing');
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -311,20 +319,24 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       onClick={() => setActiveTab(id)}
       className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all mb-1 ${
         activeTab === id
-          ? 'bg-white/5 text-white shadow-sm'
-          : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+          ? isDark
+            ? 'bg-white/5 text-white shadow-sm'
+            : 'bg-blue-50 text-blue-700 shadow-sm'
+          : isDark
+            ? 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
       }`}
     >
-      <Icon size={16} className={`mr-3 ${activeTab === id ? 'text-blue-400' : 'text-slate-500'}`} />
+      <Icon size={16} className={`mr-3 ${activeTab === id ? 'text-blue-400' : isDark ? 'text-slate-500' : 'text-slate-400'}`} />
       {label}
     </button>
   );
 
   return (
-    <div className="flex h-screen bg-[#050509] text-slate-300 font-sans overflow-hidden">
+    <div className={`flex h-screen font-sans overflow-hidden ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 border-r border-white/5 bg-[#080911] flex flex-col">
-        <div className="h-14 flex items-center px-6 border-b border-white/5">
+      <aside className={`w-64 flex-shrink-0 border-r flex flex-col ${isDark ? 'border-white/5 bg-[#080911]' : 'border-slate-200 bg-white'}`}>
+        <div className={`h-14 flex items-center px-6 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <Logo size="text-lg" onClick={onGoToLanding} />
           <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium border ${
             planBadge.color === 'purple'
@@ -338,7 +350,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         </div>
 
         <nav className="flex-1 p-3">
-          <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Menu</div>
+          <div className={`mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Menu</div>
           <NavItem id="overview" icon={LayoutGrid} label="Visão Geral" />
           <NavItem id="properties" icon={Home} label="Meus Imóveis" />
           <NavItem id="guests" icon={Users} label="Hóspedes" />
@@ -350,7 +362,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="settings" icon={Settings} label="Configurações" />
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className={`p-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           {/* Email Verification Warning */}
           {user && !user.emailVerified && (
             <button
@@ -374,13 +386,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               </div>
               {/* Email verification badge on avatar */}
               {user && !user.emailVerified && (
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-500 border-2 border-[#080911] flex items-center justify-center">
+                <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-500 border-2 ${isDark ? 'border-[#080911]' : 'border-white'} flex items-center justify-center`}>
                   <span className="sr-only">Email não verificado</span>
                 </div>
               )}
             </div>
             <div className="ml-3 overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuário'}</p>
+              <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{user?.name || 'Usuário'}</p>
               <p className="text-xs text-slate-500 truncate">{user?.email || ''}</p>
             </div>
           </div>
@@ -404,10 +416,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#050509]">
+      <main className={`flex-1 flex flex-col min-w-0 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
         {/* Topbar */}
-        <header className="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-[#050509]/50 backdrop-blur-sm z-10">
-          <h2 className="text-sm font-medium text-slate-200">
+        <header className={`h-14 flex items-center justify-between px-8 border-b backdrop-blur-sm z-10 ${isDark ? 'border-white/5 bg-[#050509]/50' : 'border-slate-200 bg-white/80'}`}>
+          <h2 className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
             {activeTab === 'guests' && 'Gestão de Hóspedes'}
@@ -422,7 +434,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <div className="flex items-center space-x-4">
             <LanguageSwitcher />
             <ThemeToggle />
-            <div className="flex items-center space-x-2 pl-4 border-l border-white/10">
+            <div className={`flex items-center space-x-2 pl-4 border-l ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
               <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
               <span className="text-xs text-slate-500 font-medium">Online</span>
             </div>
@@ -458,16 +470,17 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 properties={properties}
                 stats={stats}
                 subscription={subscription}
-                onActivateTrial={() => setActiveTab('billing')}
+                onActivateTrial={() => handleSelectPlan('pro')}
+                onSelectPlan={handleSelectPlan}
               />
 
               {/* Ações Rápidas */}
-              <div className="mt-6 bg-[#0B0C15]/50 border border-white/5 rounded-xl p-6">
+              <div className={`mt-6 border rounded-xl p-6 ${isDark ? 'bg-[#0B0C15]/50 border-white/5' : 'bg-white border-slate-200 shadow-sm'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 px-4 py-2 bg-white/[0.02] rounded-lg">
+                    <div className={`flex items-center gap-3 px-4 py-2 rounded-lg ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
                       <div className={`w-2 h-2 rounded-full ${whatsappStatus.connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                      <span className="text-sm text-slate-400">
+                      <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         WhatsApp: {whatsappStatus.connected ? `Conectado (${whatsappStatus.phone || 'verificando...'})` : 'Desconectado'}
                       </span>
                     </div>
@@ -485,7 +498,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-medium text-white">Meus Imóveis</h3>
+                  <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
@@ -500,10 +513,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 </Button>
               </div>
 
-              <div className="bg-[#0B0C15] border border-white/5 rounded-xl overflow-hidden">
+              <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-white/5 bg-white/[0.02]">
+                    <tr className={isDark ? 'border-b border-white/5 bg-white/[0.02]' : 'border-b border-slate-200 bg-slate-50'}>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imóvel</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Responsável</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Telefone</th>
@@ -511,7 +524,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className={isDark ? 'divide-y divide-white/5' : 'divide-y divide-slate-200'}>
                     {properties.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
@@ -520,19 +533,19 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       </tr>
                     ) : (
                       properties.map((p) => (
-                        <tr key={p.id} className="group hover:bg-white/[0.02] transition-colors">
+                        <tr key={p.id} className={`group transition-colors ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}`}>
                           <td className="py-4 px-6">
                             <div className="flex items-center">
-                              <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center mr-3 text-slate-500">
+                              <div className={`w-8 h-8 rounded flex items-center justify-center mr-3 ${isDark ? 'bg-white/5 text-slate-500' : 'bg-slate-100 text-slate-400'}`}>
                                 <Home size={14} />
                               </div>
-                              <span className="text-sm font-medium text-slate-200">{p.name}</span>
+                              <span className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{p.name}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-sm text-slate-300">
+                          <td className={`py-4 px-6 text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                             {p.employee_name}
                           </td>
-                          <td className="py-4 px-6 text-sm text-slate-400 font-mono text-xs">
+                          <td className={`py-4 px-6 font-mono text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                             {p.employee_phone}
                           </td>
                           <td className="py-4 px-6">
@@ -586,15 +599,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: WHATSAPP */}
           {activeTab === 'whatsapp' && (
             <div className="max-w-2xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-10 text-center relative overflow-hidden">
+              <div className={`rounded-xl p-10 text-center relative overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50"></div>
 
-                <div className="w-16 h-16 rounded-2xl bg-white/5 mx-auto flex items-center justify-center mb-6 text-slate-400">
+                <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-6 ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
                   <Smartphone size={32} />
                 </div>
 
-                <h3 className="text-xl font-medium text-white mb-2">Conexão WhatsApp</h3>
-                <p className="text-sm text-slate-400 mb-8 max-w-sm mx-auto">
+                <h3 className={`text-xl font-medium mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Conexão WhatsApp</h3>
+                <p className={`text-sm mb-8 max-w-sm mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   Conecte seu WhatsApp para enviar mensagens automáticas para sua equipe de limpeza.
                 </p>
 
@@ -624,10 +637,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                     />
                   </div>
                 ) : (
-                  <div className="w-64 h-64 mx-auto border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center bg-black/20 mb-6">
-                    <Smartphone size={48} className="text-slate-600 mb-4" />
+                  <div className={`w-64 h-64 mx-auto border-2 border-dashed rounded-xl flex flex-col items-center justify-center mb-6 ${isDark ? 'border-white/10 bg-black/20' : 'border-slate-300 bg-slate-50'}`}>
+                    <Smartphone size={48} className="text-slate-400 mb-4" />
                     <span className="text-sm text-slate-500">Clique no botao abaixo</span>
-                    <span className="text-xs text-slate-600 mt-1">para conectar seu WhatsApp</span>
+                    <span className="text-xs text-slate-400 mt-1">para conectar seu WhatsApp</span>
                   </div>
                 )}
 

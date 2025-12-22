@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { useTheme } from '../../lib/ThemeContext';
 import * as api from '../../lib/api';
 import type { Reservation, Property, DashboardStats, TodayReservations, Subscription } from '../../lib/api';
 
@@ -39,6 +40,7 @@ interface CalendarViewProps {
   stats: DashboardStats;
   subscription: Subscription | null;
   onActivateTrial?: () => void;
+  onSelectPlan?: (planId: 'starter' | 'pro') => void;
 }
 
 interface DayReservation {
@@ -48,7 +50,7 @@ interface DayReservation {
   propertyName: string;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial, onSelectPlan }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
@@ -219,12 +221,30 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 </h3>
                 <p className="text-sm text-slate-400">
                   Visualize seus check-ins e check-outs automaticamente sincronizados do Airbnb e Booking.
-                  Disponível no plano <span className="text-blue-400 font-medium">Starter</span> ou <span className="text-purple-400 font-medium">Trial Gratuito</span>.
+                  Disponível no plano{' '}
+                  <button
+                    type="button"
+                    onClick={() => onSelectPlan?.('starter')}
+                    className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
+                  >
+                    Starter
+                  </button>{' '}
+                  ou{' '}
+                  <button
+                    type="button"
+                    onClick={() => onSelectPlan?.('pro')}
+                    className="text-purple-400 font-medium hover:text-purple-300 transition-colors"
+                  >
+                    Trial Gratuito
+                  </button>.
                 </p>
               </div>
             </div>
             {onActivateTrial && (
-              <Button onClick={onActivateTrial} className="flex-shrink-0">
+              <Button
+                onClick={() => (onSelectPlan ? onSelectPlan('pro') : onActivateTrial())}
+                className="flex-shrink-0"
+              >
                 <Sparkles size={16} className="mr-2" />
                 Ativar Trial Grátis
               </Button>
