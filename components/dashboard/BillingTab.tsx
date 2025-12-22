@@ -209,14 +209,6 @@ export const BillingTab: React.FC = () => {
           )}
         </div>
 
-        {subscription?.currentPeriodEnd && (
-          <p className="text-sm text-slate-400">
-            {subscription.cancelAtPeriodEnd
-              ? `Acesso até ${new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}`
-              : `Renova em ${new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}`}
-          </p>
-        )}
-
         {subscription?.trialEndsAt && subscription.status === 'trialing' && (
           <p className="text-sm text-purple-400 mt-2">
             Trial termina em {new Date(subscription.trialEndsAt).toLocaleDateString('pt-BR')}
