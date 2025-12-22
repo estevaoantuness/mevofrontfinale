@@ -22,7 +22,10 @@
       "createAccount": "Crear Mi Cuenta",
       "login": "Iniciar Sesion",
       "startFree": "Comenzar Gratis Ahora",
-      "viewPlans": "Ver Planes"
+      "viewPlans": "Ver Planes",
+      "goToDashboard": "Ir al Panel",
+      "manageProperties": "Gestionar Propiedades",
+      "viewReservations": "Ver Reservas"
     },
     "features": {
       "icalSync": {
@@ -109,7 +112,9 @@
     },
     "finalCta": {
       "title": "Listo para automatizar?",
-      "subtitle": "Unete a cientos de anfitriones que ya ahorran tiempo con Mevo. Comienza gratis hoy."
+      "subtitle": "Unete a cientos de anfitriones que ya ahorran tiempo con Mevo. Comienza gratis hoy.",
+      "loggedInTitle": "Continua gestionando tus propiedades",
+      "loggedInSubtitle": "Tu panel esta listo. Accede ahora y monitorea tus reservas y automatizaciones."
     },
     "footer": {
       "copyright": "mevo.ia - Automatizacion para anfitriones exigentes."

@@ -144,12 +144,26 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 z-10">
-          <Button variant="primary" className="h-12 px-8 text-base" onClick={onRegister || onLogin}>
-            {t('landing.cta.createAccount')}
-          </Button>
-          <Button variant="secondary" className="h-12 px-8 text-base" onClick={onLogin}>
-            {t('landing.cta.login')}
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button variant="primary" className="h-12 px-8 text-base" onClick={onDashboard}>
+                <Building2 size={20} className="mr-2" />
+                {t('landing.cta.manageProperties')}
+              </Button>
+              <Button variant="secondary" className="h-12 px-8 text-base" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                {t('landing.cta.viewPlans')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="primary" className="h-12 px-8 text-base" onClick={onRegister || onLogin}>
+                {t('landing.cta.createAccount')}
+              </Button>
+              <Button variant="secondary" className="h-12 px-8 text-base" onClick={onLogin}>
+                {t('landing.cta.login')}
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Features Grid - 6 features */}
@@ -270,18 +284,32 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
       <section className={`py-24 px-6 ${isDark ? 'bg-gradient-to-b from-[#050509] to-blue-900/20' : 'bg-gradient-to-b from-white to-blue-50'}`}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            {t('landing.finalCta.title')}
+            {isAuthenticated ? t('landing.finalCta.loggedInTitle') : t('landing.finalCta.title')}
           </h2>
           <p className={`text-lg mb-10 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            {t('landing.finalCta.subtitle')}
+            {isAuthenticated ? t('landing.finalCta.loggedInSubtitle') : t('landing.finalCta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="primary" className="h-14 px-10 text-lg" onClick={onRegister || onLogin}>
-              {t('landing.cta.startFree')}
-            </Button>
-            <Button variant="secondary" className="h-14 px-10 text-lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-              {t('landing.cta.viewPlans')}
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button variant="primary" className="h-14 px-10 text-lg" onClick={onDashboard}>
+                  <Building2 size={22} className="mr-2" />
+                  {t('landing.cta.goToDashboard')}
+                </Button>
+                <Button variant="secondary" className="h-14 px-10 text-lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                  {t('landing.cta.viewPlans')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="primary" className="h-14 px-10 text-lg" onClick={onRegister || onLogin}>
+                  {t('landing.cta.startFree')}
+                </Button>
+                <Button variant="secondary" className="h-14 px-10 text-lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                  {t('landing.cta.viewPlans')}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </section>

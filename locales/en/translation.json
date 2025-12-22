@@ -22,7 +22,10 @@
       "createAccount": "Create My Account",
       "login": "Sign In",
       "startFree": "Start Free Now",
-      "viewPlans": "View Plans"
+      "viewPlans": "View Plans",
+      "goToDashboard": "Go to Dashboard",
+      "manageProperties": "Manage Properties",
+      "viewReservations": "View Reservations"
     },
     "features": {
       "icalSync": {
@@ -109,7 +112,9 @@
     },
     "finalCta": {
       "title": "Ready to automate?",
-      "subtitle": "Join hundreds of hosts already saving time with Mevo. Start free today."
+      "subtitle": "Join hundreds of hosts already saving time with Mevo. Start free today.",
+      "loggedInTitle": "Continue managing your properties",
+      "loggedInSubtitle": "Your dashboard is ready. Access now and track your reservations and automations."
     },
     "footer": {
       "copyright": "mevo.ai - Automation for demanding hosts."
