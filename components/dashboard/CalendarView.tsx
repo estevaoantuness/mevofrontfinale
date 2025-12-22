@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -49,6 +49,104 @@ interface DayReservation {
   color: typeof PROPERTY_COLORS[0];
   propertyName: string;
 }
+
+interface GroupedDayEvents {
+  checkins: DayReservation[];
+  checkouts: DayReservation[];
+  stays: DayReservation[];
+}
+
+// Tooltip component for showing properties on hover
+interface TooltipProps {
+  items: DayReservation[];
+  type: 'checkin' | 'checkout' | 'stay';
+  isDark: boolean;
+}
+
+const EventTooltip: React.FC<TooltipProps> = ({ items, type, isDark }) => {
+  const typeLabels = {
+    checkin: 'Check-ins',
+    checkout: 'Check-outs',
+    stay: 'Ocupados'
+  };
+
+  return (
+    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 min-w-[140px] max-w-[200px] p-2 rounded-lg shadow-xl text-xs ${
+      isDark ? 'bg-[#1a1b26] border border-white/10' : 'bg-white border border-slate-200 shadow-lg'
+    }`}>
+      <div className={`font-semibold mb-1.5 ${
+        type === 'checkin' ? 'text-emerald-400' : type === 'checkout' ? 'text-red-400' : 'text-blue-400'
+      }`}>
+        {typeLabels[type]} ({items.length})
+      </div>
+      <div className="space-y-1">
+        {items.map((item, idx) => (
+          <div key={idx} className={`truncate ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+            • {item.propertyName}
+          </div>
+        ))}
+      </div>
+      {/* Arrow */}
+      <div className={`absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
+        isDark ? 'border-t-[#1a1b26]' : 'border-t-white'
+      }`} />
+    </div>
+  );
+};
+
+// Event indicator component with hover tooltip
+interface EventIndicatorProps {
+  items: DayReservation[];
+  type: 'checkin' | 'checkout' | 'stay';
+  isDark: boolean;
+}
+
+const EventIndicator: React.FC<EventIndicatorProps> = ({ items, type, isDark }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  if (items.length === 0) return null;
+
+  const count = items.length;
+  const label = type === 'checkin' ? 'in' : type === 'checkout' ? 'out' : '';
+  const colorClass = type === 'checkin'
+    ? 'text-emerald-400 bg-emerald-500/10'
+    : type === 'checkout'
+    ? 'text-red-400 bg-red-500/10'
+    : 'text-blue-400 bg-blue-500/10';
+
+  // For stays, show a small dot indicator instead of text
+  if (type === 'stay') {
+    return (
+      <div
+        className="relative"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <div className={`flex items-center justify-center gap-0.5 px-1.5 py-0.5 rounded ${colorClass}`}>
+          {items.slice(0, 4).map((_, idx) => (
+            <div key={idx} className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          ))}
+          {count > 4 && <span className="text-[9px] ml-0.5">+{count - 4}</span>}
+        </div>
+        {showTooltip && <EventTooltip items={items} type={type} isDark={isDark} />}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold text-[10px] cursor-default ${colorClass}`}>
+        {count > 1 && <span>{count}</span>}
+        <span className="uppercase">{label}</span>
+      </div>
+      {showTooltip && <EventTooltip items={items} type={type} isDark={isDark} />}
+    </div>
+  );
+};
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial, onSelectPlan }) => {
   const { isDark } = useTheme();
@@ -199,6 +297,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     if (!date) return [];
     const key = date.toISOString().split('T')[0];
     return reservationsByDay[key] || [];
+  };
+
+  // Agrupar reservas por tipo (checkin, checkout, stay)
+  const getGroupedDayEvents = (date: Date | null): GroupedDayEvents => {
+    const reservations = getDayReservations(date);
+    return {
+      checkins: reservations.filter(r => r.type === 'checkin'),
+      checkouts: reservations.filter(r => r.type === 'checkout'),
+      stays: reservations.filter(r => r.type === 'stay')
+    };
   };
 
   // Filtrar propriedades pela busca
@@ -366,48 +474,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           <div className="grid grid-cols-7">
             {calendarDays.map((date, index) => {
               const dayReservations = hasCalendarAccess ? getDayReservations(date) : [];
+              const groupedEvents = hasCalendarAccess ? getGroupedDayEvents(date) : { checkins: [], checkouts: [], stays: [] };
               const today = isToday(date);
+              const hasEvents = dayReservations.length > 0;
 
               return (
                 <div
                   key={index}
-                  onClick={() => hasCalendarAccess && date && dayReservations.length > 0 && setSelectedDay(date)}
+                  onClick={() => hasCalendarAccess && date && hasEvents && setSelectedDay(date)}
                   className={`
                     min-h-[100px] p-2 border-b border-r transition-colors
                     ${isDark ? 'border-white/5' : 'border-slate-200'}
-                    ${date ? (hasCalendarAccess ? (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
+                    ${date ? (hasCalendarAccess && hasEvents ? (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
                   `}
                 >
                   {date && (
                     <>
-                      <div className={`text-sm font-medium mb-1 ${today ? 'text-blue-400' : 'text-slate-400'}`}>
+                      <div className={`text-sm font-medium mb-2 ${today ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {date.getDate()}
                       </div>
-                      {hasCalendarAccess ? (
-                        <div className="space-y-1">
-                          {dayReservations.slice(0, 3).map((dayRes, idx) => (
-                            <div
-                              key={`${dayRes.reservation.id}-${dayRes.type}-${idx}`}
-                              className={`
-                                text-[10px] px-1.5 py-0.5 rounded truncate
-                                ${dayRes.color.bg} ${dayRes.color.text} border ${dayRes.color.border}
-                              `}
-                              title={`${dayRes.propertyName} - ${dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}`}
-                            >
-                              {dayRes.type === 'checkin' && '▶ '}
-                              {dayRes.type === 'checkout' && '◀ '}
-                              {dayRes.propertyName.length > 10 ? dayRes.propertyName.substring(0, 10) + '...' : dayRes.propertyName}
-                            </div>
-                          ))}
-                          {dayReservations.length > 3 && (
-                            <div className="text-[10px] text-slate-500 px-1.5">
-                              +{dayReservations.length - 3} mais
-                            </div>
-                          )}
+                      {hasCalendarAccess && hasEvents && (
+                        <div className="flex flex-wrap gap-1">
+                          <EventIndicator items={groupedEvents.checkouts} type="checkout" isDark={isDark} />
+                          <EventIndicator items={groupedEvents.checkins} type="checkin" isDark={isDark} />
+                          <EventIndicator items={groupedEvents.stays} type="stay" isDark={isDark} />
                         </div>
-                      ) : null}
+                      )}
                     </>
                   )}
                 </div>
