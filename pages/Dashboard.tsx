@@ -16,7 +16,9 @@ import {
   CreditCard,
   User,
   AlertTriangle,
-  Check
+  Check,
+  Calendar,
+  History
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -25,6 +27,8 @@ import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
+import { LogsTab } from '../components/dashboard/LogsTab';
+import { ReservationsTab } from '../components/dashboard/ReservationsTab';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useAuth } from '../lib/AuthContext';
@@ -328,6 +332,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         <nav className="flex-1 p-3">
           <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Menu</div>
           <NavItem id="overview" icon={LayoutGrid} label="Visao Geral" />
+          <NavItem id="reservations" icon={Calendar} label="Reservas" />
+          <NavItem id="logs" icon={History} label="Historico" />
           <NavItem id="properties" icon={Home} label="Meus Imoveis" />
           <NavItem id="whatsapp" icon={MessageCircle} label="Conexao WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
@@ -370,6 +376,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         <header className="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-[#050509]/50 backdrop-blur-sm z-10">
           <h2 className="text-sm font-medium text-slate-200">
             {activeTab === 'overview' && 'Visao Geral'}
+            {activeTab === 'reservations' && 'Reservas'}
+            {activeTab === 'logs' && 'Historico de Mensagens'}
             {activeTab === 'properties' && 'Gerenciar Imoveis'}
             {activeTab === 'whatsapp' && 'Conexao WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
@@ -426,6 +434,20 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   </Button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB: RESERVATIONS */}
+          {activeTab === 'reservations' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ReservationsTab properties={properties} />
+            </div>
+          )}
+
+          {/* TAB: LOGS */}
+          {activeTab === 'logs' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <LogsTab properties={properties} />
             </div>
           )}
 
