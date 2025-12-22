@@ -37,10 +37,20 @@ export interface DashboardStats {
 
 export interface MessageLog {
   id: number;
-  property_name: string;
+  property_id?: number | null;
+  property_name?: string | null;
+  employee_phone?: string | null;
+  recipient?: string | null;
   message: string;
   sent_at: string;
   status: string;
+}
+
+export interface LogsResponse {
+  logs: MessageLog[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface Guest {
@@ -58,6 +68,10 @@ export interface Reservation {
   checkoutDate: string;
   checkinTime?: string;
   checkoutTime?: string;
+  welcomeMessageSent?: boolean;
+  checkinReminderSent?: boolean;
+  checkoutReminderSent?: boolean;
+  reviewRequestSent?: boolean;
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
@@ -138,6 +152,17 @@ export interface ApiHealth {
 const getToken = () => localStorage.getItem('mevo_token');
 const setToken = (token: string) => localStorage.setItem('mevo_token', token);
 const removeToken = () => localStorage.removeItem('mevo_token');
+
+// Normalize reservation payloads to keep backward compatibility in UI
+const normalizeReservation = (reservation: Reservation): Reservation => ({
+  ...reservation,
+  guestName: reservation.guestName ?? reservation.guest?.name,
+  guestEmail: reservation.guestEmail ?? reservation.guest?.email,
+  guestPhone: reservation.guestPhone ?? reservation.guest?.phone
+});
+
+const normalizeReservationList = (reservations: Reservation[]) =>
+  reservations.map(normalizeReservation);
 
 // Base fetch helper
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -237,8 +262,13 @@ export async function getStats(): Promise<DashboardStats> {
   return apiFetch<DashboardStats>('/dashboard/stats');
 }
 
-export async function getLogs(): Promise<MessageLog[]> {
-  return apiFetch<MessageLog[]>('/logs');
+export async function getLogs(params?: { limit?: number; offset?: number }): Promise<LogsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.limit !== undefined) searchParams.append('limit', params.limit.toString());
+  if (params?.offset !== undefined) searchParams.append('offset', params.offset.toString());
+
+  const query = searchParams.toString();
+  return apiFetch<LogsResponse>(`/dashboard/logs${query ? `?${query}` : ''}`);
 }
 
 export async function runWorker(): Promise<void> {
@@ -263,15 +293,24 @@ export async function getReservations(params?: {
   if (params?.offset) searchParams.append('offset', params.offset.toString());
 
   const query = searchParams.toString();
-  return apiFetch<ReservationsResponse>(`/reservations${query ? `?${query}` : ''}`);
+  const response = await apiFetch<ReservationsResponse>(`/reservations${query ? `?${query}` : ''}`);
+  return {
+    ...response,
+    reservations: normalizeReservationList(response.reservations)
+  };
 }
 
 export async function getReservationsToday(): Promise<TodayReservations> {
-  return apiFetch<TodayReservations>('/reservations/today');
+  const response = await apiFetch<TodayReservations>('/reservations/today');
+  return {
+    checkins: normalizeReservationList(response.checkins),
+    checkouts: normalizeReservationList(response.checkouts)
+  };
 }
 
 export async function getReservationsUpcoming(): Promise<Reservation[]> {
-  return apiFetch<Reservation[]>('/reservations/upcoming');
+  const response = await apiFetch<Reservation[]>('/reservations/upcoming');
+  return normalizeReservationList(response);
 }
 
 // Settings
@@ -747,7 +786,11 @@ export async function getGuestReservations(id: number, params?: {
   if (params?.limit) searchParams.append('limit', params.limit.toString());
   if (params?.offset) searchParams.append('offset', params.offset.toString());
   const query = searchParams.toString();
-  return apiFetch<GuestReservationsResponse>(`/guests/${id}/reservations${query ? `?${query}` : ''}`);
+  const response = await apiFetch<GuestReservationsResponse>(`/guests/${id}/reservations${query ? `?${query}` : ''}`);
+  return {
+    ...response,
+    reservations: normalizeReservationList(response.reservations)
+  };
 }
 
 export { API_URL };

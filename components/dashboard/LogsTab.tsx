@@ -33,22 +33,24 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
   const [resendingId, setResendingId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs({ reset: true });
   }, []);
 
-  const fetchLogs = async (reset = false) => {
+  const fetchLogs = async (options: { reset?: boolean; offset?: number } = {}) => {
     try {
       setLoading(true);
-      const newOffset = reset ? 0 : offset;
-      const data = await api.getLogs();
+      const reset = options.reset ?? false;
+      const newOffset = reset ? 0 : (options.offset ?? offset);
+      const data = await api.getLogs({ limit, offset: newOffset });
 
       if (reset) {
-        setLogs(data);
-        setOffset(0);
+        setLogs(data.logs);
       } else {
-        setLogs(data);
+        setLogs(prev => [...prev, ...data.logs]);
       }
-      setTotal(data.length);
+
+      setTotal(data.total);
+      setOffset(newOffset);
     } catch (err) {
       console.error('Erro ao buscar logs:', err);
     } finally {
@@ -57,12 +59,14 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
   };
 
   const handleLoadMore = () => {
-    setOffset(prev => prev + limit);
-    fetchLogs();
+    if (logs.length >= total) return;
+    const nextOffset = offset + limit;
+    fetchLogs({ offset: nextOffset });
   };
 
   const handleResend = async (log: MessageLog) => {
-    if (!confirm(`Reenviar mensagem para ${log.property_name}?`)) return;
+    const targetName = log.property_name || 'Imóvel';
+    if (!confirm(`Reenviar mensagem para ${targetName}?`)) return;
 
     setResendingId(log.id);
     try {
@@ -114,9 +118,11 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
     if (propertyFilter !== 'all' && log.property_name !== propertyFilter) return false;
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
+      const messageText = log.message || '';
+      const propertyName = log.property_name || '';
       return (
-        log.property_name.toLowerCase().includes(search) ||
-        log.message.toLowerCase().includes(search)
+        propertyName.toLowerCase().includes(search) ||
+        messageText.toLowerCase().includes(search)
       );
     }
     return true;
@@ -152,7 +158,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
   };
 
   // Get unique property names for filter
-  const uniqueProperties = [...new Set(logs.map(l => l.property_name))];
+  const uniqueProperties = [...new Set(logs.map(l => l.property_name).filter(Boolean))];
 
   return (
     <div className="max-w-4xl">
@@ -164,7 +170,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
             {total} mensagens enviadas
           </p>
         </div>
-        <Button variant="secondary" onClick={() => fetchLogs(true)} disabled={loading}>
+        <Button variant="secondary" onClick={() => fetchLogs({ reset: true })} disabled={loading}>
           <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
           Atualizar
         </Button>
@@ -274,7 +280,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
-                            <span className="font-medium text-white">{log.property_name}</span>
+                            <span className="font-medium text-white">{log.property_name || 'Imóvel'}</span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(log.status)}`}>
                               {getStatusLabel(log.status)}
                             </span>

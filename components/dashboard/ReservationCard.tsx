@@ -34,8 +34,10 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
     ? reservation.checkinTime || '15:00'
     : reservation.checkoutTime || '11:00';
 
-  // Notification status (mock for now - would come from backend)
-  const notificationSent = Math.random() > 0.5; // TODO: Get from actual data
+  // Notification status from backend flags
+  const notificationSent = type === 'checkin'
+    ? Boolean(reservation.checkinReminderSent || reservation.welcomeMessageSent)
+    : Boolean(reservation.checkoutReminderSent);
 
   const handleSendNotification = async () => {
     setSending(true);
