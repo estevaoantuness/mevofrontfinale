@@ -128,14 +128,14 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
           <div className="grid grid-cols-2 gap-4 mb-4">
             {/* Responsible */}
             <div className="bg-white/[0.02] rounded-lg p-3">
-              <span className="text-xs text-slate-500 block mb-1">Responsavel</span>
+              <span className="text-xs text-slate-500 block mb-1">Responsável</span>
               <span className="text-sm text-white font-medium">{employeeName}</span>
             </div>
 
             {/* Phone */}
             <div className="bg-white/[0.02] rounded-lg p-3">
               <span className="text-xs text-slate-500 block mb-1">Telefone</span>
-              <span className="text-sm text-white font-mono">{employeePhone || 'Nao informado'}</span>
+              <span className="text-sm text-white font-mono">{employeePhone || 'Não informado'}</span>
             </div>
 
             {/* Check-in Date */}

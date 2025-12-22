@@ -184,7 +184,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    {isLimitReached ? 'Fazer Upgrade' : 'Comecar Trial Gratis'}
+                    {isLimitReached ? 'Fazer Upgrade' : 'Começar Trial Grátis'}
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 )}
@@ -194,7 +194,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
                 onClick={onClose}
                 className="w-full py-2 text-sm text-slate-500 hover:text-slate-300 transition-colors"
               >
-                Agora nao
+                Agora não
               </button>
             </div>
 
@@ -202,7 +202,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
             <p className="mt-6 text-center text-xs text-slate-600">
               {isLimitReached
                 ? 'Cancele quando quiser. Seus dados ficam salvos.'
-                : 'Sem cartao de credito. Cancele quando quiser.'}
+                : 'Sem cartão de crédito. Cancele quando quiser.'}
             </p>
           </div>
         </motion.div>

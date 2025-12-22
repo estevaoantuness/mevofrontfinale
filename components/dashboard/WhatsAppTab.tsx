@@ -21,7 +21,7 @@ export const WhatsAppTab = ({ whatsappStatus, qrCode, onTestClick }: WhatsAppTab
 
                 <h3 className="text-xl font-medium text-white mb-2">Conexão WhatsApp</h3>
                 <p className="text-sm text-slate-400 mb-8 max-w-sm mx-auto">
-                    Escaneie o QR Code para permitir que o Mevo envie mensagens automaticas para sua equipe de limpeza.
+                    Escaneie o QR Code para permitir que o Mevo envie mensagens automáticas para sua equipe de limpeza.
                 </p>
 
                 <div

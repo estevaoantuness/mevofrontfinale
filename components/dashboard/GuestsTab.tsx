@@ -64,7 +64,7 @@ export const GuestsTab: React.FC = () => {
       setGuests(result.guests);
       setTotal(result.total);
     } catch (err) {
-      setError('Erro ao carregar hospedes');
+      setError('Erro ao carregar hóspedes');
       console.error(err);
     } finally {
       setLoading(false);
@@ -82,14 +82,14 @@ export const GuestsTab: React.FC = () => {
   };
 
   const handleDelete = async (guest: GuestFull) => {
-    if (!confirm(`Tem certeza que deseja excluir o hospede "${guest.name}"?`)) return;
+    if (!confirm(`Tem certeza que deseja excluir o hóspede "${guest.name}"?`)) return;
 
     try {
       await api.deleteGuest(guest.id);
       setGuests(guests.filter(g => g.id !== guest.id));
       setTotal(t => t - 1);
     } catch (err) {
-      alert('Erro ao excluir hospede');
+      alert('Erro ao excluir hóspede');
     }
   };
 
@@ -173,9 +173,9 @@ export const GuestsTab: React.FC = () => {
         {guests.length === 0 ? (
           <div className="text-center py-12">
             <Users size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-400">Nenhum hospede encontrado</p>
+            <p className="text-slate-400">Nenhum hóspede encontrado</p>
             <p className="text-sm text-slate-500 mt-1">
-              {searchDebounced ? 'Tente uma busca diferente' : 'Adicione seu primeiro hospede'}
+              {searchDebounced ? 'Tente uma busca diferente' : 'Adicione seu primeiro hóspede'}
             </p>
           </div>
         ) : (
@@ -186,7 +186,7 @@ export const GuestsTab: React.FC = () => {
               <div className="col-span-3">Contato</div>
               <div className="col-span-2">Documento</div>
               <div className="col-span-2">Cadastro</div>
-              <div className="col-span-2 text-right">Acoes</div>
+              <div className="col-span-2 text-right">Ações</div>
             </div>
 
             {/* Table Body */}
@@ -285,7 +285,7 @@ export const GuestsTab: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-slate-500">
-            Mostrando {((page - 1) * limit) + 1} - {Math.min(page * limit, total)} de {total} hospedes
+            Mostrando {((page - 1) * limit) + 1} - {Math.min(page * limit, total)} de {total} hóspedes
           </p>
           <div className="flex items-center gap-2">
             <button

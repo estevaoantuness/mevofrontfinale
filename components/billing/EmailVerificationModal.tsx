@@ -166,7 +166,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
             {/* Footer */}
             <p className="mt-6 text-center text-xs text-slate-600">
-              Nao recebeu? Verifique sua caixa de spam ou tente reenviar.
+              Não recebeu? Verifique sua caixa de spam ou tente reenviar.
             </p>
           </div>
         </motion.div>

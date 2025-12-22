@@ -60,12 +60,12 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
     setError('');
 
     if (!name.trim()) {
-      setError('Nome e obrigatorio');
+      setError('Nome é obrigatório');
       return;
     }
 
     if (!content.trim()) {
-      setError('Conteudo e obrigatorio');
+      setError('Conteúdo é obrigatório');
       return;
     }
 
@@ -187,12 +187,12 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
 
           {/* Content */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">Conteudo da Mensagem</label>
+            <label className="block text-xs font-medium text-slate-400 mb-2">Conteúdo da Mensagem</label>
             <textarea
               id="template-content"
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none"
               rows={6}
-              placeholder="Digite o conteudo do template..."
+              placeholder="Digite o conteúdo do template..."
               value={content}
               onChange={e => setContent(e.target.value)}
               required

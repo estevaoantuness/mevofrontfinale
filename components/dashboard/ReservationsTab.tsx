@@ -122,7 +122,7 @@ export const ReservationsTab = ({ properties }: ReservationsTabProps) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     if (date.toDateString() === today.toDateString()) return 'Hoje';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Amanha';
+    if (date.toDateString() === tomorrow.toDateString()) return 'Amanhã';
 
     return date.toLocaleDateString('pt-BR', {
       weekday: 'short',
@@ -162,7 +162,7 @@ export const ReservationsTab = ({ properties }: ReservationsTabProps) => {
             {[
               { id: 'today', label: 'Hoje' },
               { id: 'week', label: 'Esta Semana' },
-              { id: 'month', label: 'Este Mes' }
+              { id: 'month', label: 'Este Mês' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -185,7 +185,7 @@ export const ReservationsTab = ({ properties }: ReservationsTabProps) => {
               value={propertyFilter}
               onChange={e => setPropertyFilter(e.target.value)}
             >
-              <option value="all">Todos os imoveis</option>
+              <option value="all">Todos os imóveis</option>
               {uniqueProperties.map(prop => (
                 <option key={prop} value={prop}>{prop}</option>
               ))}
@@ -282,7 +282,7 @@ export const ReservationsTab = ({ properties }: ReservationsTabProps) => {
             {upcomingSummary.length === 0 ? (
               <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-8 text-center">
                 <Calendar className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400">Nenhuma reserva nos proximos 7 dias</p>
+                <p className="text-slate-400">Nenhuma reserva nos próximos 7 dias</p>
               </div>
             ) : (
               <div className="bg-[#0B0C15] border border-white/5 rounded-xl overflow-hidden">

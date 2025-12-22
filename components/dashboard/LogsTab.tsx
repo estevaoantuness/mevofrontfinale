@@ -72,7 +72,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
     try {
       // TODO: Implementar endpoint de reenvio
       await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Funcionalidade de reenvio sera implementada em breve!');
+      alert('Funcionalidade de reenvio será implementada em breve!');
     } catch (err: any) {
       alert('Erro ao reenviar: ' + err.message);
     } finally {
@@ -200,7 +200,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
               value={propertyFilter}
               onChange={e => setPropertyFilter(e.target.value)}
             >
-              <option value="all">Todos os imoveis</option>
+              <option value="all">Todos os imóveis</option>
               {uniqueProperties.map(prop => (
                 <option key={prop} value={prop}>{prop}</option>
               ))}
@@ -239,7 +239,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
             <p className="text-sm text-slate-500">
               {searchTerm || statusFilter !== 'all' || propertyFilter !== 'all'
                 ? 'Tente ajustar os filtros'
-                : 'As mensagens enviadas aparecerao aqui'}
+                : 'As mensagens enviadas aparecerão aqui'}
             </p>
           </div>
         ) : (

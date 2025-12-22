@@ -21,7 +21,7 @@ const PLANS = [
     monthlyPrice: 67,
     yearlyPrice: 49,
     propertyLimit: 3,
-    features: ['Ate 3 propriedades', 'Sync iCal', 'Automacoes basicas', 'Integracao WhatsApp'],
+    features: ['Até 3 propriedades', 'Sync iCal', 'Automações básicas', 'Integração WhatsApp'],
     hasTrial: false
   },
   {
@@ -30,7 +30,7 @@ const PLANS = [
     monthlyPrice: 197,
     yearlyPrice: 149,
     propertyLimit: 10,
-    features: ['Ate 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritario'],
+    features: ['Até 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritário'],
     isPopular: true,
     hasTrial: true,
     trialDays: 10
@@ -41,7 +41,7 @@ const PLANS = [
     monthlyPrice: 379,
     yearlyPrice: 289,
     propertyLimit: 30,
-    features: ['Ate 30 propriedades', 'Tudo do Pro', 'Multi-usuarios', 'API completa'],
+    features: ['Até 30 propriedades', 'Tudo do Pro', 'Multi-usuários', 'API completa'],
     hasTrial: false
   }
 ];
@@ -187,7 +187,7 @@ export const BillingTab: React.FC = () => {
         {subscription?.currentPeriodEnd && (
           <p className="text-sm text-slate-400">
             {subscription.cancelAtPeriodEnd
-              ? `Acesso ate ${new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}`
+              ? `Acesso até ${new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}`
               : `Renova em ${new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}`}
           </p>
         )}
@@ -391,7 +391,7 @@ export const BillingTab: React.FC = () => {
                   className="w-full text-sm"
                   onClick={() => openCheckout(plan)}
                 >
-                  {plan.hasTrial ? 'Comecar Trial' : 'Assinar'}
+                  {plan.hasTrial ? 'Começar Trial' : 'Assinar'}
                 </Button>
               </div>
             ))}

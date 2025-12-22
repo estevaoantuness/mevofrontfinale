@@ -69,7 +69,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   // WhatsApp Test State
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [testPhone, setTestPhone] = useState('');
-  const [testMessage, setTestMessage] = useState('Ola! Esta e uma mensagem de teste do Mevo.');
+  const [testMessage, setTestMessage] = useState('Olá! Esta é uma mensagem de teste do Mevo.');
   const [testLoading, setTestLoading] = useState(false);
 
 
@@ -220,13 +220,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         });
       } else {
         // Outro erro - mostrar mensagem
-        alert(err.message || 'Erro ao criar imovel');
+        alert(err.message || 'Erro ao criar imóvel');
       }
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este imovel?')) {
+    if (confirm('Tem certeza que deseja excluir este imóvel?')) {
       try {
         await api.deleteProperty(id);
         setProperties(properties.filter(p => p.id !== id));
@@ -426,7 +426,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                     Seu trial termina em {Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} dias
                   </p>
                   <p className="text-sm text-yellow-400/70">
-                    Faca upgrade para continuar usando todas as funcionalidades.
+                    Faça upgrade para continuar usando todas as funcionalidades.
                   </p>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-medium text-white">Meus Imóveis</h3>
-                  <p className="text-sm text-slate-500">Gerencie suas conexoes iCal e equipe de limpeza</p>
+                  <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
                   // Preencher com número padrão se existir
@@ -501,7 +501,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                     {properties.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
-                          Nenhum imovel cadastrado. Adicione o primeiro acima.
+                          Nenhum imóvel cadastrado. Adicione o primeiro acima.
                         </td>
                       </tr>
                     ) : (
@@ -579,9 +579,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <Smartphone size={32} />
                 </div>
 
-                <h3 className="text-xl font-medium text-white mb-2">Conexao WhatsApp</h3>
+                <h3 className="text-xl font-medium text-white mb-2">Conexão WhatsApp</h3>
                 <p className="text-sm text-slate-400 mb-8 max-w-sm mx-auto">
-                  Conecte seu WhatsApp para enviar mensagens automaticas para sua equipe de limpeza.
+                  Conecte seu WhatsApp para enviar mensagens automáticas para sua equipe de limpeza.
                 </p>
 
                 <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-8 ${
@@ -700,7 +700,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           />
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Nome do Responsavel"
+              label="Nome do Responsável"
               placeholder="Ex: Maria"
               required
               value={newProp.employee_name}
@@ -735,11 +735,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 {saveAsDefault && <Check size={14} className="text-white" />}
               </div>
               <div className="flex-1">
-                <span className="text-sm text-slate-300">Salvar este numero como padrao</span>
+                <span className="text-sm text-slate-300">Salvar este número como padrão</span>
                 <p className="text-xs text-slate-500 mt-0.5">
                   {defaultPhone
-                    ? `Substituir o padrao atual (${defaultPhone})`
-                    : 'Sera preenchido automaticamente nos proximos imoveis'}
+                    ? `Substituir o padrão atual (${defaultPhone})`
+                    : 'Será preenchido automaticamente nos próximos imóveis'}
                 </p>
               </div>
             </label>
@@ -781,7 +781,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Nome do Responsavel"
+                label="Nome do Responsável"
                 placeholder="Ex: Maria"
                 required
                 value={editProp.employee_name}

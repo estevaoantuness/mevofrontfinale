@@ -154,7 +154,7 @@ export const TemplatesTab: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium text-white">Templates de Mensagens</h3>
-          <p className="text-sm text-slate-500">Personalize as mensagens automaticas enviadas aos hospedes e funcionarios</p>
+          <p className="text-sm text-slate-500">Personalize as mensagens automáticas enviadas aos hóspedes e funcionários</p>
         </div>
         <Button onClick={handleCreate}>
           <Plus size={16} className="mr-2" /> Novo Template
@@ -198,7 +198,7 @@ export const TemplatesTab: React.FC = () => {
           <div className="text-center py-12 bg-[#0B0C15] border border-white/5 rounded-xl">
             <MessageSquare size={48} className="mx-auto text-slate-600 mb-4" />
             <p className="text-slate-400">Nenhum template encontrado</p>
-            <p className="text-sm text-slate-500 mt-1">Crie seu primeiro template para comecar</p>
+            <p className="text-sm text-slate-500 mt-1">Crie seu primeiro template para começar</p>
           </div>
         ) : (
           filteredTemplates.map(template => (

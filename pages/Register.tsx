@@ -12,9 +12,9 @@ import { useTranslatedError } from '../hooks/useTranslatedError';
 
 // Planos para o CheckoutModal
 const PLANS_DATA = {
-  starter: { id: 'starter', name: 'Starter', monthlyPrice: 67, yearlyPrice: 49, features: ['Ate 3 propriedades', 'Sync iCal', 'Automacoes basicas', 'Integracao WhatsApp'], hasTrial: false },
-  pro: { id: 'pro', name: 'Pro', monthlyPrice: 197, yearlyPrice: 149, features: ['Ate 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritario'], hasTrial: true, trialDays: 10 },
-  agency: { id: 'agency', name: 'Agency', monthlyPrice: 379, yearlyPrice: 289, features: ['Ate 30 propriedades', 'Tudo do Pro', 'Multi-usuarios', 'API completa'], hasTrial: false }
+  starter: { id: 'starter', name: 'Starter', monthlyPrice: 67, yearlyPrice: 49, features: ['Até 3 propriedades', 'Sync iCal', 'Automações básicas', 'Integração WhatsApp'], hasTrial: false },
+  pro: { id: 'pro', name: 'Pro', monthlyPrice: 197, yearlyPrice: 149, features: ['Até 10 propriedades', 'Tudo do Starter', 'Webhooks', 'Suporte prioritário'], hasTrial: true, trialDays: 10 },
+  agency: { id: 'agency', name: 'Agency', monthlyPrice: 379, yearlyPrice: 289, features: ['Até 30 propriedades', 'Tudo do Pro', 'Multi-usuários', 'API completa'], hasTrial: false }
 };
 
 interface RegisterPageProps {

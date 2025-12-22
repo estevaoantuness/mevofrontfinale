@@ -25,16 +25,16 @@ const TYPE_LABELS: Record<string, { label: string; description: string; icon: st
   checkout_reminder: { label: 'Lembrete de Checkout', description: 'Enviado 1 dia antes do checkout', icon: 'reminder' },
   checkin_reminder: { label: 'Lembrete de Check-in', description: 'Enviado 1 dia antes do check-in', icon: 'reminder' },
   welcome: { label: 'Boas-vindas', description: 'Enviado ao criar reserva', icon: 'welcome' },
-  review_request: { label: 'Solicitacao de Avaliacao', description: 'Enviado 1 dia apos o checkout', icon: 'review' },
+  review_request: { label: 'Solicitação de Avaliação', description: 'Enviado 1 dia após o checkout', icon: 'review' },
   custom: { label: 'Personalizado', description: 'Template customizado para uso manual', icon: 'custom' }
 };
 
 // Placeholders for team messages
 const TEAM_PLACEHOLDERS = [
-  { placeholder: '{{employee_name}}', description: 'Nome do funcionario' },
-  { placeholder: '{{property_name}}', description: 'Nome do imovel' },
-  { placeholder: '{{checkout_time}}', description: 'Horario de checkout' },
-  { placeholder: '{{checkin_time}}', description: 'Horario de check-in' },
+  { placeholder: '{{employee_name}}', description: 'Nome do funcionário' },
+  { placeholder: '{{property_name}}', description: 'Nome do imóvel' },
+  { placeholder: '{{checkout_time}}', description: 'Horário de checkout' },
+  { placeholder: '{{checkin_time}}', description: 'Horário de check-in' },
   { placeholder: '{{checkout_date}}', description: 'Data de checkout' },
   { placeholder: '{{checkin_date}}', description: 'Data de check-in' },
   { placeholder: '{{guest_name}}', description: 'Nome do hospede' }
@@ -57,7 +57,7 @@ const TemplateEditor = ({ template, onSave, onClose }: TemplateEditorProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !content.trim()) {
-      setError('Nome e conteudo sao obrigatorios');
+      setError('Nome e conteúdo são obrigatórios');
       return;
     }
 
@@ -98,7 +98,7 @@ const TemplateEditor = ({ template, onSave, onClose }: TemplateEditorProps) => {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           <Input
             label="Nome do Template"
-            placeholder="Ex: Aviso de Checkout Padrao"
+            placeholder="Ex: Aviso de Checkout Padrão"
             value={name}
             onChange={e => setName(e.target.value)}
             required
@@ -155,7 +155,7 @@ const TemplateEditor = ({ template, onSave, onClose }: TemplateEditorProps) => {
           <div className="flex items-center justify-between p-4 bg-white/[0.02] rounded-lg border border-white/5">
             <div>
               <span className="text-sm font-medium text-white">Template Ativo</span>
-              <p className="text-xs text-slate-500 mt-0.5">Templates ativos serao usados no envio automatico</p>
+              <p className="text-xs text-slate-500 mt-0.5">Templates ativos serão usados no envio automático</p>
             </div>
             <button
               type="button"

@@ -63,7 +63,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
     setError('');
 
     if (!name.trim()) {
-      setError('Nome e obrigatorio');
+      setError('Nome é obrigatório');
       return;
     }
 

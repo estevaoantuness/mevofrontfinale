@@ -268,7 +268,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   type="text"
-                  placeholder="Buscar imovel..."
+                  placeholder="Buscar imóvel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48"
@@ -298,7 +298,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                           !filterPropertyId ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300 hover:bg-white/5'
                         }`}
                       >
-                        Todos os imoveis
+                        Todos os imóveis
                       </button>
                       {filteredProperties.map((property, index) => (
                         <button
@@ -455,7 +455,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               <p className="text-2xl font-semibold text-white">
                 {hasCalendarAccess ? stats.messagesThisMonth : '-'}
               </p>
-              <p className="text-xs text-slate-500">Msgs Este Mes</p>
+              <p className="text-xs text-slate-500">Msgs Este Mês</p>
             </div>
           </div>
         </div>

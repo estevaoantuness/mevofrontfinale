@@ -315,7 +315,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
           Zona de Perigo
         </h3>
         <p className="text-sm text-slate-400 mb-4">
-          Acoes irreversiveis. Prossiga com cuidado.
+          Ações irreversíveis. Prossiga com cuidado.
         </p>
 
         {!showDeleteConfirm ? (
@@ -330,7 +330,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
         ) : (
           <div className="bg-red-500/10 rounded-lg p-4 space-y-4">
             <p className="text-sm text-red-400">
-              Esta acao ira deletar permanentemente sua conta, todas as propriedades, reservas e dados.
+              Esta ação irá deletar permanentemente sua conta, todas as propriedades, reservas e dados.
               Digite <code className="px-1 py-0.5 bg-red-500/20 rounded">DELETE_MY_ACCOUNT</code> para confirmar.
             </p>
             <Input
