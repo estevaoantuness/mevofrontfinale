@@ -11,6 +11,7 @@ import {
   Send
 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useTheme } from '../../lib/ThemeContext';
 import * as api from '../../lib/api';
 import type { Property, MessageLog } from '../../lib/api';
 
@@ -19,6 +20,7 @@ interface LogsTabProps {
 }
 
 export const LogsTab = ({ properties }: LogsTabProps) => {
+  const { isDark } = useTheme();
   const [logs, setLogs] = useState<MessageLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -165,7 +167,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-medium text-white">Histórico de Mensagens</h3>
+          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Histórico de Mensagens</h3>
           <p className="text-sm text-slate-500">
             {total} mensagens enviadas
           </p>
@@ -177,7 +179,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
       </div>
 
       {/* Filters */}
-      <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-4 mb-6">
+      <div className={`rounded-xl p-4 mb-6 ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
         <div className="flex flex-wrap gap-4">
           {/* Search */}
           <div className="flex-1 min-w-[200px]">
@@ -186,7 +188,11 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
               <input
                 type="text"
                 placeholder="Buscar mensagens..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className={`w-full border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                  isDark
+                    ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -196,7 +202,11 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
           {/* Property Filter */}
           <div className="relative">
             <select
-              className="appearance-none bg-white/5 border border-white/10 rounded-lg px-4 py-2 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer"
+              className={`appearance-none border rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'bg-white border-slate-300 text-slate-900'
+              }`}
               value={propertyFilter}
               onChange={e => setPropertyFilter(e.target.value)}
             >
@@ -211,7 +221,11 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
           {/* Status Filter */}
           <div className="relative">
             <select
-              className="appearance-none bg-white/5 border border-white/10 rounded-lg px-4 py-2 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer"
+              className={`appearance-none border rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'bg-white border-slate-300 text-slate-900'
+              }`}
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
             >
@@ -228,14 +242,14 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
       {/* Logs List */}
       <div className="space-y-6">
         {loading && logs.length === 0 ? (
-          <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-12 text-center">
-            <RefreshCw className="w-8 h-8 text-slate-600 mx-auto mb-3 animate-spin" />
+          <div className={`rounded-xl p-12 text-center ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+            <RefreshCw className="w-8 h-8 text-slate-400 mx-auto mb-3 animate-spin" />
             <p className="text-slate-500">Carregando historico...</p>
           </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="bg-[#0B0C15] border border-white/5 rounded-xl p-12 text-center">
-            <MessageCircle className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400 font-medium mb-1">Nenhuma mensagem encontrada</p>
+          <div className={`rounded-xl p-12 text-center ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+            <MessageCircle className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+            <p className={`font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Nenhuma mensagem encontrada</p>
             <p className="text-sm text-slate-500">
               {searchTerm || statusFilter !== 'all' || propertyFilter !== 'all'
                 ? 'Tente ajustar os filtros'
@@ -247,9 +261,9 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
             <div key={date}>
               {/* Date Header */}
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-sm font-medium text-slate-400">{date}</span>
-                <div className="flex-1 h-px bg-white/5" />
-                <span className="text-xs text-slate-600">{dateLogs.length} mensagens</span>
+                <span className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{date}</span>
+                <div className={`flex-1 h-px ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
+                <span className="text-xs text-slate-500">{dateLogs.length} mensagens</span>
               </div>
 
               {/* Logs for this date */}
@@ -257,10 +271,10 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
                 {dateLogs.map(log => (
                   <div
                     key={log.id}
-                    className={`bg-[#0B0C15] border rounded-xl transition-all ${
-                      expandedLog === log.id
-                        ? 'border-blue-500/30 shadow-lg shadow-blue-500/5'
-                        : 'border-white/5 hover:border-white/10'
+                    className={`rounded-xl transition-all ${
+                      isDark
+                        ? `bg-[#0B0C15] ${expandedLog === log.id ? 'border border-blue-500/30 shadow-lg shadow-blue-500/5' : 'border border-white/5 hover:border-white/10'}`
+                        : `bg-white ${expandedLog === log.id ? 'border border-blue-500/30 shadow-lg' : 'border border-slate-200 hover:border-slate-300'}`
                     }`}
                   >
                     {/* Main Row */}
@@ -280,12 +294,12 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
-                            <span className="font-medium text-white">{log.property_name || 'Imóvel'}</span>
+                            <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{log.property_name || 'Imóvel'}</span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getStatusColor(log.status)}`}>
                               {getStatusLabel(log.status)}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-400 truncate">
+                          <p className={`text-sm truncate ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                             {log.message}
                           </p>
                         </div>
@@ -304,9 +318,9 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
 
                     {/* Expanded Content */}
                     {expandedLog === log.id && (
-                      <div className="px-4 pb-4 border-t border-white/5 mt-2 pt-4">
-                        <div className="bg-white/[0.02] rounded-lg p-4 mb-4">
-                          <p className="text-sm text-slate-300 whitespace-pre-wrap">
+                      <div className={`px-4 pb-4 border-t mt-2 pt-4 ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+                        <div className={`rounded-lg p-4 mb-4 ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
+                          <p className={`text-sm whitespace-pre-wrap ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                             {log.message}
                           </p>
                         </div>

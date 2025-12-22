@@ -15,10 +15,12 @@ import {
 import { Button } from '../ui/Button';
 import { GuestModal } from './GuestModal';
 import { GuestDetailModal } from './GuestDetailModal';
+import { useTheme } from '../../lib/ThemeContext';
 import * as api from '../../lib/api';
 import type { GuestFull } from '../../lib/api';
 
 export const GuestsTab: React.FC = () => {
+  const { isDark } = useTheme();
   const [guests, setGuests] = useState<GuestFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -142,7 +144,7 @@ export const GuestsTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-white">Hóspedes</h3>
+          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Hóspedes</h3>
           <p className="text-sm text-slate-500">Gerencie os hóspedes cadastrados</p>
         </div>
         <Button onClick={handleCreate}>
@@ -158,7 +160,11 @@ export const GuestsTab: React.FC = () => {
           placeholder="Buscar por nome, email ou telefone..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            isDark
+              ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
+              : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+          }`}
         />
       </div>
 
@@ -169,11 +175,11 @@ export const GuestsTab: React.FC = () => {
       )}
 
       {/* Guests Table */}
-      <div className="bg-[#0B0C15] border border-white/10 rounded-xl overflow-hidden">
+      <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
         {guests.length === 0 ? (
           <div className="text-center py-12">
-            <Users size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-400">Nenhum hóspede encontrado</p>
+            <Users size={48} className="mx-auto text-slate-400 mb-4" />
+            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nenhum hóspede encontrado</p>
             <p className="text-sm text-slate-500 mt-1">
               {searchDebounced ? 'Tente uma busca diferente' : 'Adicione seu primeiro hóspede'}
             </p>
@@ -181,7 +187,7 @@ export const GuestsTab: React.FC = () => {
         ) : (
           <>
             {/* Table Header */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 border-b border-white/5 text-xs font-medium text-slate-500 uppercase tracking-wider">
+            <div className={`hidden md:grid grid-cols-12 gap-4 px-5 py-3 border-b text-xs font-medium text-slate-500 uppercase tracking-wider ${isDark ? 'border-white/5' : 'border-slate-200 bg-slate-50'}`}>
               <div className="col-span-3">Nome</div>
               <div className="col-span-3">Contato</div>
               <div className="col-span-2">Documento</div>
@@ -193,9 +199,9 @@ export const GuestsTab: React.FC = () => {
             {guests.map(guest => (
               <div
                 key={guest.id}
-                className={`grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-5 py-4 border-b border-white/5 last:border-b-0 hover:bg-white/5 transition-colors ${
-                  !guest.isActive ? 'opacity-50' : ''
-                }`}
+                className={`grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-5 py-4 border-b last:border-b-0 transition-colors ${
+                  isDark ? 'border-white/5 hover:bg-white/5' : 'border-slate-100 hover:bg-slate-50'
+                } ${!guest.isActive ? 'opacity-50' : ''}`}
               >
                 {/* Name */}
                 <div className="col-span-3 flex items-center gap-3">
@@ -203,7 +209,7 @@ export const GuestsTab: React.FC = () => {
                     {guest.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{guest.name}</p>
+                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{guest.name}</p>
                     {guest.nationality && (
                       <p className="text-xs text-slate-500">{guest.nationality}</p>
                     )}
@@ -233,15 +239,15 @@ export const GuestsTab: React.FC = () => {
                 <div className="col-span-2">
                   {guest.document ? (
                     <div>
-                      <span className="text-xs text-slate-300 font-mono">{guest.document}</span>
+                      <span className={`text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{guest.document}</span>
                       {guest.documentType && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-white/5 text-slate-500 uppercase">
+                        <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${isDark ? 'bg-white/5 text-slate-500' : 'bg-slate-100 text-slate-500'}`}>
                           {guest.documentType}
                         </span>
                       )}
                     </div>
                   ) : (
-                    <span className="text-xs text-slate-600">-</span>
+                    <span className="text-xs text-slate-500">-</span>
                   )}
                 </div>
 
@@ -291,7 +297,11 @@ export const GuestsTab: React.FC = () => {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className={`p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
             >
               <ChevronLeft size={16} />
             </button>
@@ -315,7 +325,9 @@ export const GuestsTab: React.FC = () => {
                     className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
                       page === pageNum
                         ? 'bg-blue-500 text-white'
-                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                        : isDark
+                          ? 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                          : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
                     {pageNum}
@@ -327,7 +339,11 @@ export const GuestsTab: React.FC = () => {
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className={`p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
             >
               <ChevronRight size={16} />
             </button>

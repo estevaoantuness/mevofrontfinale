@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Copy, Trash2, Eye, MessageSquare, Mail, Smartphone, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { TemplateModal } from './TemplateModal';
+import { useTheme } from '../../lib/ThemeContext';
 import * as api from '../../lib/api';
 import type { MessageTemplate, TemplateType } from '../../lib/api';
 
 export const TemplatesTab: React.FC = () => {
+  const { isDark } = useTheme();
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [types, setTypes] = useState<TemplateType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +155,7 @@ export const TemplatesTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-white">Templates de Mensagens</h3>
+          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Templates de Mensagens</h3>
           <p className="text-sm text-slate-500">Personalize as mensagens automáticas enviadas aos hóspedes e funcionários</p>
         </div>
         <Button onClick={handleCreate}>
@@ -166,7 +168,11 @@ export const TemplatesTab: React.FC = () => {
         <select
           value={filterType}
           onChange={e => setFilterType(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className={`border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            isDark
+              ? 'bg-white/5 border-white/10 text-white'
+              : 'bg-white border-slate-300 text-slate-900'
+          }`}
         >
           <option value="">Todos os tipos</option>
           {types.map(type => (
@@ -177,7 +183,11 @@ export const TemplatesTab: React.FC = () => {
         <select
           value={filterChannel}
           onChange={e => setFilterChannel(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className={`border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            isDark
+              ? 'bg-white/5 border-white/10 text-white'
+              : 'bg-white border-slate-300 text-slate-900'
+          }`}
         >
           <option value="">Todos os canais</option>
           <option value="whatsapp">WhatsApp</option>
@@ -195,26 +205,28 @@ export const TemplatesTab: React.FC = () => {
       {/* Templates List */}
       <div className="space-y-3">
         {filteredTemplates.length === 0 ? (
-          <div className="text-center py-12 bg-[#0B0C15] border border-white/5 rounded-xl">
-            <MessageSquare size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-400">Nenhum template encontrado</p>
+          <div className={`text-center py-12 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+            <MessageSquare size={48} className="mx-auto text-slate-400 mb-4" />
+            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nenhum template encontrado</p>
             <p className="text-sm text-slate-500 mt-1">Crie seu primeiro template para começar</p>
           </div>
         ) : (
           filteredTemplates.map(template => (
             <div
               key={template.id}
-              className={`bg-[#0B0C15] border rounded-xl p-5 transition-all ${
-                template.isActive ? 'border-white/10' : 'border-white/5 opacity-60'
+              className={`rounded-xl p-5 transition-all ${
+                isDark
+                  ? `bg-[#0B0C15] ${template.isActive ? 'border border-white/10' : 'border border-white/5 opacity-60'}`
+                  : `bg-white shadow-sm ${template.isActive ? 'border border-slate-200' : 'border border-slate-100 opacity-60'}`
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h4 className="font-medium text-white truncate">{template.name}</h4>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 text-xs">
+                    <h4 className={`font-medium truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{template.name}</h4>
+                    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
                       {getChannelIcon(template.channel)}
-                      <span className="text-slate-400">{getChannelLabel(template.channel)}</span>
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>{getChannelLabel(template.channel)}</span>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                       template.isActive
@@ -236,7 +248,7 @@ export const TemplatesTab: React.FC = () => {
                     )}
                   </div>
 
-                  <p className="text-sm text-slate-400 line-clamp-2">
+                  <p className={`text-sm line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {template.content.substring(0, 150)}{template.content.length > 150 ? '...' : ''}
                   </p>
                 </div>
@@ -318,12 +330,12 @@ export const TemplatesTab: React.FC = () => {
       {previewContent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className={`absolute inset-0 backdrop-blur-sm ${isDark ? 'bg-black/70' : 'bg-black/40'}`}
             onClick={() => setPreviewContent(null)}
           />
-          <div className="relative w-full max-w-lg bg-[#0B0C15] border border-white/10 rounded-xl p-6 shadow-2xl">
-            <h3 className="text-lg font-medium text-white mb-4">Preview da Mensagem</h3>
-            <div className="bg-white/5 rounded-lg p-4 text-sm text-slate-300 whitespace-pre-wrap">
+          <div className={`relative w-full max-w-lg rounded-xl p-6 shadow-2xl ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
+            <h3 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Preview da Mensagem</h3>
+            <div className={`rounded-lg p-4 text-sm whitespace-pre-wrap ${isDark ? 'bg-white/5 text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
               {previewContent}
             </div>
             <div className="mt-4 flex justify-end">

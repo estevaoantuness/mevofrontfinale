@@ -3,6 +3,7 @@ import { CreditCard, Download, ExternalLink, AlertTriangle, Check, Loader2, Spar
 import { useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { CheckoutModal } from '../billing/CheckoutModal';
+import { useTheme } from '../../lib/ThemeContext';
 import {
   getSubscription,
   getInvoices,
@@ -48,6 +49,7 @@ const PLANS = [
 ];
 
 export const BillingTab: React.FC = () => {
+  const { isDark } = useTheme();
   const location = useLocation();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -179,19 +181,19 @@ export const BillingTab: React.FC = () => {
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+        <div className={`p-4 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
           <AlertTriangle size={16} />
           {error}
         </div>
       )}
 
       {/* Current Plan */}
-      <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-1">Seu Plano</h3>
+            <h3 className={`text-lg font-semibold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Seu Plano</h3>
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold text-white">{subscription?.planName || 'Starter'}</span>
+              <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{subscription?.planName || 'Starter'}</span>
               {getStatusBadge(subscription?.status || 'inactive')}
             </div>
           </div>
@@ -218,16 +220,16 @@ export const BillingTab: React.FC = () => {
 
       {/* Usage */}
       {usage && (
-        <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Uso Atual</h3>
+        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Uso Atual</h3>
 
           {/* Properties Progress */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-slate-400">Propriedades</span>
-              <span className="text-sm text-white">{usage.properties.used} / {usage.properties.limit}</span>
+              <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Propriedades</span>
+              <span className={`text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.properties.used} / {usage.properties.limit}</span>
             </div>
-            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
               <div
                 className={`h-full rounded-full transition-all ${
                   usage.properties.percentage >= 90 ? 'bg-red-500' :
@@ -237,7 +239,7 @@ export const BillingTab: React.FC = () => {
               />
             </div>
             {usage.properties.percentage >= 90 && (
-              <p className="text-xs text-yellow-400 mt-2 flex items-center gap-1">
+              <p className={`text-xs mt-2 flex items-center gap-1 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
                 <AlertTriangle size={12} />
                 Você está quase no limite. Considere fazer upgrade.
               </p>
@@ -246,34 +248,34 @@ export const BillingTab: React.FC = () => {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#050509] rounded-lg p-4">
-              <p className="text-2xl font-bold text-white">{usage.reservationsThisMonth}</p>
-              <p className="text-sm text-slate-400">Reservas este mês</p>
+            <div className={`rounded-lg p-4 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.reservationsThisMonth}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Reservas este mês</p>
             </div>
-            <div className="bg-[#050509] rounded-lg p-4">
-              <p className="text-2xl font-bold text-white">{usage.messagesThisMonth}</p>
-              <p className="text-sm text-slate-400">Mensagens enviadas</p>
+            <div className={`rounded-lg p-4 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.messagesThisMonth}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Mensagens enviadas</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Invoices */}
-      <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Histórico de Faturas</h3>
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+        <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Histórico de Faturas</h3>
 
         {invoices.length === 0 ? (
-          <p className="text-slate-400 text-sm">Nenhuma fatura encontrada.</p>
+          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Nenhuma fatura encontrada.</p>
         ) : (
           <div className="space-y-3">
             {invoices.slice(0, 6).map((invoice) => (
               <div
                 key={invoice.id}
-                className="flex items-center justify-between p-4 bg-[#050509] rounded-lg"
+                className={`flex items-center justify-between p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}
               >
                 <div>
-                  <p className="text-white font-medium">{invoice.amountFormatted}</p>
-                  <p className="text-sm text-slate-400">
+                  <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{invoice.amountFormatted}</p>
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {new Date(invoice.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -288,7 +290,7 @@ export const BillingTab: React.FC = () => {
                       href={invoice.invoicePdf}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-slate-400 hover:text-white transition-colors"
+                      className={`transition-colors ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                     >
                       <Download size={16} />
                     </a>
@@ -302,9 +304,9 @@ export const BillingTab: React.FC = () => {
 
       {/* Cancel Subscription */}
       {subscription?.hasStripeSubscription && subscription.status !== 'canceled' && (
-        <div className="bg-[#0B0C15] border border-red-500/20 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-2">Cancelar Assinatura</h3>
-          <p className="text-sm text-slate-400 mb-4">
+        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-red-500/20' : 'bg-white border border-red-200 shadow-sm'}`}>
+          <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Cancelar Assinatura</h3>
+          <p className={`text-sm mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             Você pode cancelar a qualquer momento. O acesso continua até o fim do período pago.
           </p>
 
@@ -317,8 +319,8 @@ export const BillingTab: React.FC = () => {
               Cancelar Assinatura
             </Button>
           ) : (
-            <div className="bg-red-500/10 rounded-lg p-4">
-              <p className="text-sm text-red-400 mb-4">
+            <div className={`rounded-lg p-4 ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}>
+              <p className={`text-sm mb-4 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
                 Tem certeza? Você perderá acesso às funcionalidades premium ao final do período.
               </p>
               <div className="flex gap-3">
@@ -345,25 +347,25 @@ export const BillingTab: React.FC = () => {
 
       {/* Upgrade / Choose Plan Section */}
       {(!subscription?.hasStripeSubscription || subscription?.status === 'canceled') && (
-        <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
+        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-blue-400" />
-            <h3 className="text-lg font-semibold text-white">Escolha seu Plano</h3>
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Escolha seu Plano</h3>
           </div>
-          <p className="text-sm text-slate-400 mb-6">
+          <p className={`text-sm mb-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             Desbloqueie todo o potencial do Mevo com um plano premium.
           </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-3 mb-6">
-            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-slate-500'}`}>Mensal</span>
+            <span className={`text-sm ${!isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}>Mensal</span>
             <button
               onClick={() => setIsYearly(!isYearly)}
               className="relative w-11 h-6 rounded-full bg-blue-600 transition-colors"
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-5' : ''}`} />
             </button>
-            <span className={`text-sm ${isYearly ? 'text-white' : 'text-slate-500'}`}>Anual</span>
+            <span className={`text-sm ${isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}>Anual</span>
             <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">-27%</span>
           </div>
 
@@ -376,7 +378,9 @@ export const BillingTab: React.FC = () => {
                 className={`relative p-4 rounded-xl border transition-all ${
                   plan.isPopular
                     ? 'border-blue-500/50 bg-blue-500/5'
-                    : 'border-white/10 bg-[#050509]'
+                    : isDark
+                      ? 'border-white/10 bg-[#050509]'
+                      : 'border-slate-200 bg-slate-50'
                 } ${highlightPlan === plan.id ? 'ring-2 ring-blue-500/70 shadow-[0_0_0_4px_rgba(59,130,246,0.15)] scale-[1.01]' : ''}`}
               >
                 {plan.isPopular && (
@@ -384,12 +388,12 @@ export const BillingTab: React.FC = () => {
                     Popular
                   </span>
                 )}
-                <h4 className="text-white font-semibold mb-1">{plan.name}</h4>
+                <h4 className={`font-semibold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h4>
                 <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-2xl font-bold text-white">
+                  <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     R${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-slate-400 text-sm">/mês</span>
+                  <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>/mês</span>
                 </div>
                 {plan.hasTrial && (
                   <span className="inline-block mb-3 px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded">
@@ -398,7 +402,7 @@ export const BillingTab: React.FC = () => {
                 )}
                 <ul className="space-y-1.5 mb-4">
                   {plan.features.slice(0, 3).map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-slate-400">
+                    <li key={i} className={`flex items-center gap-2 text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       <Check className="w-3 h-3 text-green-400" />
                       {f}
                     </li>
