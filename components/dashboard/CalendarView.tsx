@@ -322,8 +322,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
                             `}
                             title={`${dayRes.propertyName} - ${dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}`}
                           >
-                            {dayRes.type === 'checkin' && '-> '}
-                            {dayRes.type === 'checkout' && '<- '}
+                            {dayRes.type === 'checkin' && '▶ '}
+                            {dayRes.type === 'checkout' && '◀ '}
                             {dayRes.propertyName.length > 10 ? dayRes.propertyName.substring(0, 10) + '...' : dayRes.propertyName}
                           </div>
                         ))}
@@ -345,11 +345,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
         <div className="flex items-center gap-6 mt-4 pt-4 border-t border-white/5">
           <span className="text-xs text-slate-500">Legenda:</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">-></span>
+            <span className="text-xs text-emerald-400 font-bold">IN</span>
             <span className="text-xs text-slate-400">Check-in</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">&lt;-</span>
+            <span className="text-xs text-red-400 font-bold">OUT</span>
             <span className="text-xs text-slate-400">Check-out</span>
           </div>
           <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
         <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <span className="text-red-400 font-bold text-sm">&lt;-</span>
+              <span className="text-red-400 font-bold text-sm">OUT</span>
             </div>
             <div>
               <p className="text-2xl font-semibold text-white">{todayData?.checkouts.length || 0}</p>
@@ -388,7 +388,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats })
         <div className="bg-[#0B0C15] border border-white/5 p-5 rounded-xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <span className="text-emerald-400 font-bold text-sm">-></span>
+              <span className="text-emerald-400 font-bold text-sm">IN</span>
             </div>
             <div>
               <p className="text-2xl font-semibold text-white">{todayData?.checkins.length || 0}</p>
