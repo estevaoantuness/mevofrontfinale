@@ -83,21 +83,23 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   // Worker Loading State
   const [workerLoading, setWorkerLoading] = useState(false);
 
-  // Fetch data on mount
+  // Fetch data on mount (includes WhatsApp status)
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [propsData, statsData, subData] = await Promise.all([
+      const [propsData, statsData, subData, whatsappData] = await Promise.all([
         api.getProperties(),
         api.getStats(),
-        api.getSubscription().catch(() => null)
+        api.getSubscription().catch(() => null),
+        api.getWhatsAppStatus().catch(() => ({ configured: false, connected: false }))
       ]);
       setProperties(propsData);
       setStats(statsData);
       if (subData) setSubscription(subData);
+      if (whatsappData) setWhatsappStatus(whatsappData);
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
