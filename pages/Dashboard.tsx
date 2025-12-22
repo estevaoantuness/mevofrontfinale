@@ -506,7 +506,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   </div>
                 ) : qrCode ? (
                   <div className="w-64 h-64 mx-auto rounded-xl overflow-hidden mb-6 bg-white p-2">
-                    <img src={`data:image/png;base64,${qrCode}`} alt="QR Code WhatsApp" className="w-full h-full" />
+                    <img src={qrCode.startsWith('data:') ? qrCode : `data:image/png;base64,${qrCode}`} alt="QR Code WhatsApp" className="w-full h-full" />
                   </div>
                 ) : (
                   <div className="w-64 h-64 mx-auto border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center bg-black/20 mb-6">
