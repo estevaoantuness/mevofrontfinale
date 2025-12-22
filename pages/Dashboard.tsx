@@ -15,7 +15,8 @@ import {
   ExternalLink,
   CreditCard,
   User,
-  AlertTriangle
+  AlertTriangle,
+  Check
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -24,6 +25,7 @@ import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
+import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { useAuth } from '../lib/AuthContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
@@ -72,6 +74,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     currentLimit?: number;
     propertyCount?: number;
   }>({ isOpen: false, reason: 'no_subscription' });
+
+  // Default Phone State (localStorage)
+  const [defaultPhone, setDefaultPhone] = useState(() => localStorage.getItem('mevo_default_phone') || '');
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
+  const [phoneChanged, setPhoneChanged] = useState(false);
+
+  // Worker Loading State
+  const [workerLoading, setWorkerLoading] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
@@ -152,6 +162,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     try {
       const property = await api.createProperty(newProp);
       setProperties([property, ...properties]);
+
+      // Salvar número como padrão se checkbox marcado
+      if (saveAsDefault && newProp.employee_phone) {
+        localStorage.setItem('mevo_default_phone', newProp.employee_phone);
+        setDefaultPhone(newProp.employee_phone);
+      }
+
       setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });
       setIsModalOpen(false);
     } catch (err: any) {
@@ -269,12 +286,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   }, [activeTab]);
 
   const handleRunWorker = async () => {
+    setWorkerLoading(true);
     try {
       await api.runWorker();
-      alert('Worker executado! Verifique os logs.');
+      // Aguarda 2 segundos mostrando o loading
+      await new Promise(resolve => setTimeout(resolve, 2000));
       fetchData();
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setWorkerLoading(false);
     }
   };
 
@@ -425,7 +446,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <h3 className="text-lg font-medium text-white">Meus Imoveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexoes iCal e equipe de limpeza</p>
                 </div>
-                <Button onClick={() => setIsModalOpen(true)}>
+                <Button onClick={() => {
+                  // Preencher com número padrão se existir
+                  const savedPhone = localStorage.getItem('mevo_default_phone') || '';
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: savedPhone });
+                  setSaveAsDefault(false);
+                  setPhoneChanged(false);
+                  setIsModalOpen(true);
+                }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imovel
                 </Button>
               </div>
@@ -685,9 +713,40 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               placeholder="41999990000"
               required
               value={newProp.employee_phone}
-              onChange={e => setNewProp({...newProp, employee_phone: e.target.value})}
+              onChange={e => {
+                const newPhone = e.target.value;
+                setNewProp({...newProp, employee_phone: newPhone});
+                // Detectar se o telefone mudou do padrão salvo
+                const savedPhone = localStorage.getItem('mevo_default_phone') || '';
+                setPhoneChanged(newPhone !== savedPhone && newPhone.length > 0);
+              }}
             />
           </div>
+
+          {/* Checkbox para salvar como padrão - aparece se não há padrão ou se mudou */}
+          {(phoneChanged || !defaultPhone) && newProp.employee_phone && (
+            <label className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07] transition-colors">
+              <div
+                onClick={() => setSaveAsDefault(!saveAsDefault)}
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                  saveAsDefault
+                    ? 'bg-blue-500 border-blue-500'
+                    : 'border-slate-500 hover:border-slate-400'
+                }`}
+              >
+                {saveAsDefault && <Check size={14} className="text-white" />}
+              </div>
+              <div className="flex-1">
+                <span className="text-sm text-slate-300">Salvar este numero como padrao</span>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {defaultPhone
+                    ? `Substituir o padrao atual (${defaultPhone})`
+                    : 'Sera preenchido automaticamente nos proximos imoveis'}
+                </p>
+              </div>
+            </label>
+          )}
+
           <Input
             label="Airbnb iCal URL"
             placeholder="https://airbnb.com/calendar/ical/..."
@@ -806,6 +865,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         currentPlan={subscriptionModal.currentPlan}
         currentLimit={subscriptionModal.currentLimit}
         propertyCount={subscriptionModal.propertyCount}
+      />
+
+      {/* Worker Loading Overlay */}
+      <LoadingOverlay
+        isVisible={workerLoading}
+        title="Executando Worker"
+        subtitle="Processando checkouts e enviando mensagens..."
       />
     </div>
   );
