@@ -20,17 +20,17 @@ const PLANS: PricingPlan[] = [
   {
     id: 'starter',
     name: 'Starter',
-    description: 'Para quem esta comecando',
+    description: 'Para quem está começando',
     monthlyPrice: 67,
     yearlyPrice: 49,
     propertyLimit: 3,
     features: [
-      'Ate 3 propriedades',
+      'Até 3 propriedades',
       'Sync iCal (Airbnb/Booking/VRBO)',
-      'Automacoes basicas',
-      '1 usuario',
+      'Automações básicas',
+      '1 usuário',
       'Templates com placeholders',
-      'Integracao WhatsApp',
+      'Integração WhatsApp',
       'Suporte por email'
     ],
     isPopular: false,
@@ -39,18 +39,18 @@ const PLANS: PricingPlan[] = [
   {
     id: 'pro',
     name: 'Pro',
-    description: 'Para anfitrioes profissionais',
+    description: 'Para anfitriões profissionais',
     monthlyPrice: 197,
     yearlyPrice: 149,
     propertyLimit: 10,
     features: [
-      'Ate 10 propriedades',
+      'Até 10 propriedades',
       'Tudo do Starter',
-      'Multi-canais iCal avancados',
-      'Webhooks para integracoes',
+      'Multi-canais iCal avançados',
+      'Webhooks para integrações',
       'Prioridade de fila',
       'Logs completos',
-      'Suporte prioritario'
+      'Suporte prioritário'
     ],
     isPopular: true,
     hasTrial: true,
@@ -59,16 +59,16 @@ const PLANS: PricingPlan[] = [
   {
     id: 'agency',
     name: 'Agency',
-    description: 'Para gestores de multiplas propriedades',
+    description: 'Para gestores de múltiplas propriedades',
     monthlyPrice: 379,
     yearlyPrice: 289,
     propertyLimit: 30,
     features: [
-      'Ate 30 propriedades',
+      'Até 30 propriedades',
       'Tudo do Pro',
-      'Multiplos usuarios e permissoes',
-      'Auditoria e logs avancados',
-      'Suporte prioritario (SLA)',
+      'Múltiplos usuários e permissões',
+      'Auditoria e logs avançados',
+      'Suporte prioritário (SLA)',
       'API completa',
       'White-label',
       'Gerente de conta dedicado'
@@ -97,10 +97,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Precos simples e transparentes
+            Preços simples e transparentes
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Escolha o plano ideal para o tamanho do seu negocio. Cancele quando quiser.
+            Escolha o plano ideal para o tamanho do seu negócio. Cancele quando quiser.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
             Anual
           </span>
           <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
-            Economize ate 27%
+            Economize até 27%
           </span>
         </div>
 
@@ -167,11 +167,11 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   <span className="text-5xl font-bold text-white">
                     {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-slate-400">/mes</span>
+                  <span className="text-slate-400">/mês</span>
                 </div>
                 {!isYearly && plan.yearlyPrice < plan.monthlyPrice && (
                   <p className="text-sm text-green-400 mt-2">
-                    ou R${plan.yearlyPrice}/mes no anual
+                    ou R${plan.yearlyPrice}/mês no anual
                   </p>
                 )}
               </div>
@@ -180,7 +180,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
               {plan.hasTrial && (
                 <div className="text-center mb-6">
                   <span className="inline-block px-3 py-1.5 text-sm font-medium bg-purple-500/20 text-purple-400 rounded-lg">
-                    {plan.trialDays} dias gratis
+                    {plan.trialDays} dias grátis
                   </span>
                 </div>
               )}
@@ -201,7 +201,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                 className="w-full"
                 onClick={() => handleSelectPlan(plan.id)}
               >
-                {plan.hasTrial ? 'Comecar Trial Gratis' : plan.id === 'agency' ? 'Falar com Vendas' : 'Escolher Plano'}
+                {plan.hasTrial ? 'Começar Trial Grátis' : plan.id === 'agency' ? 'Falar com Vendas' : 'Escolher Plano'}
               </Button>
             </div>
           ))}
@@ -209,7 +209,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
 
         {/* Money-back guarantee */}
         <p className="text-center text-sm text-slate-500 mt-12">
-          Garantia de 7 dias. Nao gostou? Devolvemos seu dinheiro.
+          Garantia de 7 dias. Não gostou? Devolvemos seu dinheiro.
         </p>
       </div>
     </section>

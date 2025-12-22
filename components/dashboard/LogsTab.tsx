@@ -159,7 +159,7 @@ export const LogsTab = ({ properties }: LogsTabProps) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-medium text-white">Historico de Mensagens</h3>
+          <h3 className="text-lg font-medium text-white">Histórico de Mensagens</h3>
           <p className="text-sm text-slate-500">
             {total} mensagens enviadas
           </p>

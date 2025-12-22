@@ -142,11 +142,11 @@ export const GuestsTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-white">Hospedes</h3>
-          <p className="text-sm text-slate-500">Gerencie os hospedes cadastrados</p>
+          <h3 className="text-lg font-medium text-white">Hóspedes</h3>
+          <p className="text-sm text-slate-500">Gerencie os hóspedes cadastrados</p>
         </div>
         <Button onClick={handleCreate}>
-          <Plus size={16} className="mr-2" /> Novo Hospede
+          <Plus size={16} className="mr-2" /> Novo Hóspede
         </Button>
       </div>
 

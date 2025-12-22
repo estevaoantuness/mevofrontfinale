@@ -27,7 +27,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
         const result = await api.verifyResetToken(token);
         setTokenValid(result.valid);
         if (!result.valid) {
-          setError(result.error || 'Token invalido ou expirado');
+          setError(result.error || 'Token inválido ou expirado');
         }
       } catch (err: any) {
         setTokenValid(false);
@@ -42,7 +42,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
     } else {
       setVerifying(false);
       setTokenValid(false);
-      setError('Token nao fornecido');
+      setError('Token não fornecido');
     }
   }, [token]);
 
@@ -51,12 +51,12 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
     setError('');
 
     if (password.length < 6) {
-      setError('A senha deve ter no minimo 6 caracteres');
+      setError('A senha deve ter no mínimo 6 caracteres');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas nao coincidem');
+      setError('As senhas não coincidem');
       return;
     }
 
@@ -97,9 +97,9 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
             <AlertCircle className="w-8 h-8 text-red-400" />
           </div>
 
-          <h2 className="text-xl font-medium text-white mb-2">Link invalido</h2>
+          <h2 className="text-xl font-medium text-white mb-2">Link inválido</h2>
           <p className="text-sm text-slate-400 mb-6">
-            {error || 'Este link de recuperacao de senha e invalido ou ja expirou.'}
+            {error || 'Este link de recuperação de senha é inválido ou já expirou.'}
           </p>
 
           <div className="space-y-3">
@@ -128,7 +128,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
 
           <h2 className="text-xl font-medium text-white mb-2">Senha redefinida!</h2>
           <p className="text-sm text-slate-400 mb-6">
-            Sua senha foi alterada com sucesso. Agora voce pode fazer login com sua nova senha.
+            Sua senha foi alterada com sucesso. Agora você pode fazer login com sua nova senha.
           </p>
 
           <Button onClick={onGoToLogin} className="w-full">
@@ -162,7 +162,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
           <Input
             label="Nova senha"
             type="password"
-            placeholder="Minimo 6 caracteres"
+            placeholder="Mínimo 6 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

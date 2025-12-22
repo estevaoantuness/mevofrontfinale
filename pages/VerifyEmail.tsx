@@ -20,7 +20,7 @@ export const VerifyEmailPage: React.FC<VerifyEmailProps> = ({ onGoToDashboard, o
   useEffect(() => {
     if (!token) {
       setStatus('no-token');
-      setMessage('Token de verificacao nao encontrado na URL.');
+      setMessage('Token de verificação não encontrado na URL.');
       return;
     }
 
@@ -81,8 +81,8 @@ export const VerifyEmailPage: React.FC<VerifyEmailProps> = ({ onGoToDashboard, o
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
           {status === 'loading' && 'Verificando email...'}
           {status === 'success' && 'Email verificado!'}
-          {status === 'error' && 'Erro na verificacao'}
-          {status === 'no-token' && 'Link invalido'}
+          {status === 'error' && 'Erro na verificação'}
+          {status === 'no-token' && 'Link inválido'}
         </h1>
 
         {/* Message */}
@@ -101,7 +101,7 @@ export const VerifyEmailPage: React.FC<VerifyEmailProps> = ({ onGoToDashboard, o
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Proximos passos</span>
+              <span className="text-slate-400">Próximos passos</span>
               <span className="text-slate-300">Ativar seu plano</span>
             </div>
           </div>
@@ -130,14 +130,14 @@ export const VerifyEmailPage: React.FC<VerifyEmailProps> = ({ onGoToDashboard, o
               Fazer Login
             </Button>
             <p className="text-sm text-slate-500">
-              Faca login para solicitar um novo link de verificacao
+              Faça login para solicitar um novo link de verificação
             </p>
           </div>
         )}
 
         {/* Help Text */}
         <p className="mt-6 text-sm text-slate-500">
-          Duvidas? Entre em contato pelo email suporte@mevo.ai
+          Dúvidas? Entre em contato pelo email suporte@mevo.ai
         </p>
       </div>
     </div>

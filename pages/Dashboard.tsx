@@ -302,15 +302,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
         <nav className="flex-1 p-3">
           <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-600">Menu</div>
-          <NavItem id="overview" icon={LayoutGrid} label="Visao Geral" />
-          <NavItem id="properties" icon={Home} label="Meus Imoveis" />
-          <NavItem id="guests" icon={Users} label="Hospedes" />
+          <NavItem id="overview" icon={LayoutGrid} label="Visão Geral" />
+          <NavItem id="properties" icon={Home} label="Meus Imóveis" />
+          <NavItem id="guests" icon={Users} label="Hóspedes" />
           <NavItem id="templates" icon={MessageCircle} label="Templates" />
           <NavItem id="logs" icon={FileText} label="Logs" />
-          <NavItem id="whatsapp" icon={Smartphone} label="Conexao WhatsApp" />
+          <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
-          <NavItem id="settings" icon={Settings} label="Configuracoes" />
+          <NavItem id="settings" icon={Settings} label="Configurações" />
         </nav>
 
         <div className="p-4 border-t border-white/5">
@@ -323,7 +323,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-yellow-400 font-medium">Email nao verificado</p>
+                  <p className="text-xs text-yellow-400 font-medium">Email não verificado</p>
                   <p className="text-[10px] text-yellow-400/70 truncate">Clique para confirmar</p>
                 </div>
               </div>
@@ -338,12 +338,12 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               {/* Email verification badge on avatar */}
               {user && !user.emailVerified && (
                 <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-500 border-2 border-[#080911] flex items-center justify-center">
-                  <span className="sr-only">Email nao verificado</span>
+                  <span className="sr-only">Email não verificado</span>
                 </div>
               )}
             </div>
             <div className="ml-3 overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuario'}</p>
+              <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuário'}</p>
               <p className="text-xs text-slate-500 truncate">{user?.email || ''}</p>
             </div>
           </div>
@@ -371,15 +371,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         {/* Topbar */}
         <header className="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-[#050509]/50 backdrop-blur-sm z-10">
           <h2 className="text-sm font-medium text-slate-200">
-            {activeTab === 'overview' && 'Visao Geral'}
-            {activeTab === 'properties' && 'Gerenciar Imoveis'}
-            {activeTab === 'guests' && 'Gestao de Hospedes'}
+            {activeTab === 'overview' && 'Visão Geral'}
+            {activeTab === 'properties' && 'Gerenciar Imóveis'}
+            {activeTab === 'guests' && 'Gestão de Hóspedes'}
             {activeTab === 'templates' && 'Templates de Mensagens'}
             {activeTab === 'logs' && 'Logs de Mensagens'}
-            {activeTab === 'whatsapp' && 'Conexao WhatsApp'}
+            {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
             {activeTab === 'profile' && 'Meu Perfil'}
-            {activeTab === 'settings' && 'Configuracoes'}
+            {activeTab === 'settings' && 'Configurações'}
           </h2>
 
           <div className="flex items-center space-x-3">
@@ -444,7 +444,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-medium text-white">Meus Imoveis</h3>
+                  <h3 className="text-lg font-medium text-white">Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexoes iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
@@ -455,7 +455,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   setPhoneChanged(false);
                   setIsModalOpen(true);
                 }}>
-                  <Plus size={16} className="mr-2" /> Adicionar Imovel
+                  <Plus size={16} className="mr-2" /> Adicionar Imóvel
                 </Button>
               </div>
 
@@ -463,11 +463,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/[0.02]">
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imovel</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Responsavel</th>
+                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imóvel</th>
+                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Responsável</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Telefone</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Calendarios</th>
-                      <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acoes</th>
+                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Calendários</th>
+                      <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -661,11 +661,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Novo Imovel"
+        title="Novo Imóvel"
       >
         <form onSubmit={handleAddProperty} className="space-y-4">
           <Input
-            label="Nome do Imovel"
+            label="Nome do Imóvel"
             placeholder="Ex: Loft Centro 402"
             required
             value={newProp.name}
@@ -732,7 +732,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           />
           <div className="pt-4 flex justify-end gap-3">
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button type="submit">Salvar Imovel</Button>
+            <Button type="submit">Salvar Imóvel</Button>
           </div>
         </form>
       </Modal>
@@ -741,12 +741,12 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => { setIsEditModalOpen(false); setEditProp(null); }}
-        title="Editar Imovel"
+        title="Editar Imóvel"
       >
         {editProp && (
           <form onSubmit={handleUpdateProperty} className="space-y-4">
             <Input
-              label="Nome do Imovel"
+              label="Nome do Imóvel"
               placeholder="Ex: Loft Centro 402"
               required
               value={editProp.name}

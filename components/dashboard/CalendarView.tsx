@@ -128,7 +128,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     reservations.forEach(reservation => {
       const checkin = new Date(reservation.checkinDate);
       const checkout = new Date(reservation.checkoutDate);
-      const propertyName = reservation.property?.name || `Imovel ${reservation.propertyId}`;
+      const propertyName = reservation.property?.name || `Imóvel ${reservation.propertyId}`;
       const colorIndex = (reservation.propertyId - 1) % PROPERTY_COLORS.length;
       const color = PROPERTY_COLORS[colorIndex];
 
@@ -215,18 +215,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white mb-1">
-                  Calendario Sincronizado
+                  Calendário Sincronizado
                 </h3>
                 <p className="text-sm text-slate-400">
                   Visualize seus check-ins e check-outs automaticamente sincronizados do Airbnb e Booking.
-                  Disponivel no plano <span className="text-blue-400 font-medium">Starter</span> ou <span className="text-purple-400 font-medium">Trial Gratuito</span>.
+                  Disponível no plano <span className="text-blue-400 font-medium">Starter</span> ou <span className="text-purple-400 font-medium">Trial Gratuito</span>.
                 </p>
               </div>
             </div>
             {onActivateTrial && (
               <Button onClick={onActivateTrial} className="flex-shrink-0">
                 <Sparkles size={16} className="mr-2" />
-                Ativar Trial Gratis
+                Ativar Trial Grátis
               </Button>
             )}
           </div>
@@ -411,7 +411,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             </div>
             <div>
               <p className="text-2xl font-semibold text-white">{stats.totalProperties}</p>
-              <p className="text-xs text-slate-500">Imoveis Ativos</p>
+              <p className="text-xs text-slate-500">Imóveis Ativos</p>
             </div>
           </div>
         </div>
@@ -488,7 +488,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 </div>
                 {dayRes.reservation.guestName && (
                   <p className="text-sm text-slate-400">
-                    Hospede: {dayRes.reservation.guestName}
+                    Hóspede: {dayRes.reservation.guestName}
                   </p>
                 )}
                 <p className="text-xs text-slate-500 mt-1">

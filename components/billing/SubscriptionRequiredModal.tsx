@@ -81,7 +81,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">Redirecionando para pagamento</h3>
-            <p className="text-sm text-slate-400">Voce sera redirecionado para o Stripe...</p>
+            <p className="text-sm text-slate-400">Você será redirecionado para o Stripe...</p>
           </div>
         </motion.div>
       </motion.div>
@@ -134,32 +134,32 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-white mb-3">
                 {isLimitReached
-                  ? 'Limite de imoveis atingido'
+                  ? 'Limite de imóveis atingido'
                   : 'Comece seu trial gratuito'}
               </h3>
               <p className="text-slate-400">
                 {isLimitReached
-                  ? `Voce atingiu o limite de ${currentLimit} imoveis do plano ${currentPlan === 'starter' ? 'Starter' : currentPlan === 'pro' ? 'Pro' : 'Agency'}. Faca upgrade para adicionar mais.`
-                  : 'Para criar imoveis e automatizar suas operacoes, experimente o Mevo gratuitamente por 10 dias.'}
+                  ? `Você atingiu o limite de ${currentLimit} imóveis do plano ${currentPlan === 'starter' ? 'Starter' : currentPlan === 'pro' ? 'Pro' : 'Agency'}. Faça upgrade para adicionar mais.`
+                  : 'Para criar imóveis e automatizar suas operações, experimente o Mevo gratuitamente por 10 dias.'}
               </p>
             </div>
 
             {/* Features */}
             <div className="bg-[#050509]/50 rounded-xl p-5 mb-6">
               <p className="text-sm text-slate-400 mb-3">
-                {isLimitReached ? 'No proximo plano voce tera:' : 'Com o trial voce tera acesso a:'}
+                {isLimitReached ? 'No próximo plano você terá:' : 'Com o trial você terá acesso a:'}
               </p>
               <ul className="space-y-2">
                 {(isLimitReached ? [
-                  currentPlan === 'starter' ? 'Ate 10 imoveis' : 'Ate 30 imoveis',
-                  'Webhooks para integracoes',
-                  'Suporte prioritario',
+                  currentPlan === 'starter' ? 'Até 10 imóveis' : 'Até 30 imóveis',
+                  'Webhooks para integrações',
+                  'Suporte prioritário',
                   'Logs completos'
                 ] : [
-                  '10 dias gratis sem compromisso',
-                  'Ate 10 imoveis cadastrados',
-                  'Automacoes de check-in/checkout',
-                  'Integracao WhatsApp + iCal'
+                  '10 dias grátis sem compromisso',
+                  'Até 10 imóveis cadastrados',
+                  'Automações de check-in/checkout',
+                  'Integração WhatsApp + iCal'
                 ]).map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
                     <Check className="w-4 h-4 text-green-400 flex-shrink-0" />

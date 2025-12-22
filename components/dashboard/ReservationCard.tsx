@@ -25,8 +25,8 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
 
   // Find property details
   const property = properties.find(p => p.id === reservation.propertyId);
-  const propertyName = reservation.property?.name || property?.name || 'Imovel';
-  const employeeName = property?.employee_name || 'Responsavel';
+  const propertyName = reservation.property?.name || property?.name || 'Imóvel';
+  const employeeName = property?.employee_name || 'Responsável';
   const employeePhone = property?.employee_phone || '';
 
   // Format time
@@ -158,7 +158,7 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
           {/* Guest Info */}
           {(reservation.guestName || reservation.guestEmail || reservation.guestPhone) && (
             <div className="bg-white/[0.02] rounded-lg p-3 mb-4">
-              <span className="text-xs text-slate-500 block mb-2">Hospede</span>
+              <span className="text-xs text-slate-500 block mb-2">Hóspede</span>
               <div className="space-y-1">
                 {reservation.guestName && (
                   <p className="text-sm text-white">{reservation.guestName}</p>

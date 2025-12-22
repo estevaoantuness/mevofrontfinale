@@ -64,7 +64,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       await sendVerificationEmail();
       setVerificationSent(true);
     } catch (err: any) {
-      setError(err.message || 'Erro ao enviar email de verificacao');
+      setError(err.message || 'Erro ao enviar email de verificação');
     } finally {
       setSendingVerification(false);
     }
@@ -80,7 +80,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleCheckout = async () => {
     // Double-check email verification before proceeding
     if (!emailVerified) {
-      setError('Voce precisa verificar seu email antes de continuar');
+      setError('Você precisa verificar seu email antes de continuar');
       return;
     }
 
@@ -111,7 +111,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const errorCode = err.code || err.response?.data?.code;
       if (errorCode === 'EMAIL_NOT_VERIFIED') {
         setEmailVerified(false);
-        setError('Voce precisa verificar seu email antes de continuar');
+        setError('Você precisa verificar seu email antes de continuar');
       } else {
         setError(err.message || 'Erro ao iniciar pagamento');
       }
@@ -140,7 +140,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">Redirecionando para pagamento</h3>
-            <p className="text-sm text-slate-400">Voce sera redirecionado para o Stripe...</p>
+            <p className="text-sm text-slate-400">Você será redirecionado para o Stripe...</p>
           </div>
         </motion.div>
       </motion.div>
@@ -186,12 +186,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div className="flex items-baseline justify-center gap-1 mb-2">
             <span className="text-slate-400 text-lg">R$</span>
             <span className="text-4xl font-bold text-white">{price}</span>
-            <span className="text-slate-400">/mes</span>
+            <span className="text-slate-400">/mês</span>
           </div>
           {plan.hasTrial && (
             <div className="mt-4 text-center">
               <span className="inline-block px-3 py-1.5 text-sm font-medium bg-purple-500/20 text-purple-400 rounded-lg">
-                {plan.trialDays} dias gratis
+                {plan.trialDays} dias grátis
               </span>
             </div>
           )}
@@ -241,7 +241,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   ) : (
                     <>
                       <AlertCircle className="w-4 h-4 mr-2" />
-                      Email nao verificado - Clique para verificar
+                      Email não verificado - Clique para verificar
                     </>
                   )}
                 </Button>
@@ -250,7 +250,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <Mail className="w-8 h-8 text-green-400 mx-auto mb-2" />
                   <p className="text-green-400 font-medium">Email enviado!</p>
                   <p className="text-sm text-slate-400 mt-1">
-                    Verifique sua caixa de entrada e clique no link de confirmacao.
+                    Verifique sua caixa de entrada e clique no link de confirmação.
                   </p>
                   <button
                     onClick={() => {
@@ -259,7 +259,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     }}
                     className="mt-3 text-sm text-blue-400 hover:text-blue-300"
                   >
-                    Ja verifiquei, continuar
+                    Já verifiquei, continuar
                   </button>
                 </div>
               )}
@@ -278,7 +278,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   Redirecionando...
                 </>
               ) : plan.hasTrial ? (
-                'Comecar Trial Gratis'
+                'Começar Trial Grátis'
               ) : (
                 'Ir para Pagamento'
               )}

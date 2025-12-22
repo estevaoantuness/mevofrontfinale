@@ -95,8 +95,8 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
               </h3>
               <p className="text-slate-400">
                 {sent
-                  ? 'Verifique sua caixa de entrada e clique no link de confirmacao.'
-                  : 'Para continuar, confirme seu email. Enviaremos um link de verificacao.'}
+                  ? 'Verifique sua caixa de entrada e clique no link de confirmação.'
+                  : 'Para continuar, confirme seu email. Enviaremos um link de verificação.'}
               </p>
             </div>
 
@@ -131,7 +131,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                   ) : (
                     <div className="flex items-center gap-2">
                       <Send className="w-4 h-4" />
-                      Enviar Email de Verificacao
+                      Enviar Email de Verificação
                     </div>
                   )}
                 </Button>

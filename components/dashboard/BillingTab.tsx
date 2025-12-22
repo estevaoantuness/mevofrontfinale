@@ -222,7 +222,7 @@ export const BillingTab: React.FC = () => {
             {usage.properties.percentage >= 90 && (
               <p className="text-xs text-yellow-400 mt-2 flex items-center gap-1">
                 <AlertTriangle size={12} />
-                Voce esta quase no limite. Considere fazer upgrade.
+                Você está quase no limite. Considere fazer upgrade.
               </p>
             )}
           </div>
@@ -231,7 +231,7 @@ export const BillingTab: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-[#050509] rounded-lg p-4">
               <p className="text-2xl font-bold text-white">{usage.reservationsThisMonth}</p>
-              <p className="text-sm text-slate-400">Reservas este mes</p>
+              <p className="text-sm text-slate-400">Reservas este mês</p>
             </div>
             <div className="bg-[#050509] rounded-lg p-4">
               <p className="text-2xl font-bold text-white">{usage.messagesThisMonth}</p>
@@ -243,7 +243,7 @@ export const BillingTab: React.FC = () => {
 
       {/* Invoices */}
       <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Historico de Faturas</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Histórico de Faturas</h3>
 
         {invoices.length === 0 ? (
           <p className="text-slate-400 text-sm">Nenhuma fatura encontrada.</p>
@@ -288,7 +288,7 @@ export const BillingTab: React.FC = () => {
         <div className="bg-[#0B0C15] border border-red-500/20 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Cancelar Assinatura</h3>
           <p className="text-sm text-slate-400 mb-4">
-            Voce pode cancelar a qualquer momento. O acesso continua ate o fim do periodo pago.
+            Você pode cancelar a qualquer momento. O acesso continua até o fim do período pago.
           </p>
 
           {!showCancelConfirm ? (
@@ -302,7 +302,7 @@ export const BillingTab: React.FC = () => {
           ) : (
             <div className="bg-red-500/10 rounded-lg p-4">
               <p className="text-sm text-red-400 mb-4">
-                Tem certeza? Voce perdera acesso as funcionalidades premium ao final do periodo.
+                Tem certeza? Você perderá acesso às funcionalidades premium ao final do período.
               </p>
               <div className="flex gap-3">
                 <Button
@@ -371,11 +371,11 @@ export const BillingTab: React.FC = () => {
                   <span className="text-2xl font-bold text-white">
                     R${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                   </span>
-                  <span className="text-slate-400 text-sm">/mes</span>
+                  <span className="text-slate-400 text-sm">/mês</span>
                 </div>
                 {plan.hasTrial && (
                   <span className="inline-block mb-3 px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded">
-                    {plan.trialDays} dias gratis
+                    {plan.trialDays} dias grátis
                   </span>
                 )}
                 <ul className="space-y-1.5 mb-4">

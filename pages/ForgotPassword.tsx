@@ -44,14 +44,14 @@ export const ForgotPasswordPage = ({ onBack, onGoToLogin }: ForgotPasswordPagePr
           <h2 className="text-xl font-medium text-white mb-2">Email enviado!</h2>
           <p className="text-sm text-slate-400 mb-6">
             Se o email <span className="text-white font-medium">{email}</span> estiver cadastrado,
-            voce recebera um link para redefinir sua senha.
+            você receberá um link para redefinir sua senha.
           </p>
 
           <div className="bg-white/5 rounded-lg p-4 mb-6 text-left">
-            <p className="text-xs text-slate-500 mb-2">Nao recebeu o email?</p>
+            <p className="text-xs text-slate-500 mb-2">Não recebeu o email?</p>
             <ul className="text-xs text-slate-400 space-y-1">
               <li>- Verifique sua pasta de spam</li>
-              <li>- Confirme se o email esta correto</li>
+              <li>- Confirme se o email está correto</li>
               <li>- Aguarde alguns minutos</li>
             </ul>
           </div>
@@ -99,7 +99,7 @@ export const ForgotPasswordPage = ({ onBack, onGoToLogin }: ForgotPasswordPagePr
           )}
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
-            {loading ? 'Enviando...' : 'Enviar Link de Recuperacao'}
+            {loading ? 'Enviando...' : 'Enviar Link de Recuperação'}
           </Button>
         </form>
 

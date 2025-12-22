@@ -102,7 +102,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 bg-[#0B0C15] border-b border-white/10 px-6 py-4 flex items-center justify-between z-10">
           <h3 className="text-lg font-medium text-white">
-            {guest ? 'Editar Hospede' : 'Novo Hospede'}
+            {guest ? 'Editar Hóspede' : 'Novo Hóspede'}
           </h3>
           <button
             onClick={onClose}
@@ -116,7 +116,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <Input
             label="Nome *"
-            placeholder="Nome completo do hospede"
+            placeholder="Nome completo do hóspede"
             value={name}
             onChange={e => setName(e.target.value)}
             required
@@ -182,11 +182,11 @@ export const GuestModal: React.FC<GuestModalProps> = ({
                 onChange={e => setPreferredLanguage(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
-                <option value="pt-BR">Portugues (Brasil)</option>
-                <option value="en">Ingles</option>
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en">Inglês</option>
                 <option value="es">Espanhol</option>
-                <option value="fr">Frances</option>
-                <option value="de">Alemao</option>
+                <option value="fr">Francês</option>
+                <option value="de">Alemão</option>
                 <option value="it">Italiano</option>
               </select>
             </div>
@@ -197,7 +197,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
             <textarea
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none"
               rows={3}
-              placeholder="Observacoes sobre o hospede..."
+              placeholder="Observações sobre o hóspede..."
               value={notes}
               onChange={e => setNotes(e.target.value)}
             />
@@ -218,7 +218,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
                   }`}
                 />
               </div>
-              <span className="text-sm text-slate-300">Hospede ativo</span>
+              <span className="text-sm text-slate-300">Hóspede ativo</span>
             </label>
           )}
 
@@ -235,7 +235,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : guest ? 'Atualizar' : 'Criar Hospede'}
+              {loading ? 'Salvando...' : guest ? 'Atualizar' : 'Criar Hóspede'}
             </Button>
           </div>
         </form>

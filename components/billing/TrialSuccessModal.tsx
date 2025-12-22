@@ -41,9 +41,9 @@ export const TrialSuccessModal: React.FC<TrialSuccessModalProps> = ({
   };
 
   const features = [
-    { icon: Calendar, text: 'Sincronizacao de calendarios' },
-    { icon: Bell, text: 'Notificacoes automaticas' },
-    { icon: MessageCircle, text: 'Mensagens para hospedes' },
+    { icon: Calendar, text: 'Sincronização de calendários' },
+    { icon: Bell, text: 'Notificações automáticas' },
+    { icon: MessageCircle, text: 'Mensagens para hóspedes' },
     { icon: Brush, text: 'Avisos de limpeza' }
   ];
 
@@ -129,10 +129,10 @@ export const TrialSuccessModal: React.FC<TrialSuccessModalProps> = ({
                 Pronto!
               </h2>
               <p className="text-xl text-green-400 font-semibold mb-3">
-                Seu Airbnb esta automatizado!
+                Seu Airbnb está automatizado!
               </p>
               <p className="text-slate-400">
-                Seu periodo de teste de {trialDays} dias comecou agora.
+                Seu período de teste de {trialDays} dias começou agora.
               </p>
             </motion.div>
 
@@ -152,7 +152,7 @@ export const TrialSuccessModal: React.FC<TrialSuccessModalProps> = ({
               </div>
               {trialEndsAt && (
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Valido ate</span>
+                  <span className="text-slate-400">Válido até</span>
                   <span className="text-slate-300">{formatDate(trialEndsAt)}</span>
                 </div>
               )}
@@ -205,7 +205,7 @@ export const TrialSuccessModal: React.FC<TrialSuccessModalProps> = ({
               transition={{ delay: 0.7 }}
               className="mt-6 text-center text-xs text-slate-600"
             >
-              Aproveite! Apos o trial, escolha o plano ideal para voce.
+              Aproveite! Após o trial, escolha o plano ideal para você.
             </motion.p>
           </div>
         </motion.div>

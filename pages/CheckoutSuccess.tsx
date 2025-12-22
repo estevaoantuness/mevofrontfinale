@@ -69,7 +69,7 @@ export const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({ onGoToDashboar
 
         {/* Subtitle */}
         <p className="text-lg text-slate-400 mb-8">
-          Seu plano esta ativo. Voce ja pode comecar a usar todas as funcionalidades.
+          Seu plano está ativo. Você já pode começar a usar todas as funcionalidades.
         </p>
 
         {/* Summary Card */}

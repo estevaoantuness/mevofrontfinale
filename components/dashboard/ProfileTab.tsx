@@ -190,7 +190,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
             </div>
             <div className="bg-[#050509] rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-white">{profile.stats.guests}</p>
-              <p className="text-sm text-slate-400">Hospedes</p>
+              <p className="text-sm text-slate-400">Hóspedes</p>
             </div>
             <div className="bg-[#050509] rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-white">{profile.stats.whatsappInstances}</p>

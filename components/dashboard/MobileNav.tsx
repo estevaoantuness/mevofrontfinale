@@ -26,14 +26,14 @@ interface MobileNavProps {
 }
 
 const navItems = [
-  { id: 'overview', icon: LayoutGrid, label: 'Visao Geral' },
+  { id: 'overview', icon: LayoutGrid, label: 'Visão Geral' },
   { id: 'reservations', icon: Calendar, label: 'Reservas' },
-  { id: 'logs', icon: History, label: 'Historico' },
-  { id: 'properties', icon: Home, label: 'Meus Imoveis' },
+  { id: 'logs', icon: History, label: 'Histórico' },
+  { id: 'properties', icon: Home, label: 'Meus Imóveis' },
   { id: 'whatsapp', icon: MessageCircle, label: 'WhatsApp' },
   { id: 'billing', icon: CreditCard, label: 'Assinatura' },
   { id: 'profile', icon: User, label: 'Meu Perfil' },
-  { id: 'settings', icon: Settings, label: 'Configuracoes' },
+  { id: 'settings', icon: Settings, label: 'Configurações' },
 ];
 
 export const MobileNav = ({

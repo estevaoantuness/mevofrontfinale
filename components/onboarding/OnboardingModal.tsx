@@ -70,7 +70,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
 
   const handleSaveProperty = async () => {
     if (!propertyData.name || !propertyData.employee_name || !propertyData.employee_phone) {
-      alert('Preencha todos os campos obrigatorios');
+      alert('Preencha todos os campos obrigatórios');
       return;
     }
 
@@ -84,7 +84,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
       });
       setCurrentStep('complete');
     } catch (err: any) {
-      alert('Erro ao criar imovel: ' + err.message);
+      alert('Erro ao criar imóvel: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -109,7 +109,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
 
   const steps = [
     { id: 'whatsapp', label: 'WhatsApp' },
-    { id: 'property', label: 'Imovel' },
+    { id: 'property', label: 'Imóvel' },
     { id: 'complete', label: 'Pronto!' }
   ];
 
@@ -175,7 +175,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
               </div>
               <h3 className="text-lg font-medium text-white mb-2">Conecte seu WhatsApp</h3>
               <p className="text-sm text-slate-400 mb-6">
-                Escaneie o QR code com o WhatsApp do celular que recebera as notificacoes
+                Escaneie o QR code com o WhatsApp do celular que receberá as notificações
               </p>
 
               {whatsappConnected ? (
@@ -216,7 +216,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                 )}
                 {whatsappConnected && (
                   <Button onClick={() => setCurrentStep('property')}>
-                    Proximo
+                    Próximo
                     <ArrowRight size={16} className="ml-2" />
                   </Button>
                 )}
@@ -240,22 +240,22 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                 <div className="w-16 h-16 rounded-2xl bg-blue-500/10 mx-auto flex items-center justify-center mb-4">
                   <Home className="w-8 h-8 text-blue-400" />
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2">Adicione seu primeiro imovel</h3>
+                <h3 className="text-lg font-medium text-white mb-2">Adicione seu primeiro imóvel</h3>
                 <p className="text-sm text-slate-400">
-                  Configure as informacoes basicas do seu imovel
+                  Configure as informações básicas do seu imóvel
                 </p>
               </div>
 
               <div className="space-y-4">
                 <Input
-                  label="Nome do Imovel *"
+                  label="Nome do Imóvel *"
                   placeholder="Ex: Loft Centro 402"
                   value={propertyData.name}
                   onChange={e => setPropertyData({ ...propertyData, name: e.target.value })}
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Responsavel *"
+                    label="Responsável *"
                     placeholder="Ex: Maria"
                     value={propertyData.employee_name}
                     onChange={e => setPropertyData({ ...propertyData, employee_name: e.target.value })}
@@ -302,32 +302,32 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
               </div>
               <h3 className="text-xl font-medium text-white mb-2">Tudo pronto!</h3>
               <p className="text-slate-400 mb-2">
-                Sua conta esta configurada e pronta para usar.
+                Sua conta está configurada e pronta para usar.
               </p>
               <p className="text-sm text-slate-500 mb-8">
-                As mensagens para sua equipe de limpeza serao enviadas automaticamente as 08:00
+                As mensagens para sua equipe de limpeza serão enviadas automaticamente às 08:00
               </p>
 
               <div className="bg-white/5 rounded-xl p-4 mb-6 text-left">
-                <h4 className="text-sm font-medium text-white mb-3">Proximos passos:</h4>
+                <h4 className="text-sm font-medium text-white mb-3">Próximos passos:</h4>
                 <ul className="space-y-2 text-sm text-slate-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    Adicione mais imoveis na aba "Meus Imoveis"
+                    Adicione mais imóveis na aba "Meus Imóveis"
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    Personalize o template de mensagem em "Configuracoes"
+                    Personalize o template de mensagem em "Configurações"
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    Acompanhe seus checkouts no calendario
+                    Acompanhe seus checkouts no calendário
                   </li>
                 </ul>
               </div>
 
               <Button className="w-full" onClick={handleComplete}>
-                Comecar a usar o Mevo
+                Começar a usar o Mevo
                 <ArrowRight size={16} className="ml-2" />
               </Button>
             </div>
