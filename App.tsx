@@ -56,7 +56,17 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<LandingPage onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} onDashboard={() => navigate('/dashboard')} />} />
+      <Route
+        path="/"
+        element={
+          <LandingPage
+            onLogin={() => navigate('/login')}
+            onRegister={() => navigate('/register')}
+            onDashboard={() => navigate('/dashboard')}
+            onProfile={() => navigate('/dashboard?tab=profile')}
+          />
+        }
+      />
 
       <Route
         path="/login"

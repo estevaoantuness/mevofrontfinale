@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   LayoutGrid,
   Home,
@@ -48,7 +49,12 @@ interface DashboardProps {
 }
 
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
+  const location = useLocation();
   const { user } = useAuth();
+  const allowedTabs = useMemo(
+    () => new Set(['overview', 'properties', 'guests', 'templates', 'logs', 'whatsapp', 'billing', 'profile', 'settings']),
+    []
+  );
   const [activeTab, setActiveTab] = useState('overview');
   const [properties, setProperties] = useState<Property[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +64,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [qrLoading, setQrLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && allowedTabs.has(tab)) {
+      setActiveTab(tab);
+    }
+  }, [allowedTabs, location.search]);
 
   // New Property Form State
   const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });

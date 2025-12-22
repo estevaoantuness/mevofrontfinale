@@ -23,9 +23,10 @@ interface LandingPageProps {
   onLogin: () => void;
   onRegister?: () => void;
   onDashboard?: () => void;
+  onProfile?: () => void;
 }
 
-export const LandingPage = ({ onLogin, onRegister, onDashboard }: LandingPageProps) => {
+export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: LandingPageProps) => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
   const { isAuthenticated, user } = useAuth();
@@ -103,7 +104,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard }: LandingPagePro
                           {t('nav.myProperties')}
                         </button>
                         <button
-                          onClick={() => { onDashboard?.(); setUserMenuOpen(false); }}
+                          onClick={() => { onProfile?.(); setUserMenuOpen(false); }}
                           className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 ${isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'}`}
                         >
                           <User size={16} />
