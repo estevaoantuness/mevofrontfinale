@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Calendar, MessageCircle, LayoutGrid, Zap, Shield, Clock, Building2, User, ChevronDown } from 'lucide-react';
+import { Layers, Sparkles, Calculator, MessageCircle, LayoutGrid, Bot, Building2, User, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -208,19 +208,31 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
         {/* Features Grid - 6 features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32 max-w-6xl w-full z-10">
           {[
-            { icon: Calendar, titleKey: 'landing.features.icalSync.title', descKey: 'landing.features.icalSync.desc' },
-            { icon: MessageCircle, titleKey: 'landing.features.autoNotify.title', descKey: 'landing.features.autoNotify.desc' },
-            { icon: LayoutGrid, titleKey: 'landing.features.dashboard.title', descKey: 'landing.features.dashboard.desc' },
-            { icon: Zap, titleKey: 'landing.features.automations.title', descKey: 'landing.features.automations.desc' },
-            { icon: Shield, titleKey: 'landing.features.security.title', descKey: 'landing.features.security.desc' },
-            { icon: Clock, titleKey: 'landing.features.saveTime.title', descKey: 'landing.features.saveTime.desc' }
+            { icon: Layers, key: 'multiPlatform' },
+            { icon: Sparkles, key: 'autoCleaning' },
+            { icon: Calculator, key: 'priceCalculator', badge: t('landing.features.priceCalculator.badge') },
+            { icon: MessageCircle, key: 'smartMessages' },
+            { icon: LayoutGrid, key: 'dashboard' },
+            { icon: Bot, key: 'maya', badge: t('landing.features.maya.badge'), comingSoon: t('landing.features.maya.comingSoon') }
           ].map((feature, i) => (
-            <div key={i} className={`group p-8 rounded-xl border transition-all ${isDark ? 'bg-[#0B0C15] border-white/5 hover:border-blue-500/30 hover:bg-[#0E0F1A]' : 'bg-white border-slate-200 hover:border-blue-500/50 hover:shadow-lg'}`}>
+            <div key={i} className={`group p-8 rounded-xl border transition-all relative ${isDark ? 'bg-[#0B0C15] border-white/5 hover:border-blue-500/30 hover:bg-[#0E0F1A]' : 'bg-white border-slate-200 hover:border-blue-500/50 hover:shadow-lg'}`}>
+              {feature.badge && (
+                <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                  <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${feature.key === 'maya' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                    {feature.badge}
+                  </span>
+                  {feature.comingSoon && (
+                    <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 rounded">
+                      {feature.comingSoon}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform">
                 <feature.icon size={24} />
               </div>
-              <h3 className={`font-medium mb-3 text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>{t(feature.titleKey)}</h3>
-              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{t(feature.descKey)}</p>
+              <h3 className={`font-medium mb-3 text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>{t(`landing.features.${feature.key}.title`)}</h3>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{t(`landing.features.${feature.key}.desc`)}</p>
             </div>
           ))}
         </div>
