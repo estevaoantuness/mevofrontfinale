@@ -8,8 +8,8 @@ import { getPropertyPricingConfig, updatePropertyPricingConfig, createCheckout }
 import type { PropertyPricingConfigInput } from '../../lib/pricing';
 import { getEffectiveHolidayValue } from '../../lib/pricing';
 
-const HOLIDAY_MULTIPLIERS = [1.5, 1.75, 2];
-const ANNUAL_ADJUSTMENTS = [0, 5, 10, 15];
+const HOLIDAY_MULTIPLIERS = [1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+const ANNUAL_ADJUSTMENTS = [0, 3, 5, 7, 10, 12, 15, 20, 25, 30];
 
 const defaultForm: PropertyPricingConfigInput = {
   minValue: 0,
@@ -564,7 +564,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
                     checked={form.applyMonthlyCostsToCalendar}
                     onChange={e => setForm({ ...form, applyMonthlyCostsToCalendar: e.target.checked })}
                   >
-                    Adicionar custos mensais no calendário
+                    Adicionar Preços no calendário
                   </PricingCheckbox>
                 </div>
               </div>

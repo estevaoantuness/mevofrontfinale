@@ -9,7 +9,8 @@ import {
   Search,
   X,
   Lock,
-  Sparkles
+  Sparkles,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -160,7 +161,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const [showFilters, setShowFilters] = useState(false);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [calendarPricing, setCalendarPricing] = useState<Record<string, CalendarPriceDay>>({});
-  const [showPrices, setShowPrices] = useState(true);
+  const [showPrices, setShowPrices] = useState(false);
   const [viewMode, setViewMode] = useState<'compact' | 'stacked' | 'details'>('stacked');
 
   // Verificar se usuário tem acesso ao calendário sincronizado
@@ -522,6 +523,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             {/* Filtros - apenas para assinantes */}
             {hasCalendarAccess && (
               <div className="flex items-center gap-2">
+                {/* Toggle de Preços */}
+                {filterPropertyId && (
+                  <button
+                    onClick={() => setShowPrices(!showPrices)}
+                    className={`p-1.5 md:p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                      isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
+                    } ${showPrices ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
+                    title={showPrices ? 'Ocultar preços' : 'Mostrar preços'}
+                  >
+                    <DollarSign size={16} />
+                    {showPrices && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />}
+                  </button>
+                )}
+
                 {/* Busca - escondida no mobile */}
                 <div className="relative hidden md:block">
                   <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
