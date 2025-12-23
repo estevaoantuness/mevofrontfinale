@@ -160,7 +160,7 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
           {/* Guest Info */}
           {(reservation.guestName || reservation.guestEmail || reservation.guestPhone) && (
             <div className="bg-white/[0.02] rounded-lg p-3 mb-4">
-              <span className="text-xs text-slate-500 block mb-2">Hóspede</span>
+              <span className="text-xs text-slate-500 block mb-2">Funcionário</span>
               <div className="space-y-1">
                 {reservation.guestName && (
                   <p className="text-sm text-white">{reservation.guestName}</p>

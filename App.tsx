@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
-import { ThemeProvider } from './lib/ThemeContext';
+import { ThemeProvider, useTheme } from './lib/ThemeContext';
 import './lib/i18n'; // Initialize i18n
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
@@ -11,6 +11,7 @@ import { CheckoutSuccess } from './pages/CheckoutSuccess';
 import { VerifyEmailPage } from './pages/VerifyEmail';
 import { ForgotPasswordPage } from './pages/ForgotPassword';
 import { ResetPasswordPage } from './pages/ResetPassword';
+import { LoadingOverlay } from './components/ui/LoadingOverlay';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -18,9 +19,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050509]">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <LoadingOverlay
+        isVisible={true}
+        title="Verificando sessão"
+        subtitle="Aguarde um momento..."
+      />
     );
   }
 
@@ -37,9 +40,11 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050509]">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <LoadingOverlay
+        isVisible={true}
+        title="Carregando"
+        subtitle="Aguarde um momento..."
+      />
     );
   }
 

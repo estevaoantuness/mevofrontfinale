@@ -27,6 +27,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
   const [preferredLanguage, setPreferredLanguage] = useState('pt-BR');
   const [notes, setNotes] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [isDefault, setIsDefault] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,6 +44,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
       setPreferredLanguage(guest.preferredLanguage || 'pt-BR');
       setNotes(guest.notes || '');
       setIsActive(guest.isActive);
+      setIsDefault(!!guest.isDefault);
     } else {
       setName('');
       setEmail('');
@@ -54,6 +56,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
       setPreferredLanguage('pt-BR');
       setNotes('');
       setIsActive(true);
+      setIsDefault(false);
     }
     setError('');
   }, [guest, isOpen]);
@@ -79,10 +82,11 @@ export const GuestModal: React.FC<GuestModalProps> = ({
         nationality: nationality.trim() || undefined,
         preferredLanguage: preferredLanguage || undefined,
         notes: notes.trim() || undefined,
-        isActive
+        isActive,
+        isDefault
       });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar hospede';
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar funcionário';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -102,7 +106,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 bg-[#0B0C15] border-b border-white/10 px-6 py-4 flex items-center justify-between z-10">
           <h3 className="text-lg font-medium text-white">
-            {guest ? 'Editar Hóspede' : 'Novo Hóspede'}
+            {guest ? 'Editar Funcionário' : 'Novo Funcionário'}
           </h3>
           <button
             onClick={onClose}
@@ -116,7 +120,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <Input
             label="Nome *"
-            placeholder="Nome completo do hóspede"
+            placeholder="Nome completo do funcionário"
             value={name}
             onChange={e => setName(e.target.value)}
             required
@@ -197,11 +201,30 @@ export const GuestModal: React.FC<GuestModalProps> = ({
             <textarea
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none"
               rows={3}
-              placeholder="Observações sobre o hóspede..."
+              placeholder="Observações sobre o funcionário..."
               value={notes}
               onChange={e => setNotes(e.target.value)}
             />
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              onClick={() => setIsDefault(!isDefault)}
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                isDefault
+                  ? 'bg-blue-500 border-blue-500'
+                  : 'border-slate-500 hover:border-slate-400'
+              }`}
+            >
+              {isDefault && <span className="text-white text-xs">✓</span>}
+            </div>
+            <div>
+              <span className="text-sm text-slate-300">Tornar funcionário padrão</span>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Recomendado para preencher automaticamente novos imóveis
+              </p>
+            </div>
+          </label>
 
           {/* Active toggle */}
           {guest && (
@@ -218,7 +241,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
                   }`}
                 />
               </div>
-              <span className="text-sm text-slate-300">Hóspede ativo</span>
+              <span className="text-sm text-slate-300">Funcionário ativo</span>
             </label>
           )}
 
@@ -235,7 +258,7 @@ export const GuestModal: React.FC<GuestModalProps> = ({
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : guest ? 'Atualizar' : 'Criar Hóspede'}
+              {loading ? 'Salvando...' : guest ? 'Atualizar' : 'Criar Funcionário'}
             </Button>
           </div>
         </form>

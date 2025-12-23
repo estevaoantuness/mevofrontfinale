@@ -66,7 +66,7 @@ export const GuestsTab: React.FC = () => {
       setGuests(result.guests);
       setTotal(result.total);
     } catch (err) {
-      setError('Erro ao carregar hóspedes');
+      setError('Erro ao carregar funcionários');
       console.error(err);
     } finally {
       setLoading(false);
@@ -84,14 +84,14 @@ export const GuestsTab: React.FC = () => {
   };
 
   const handleDelete = async (guest: GuestFull) => {
-    if (!confirm(`Tem certeza que deseja excluir o hóspede "${guest.name}"?`)) return;
+    if (!confirm(`Tem certeza que deseja excluir o funcionário "${guest.name}"?`)) return;
 
     try {
       await api.deleteGuest(guest.id);
       setGuests(guests.filter(g => g.id !== guest.id));
       setTotal(t => t - 1);
     } catch (err) {
-      alert('Erro ao excluir hóspede');
+      alert('Erro ao excluir funcionário');
     }
   };
 
@@ -144,11 +144,11 @@ export const GuestsTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Hóspedes</h3>
-          <p className="text-sm text-slate-500">Gerencie os hóspedes cadastrados</p>
+          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Funcionários</h3>
+          <p className="text-sm text-slate-500">Gerencie os funcionários cadastrados</p>
         </div>
         <Button onClick={handleCreate}>
-          <Plus size={16} className="mr-2" /> Novo Hóspede
+          <Plus size={16} className="mr-2" /> Novo Funcionário
         </Button>
       </div>
 
@@ -179,9 +179,9 @@ export const GuestsTab: React.FC = () => {
         {guests.length === 0 ? (
           <div className="text-center py-12">
             <Users size={48} className="mx-auto text-slate-400 mb-4" />
-            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nenhum hóspede encontrado</p>
+            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nenhum funcionário encontrado</p>
             <p className="text-sm text-slate-500 mt-1">
-              {searchDebounced ? 'Tente uma busca diferente' : 'Adicione seu primeiro hóspede'}
+              {searchDebounced ? 'Tente uma busca diferente' : 'Adicione seu primeiro funcionário'}
             </p>
           </div>
         ) : (
@@ -209,7 +209,14 @@ export const GuestsTab: React.FC = () => {
                     {guest.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{guest.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{guest.name}</p>
+                      {guest.isDefault && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                          Padrão
+                        </span>
+                      )}
+                    </div>
                     {guest.nationality && (
                       <p className="text-xs text-slate-500">{guest.nationality}</p>
                     )}
@@ -291,7 +298,7 @@ export const GuestsTab: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-slate-500">
-            Mostrando {((page - 1) * limit) + 1} - {Math.min(page * limit, total)} de {total} hóspedes
+            Mostrando {((page - 1) * limit) + 1} - {Math.min(page * limit, total)} de {total} funcionários
           </p>
           <div className="flex items-center gap-2">
             <button

@@ -22,7 +22,7 @@ import type { MessageTemplate, TemplateType, TemplatePlaceholder } from '../../l
 
 // Template type labels for display
 const TYPE_LABELS: Record<string, { label: string; description: string; icon: string }> = {
-  cleaning: { label: 'Aviso de Limpeza', description: 'Enviado para funcionarios no dia do checkout', icon: 'cleaning' },
+  cleaning: { label: 'Aviso de Limpeza', description: 'Enviado para funcionários no dia do checkout', icon: 'cleaning' },
   checkout_reminder: { label: 'Lembrete de Checkout', description: 'Enviado 1 dia antes do checkout', icon: 'reminder' },
   checkin_reminder: { label: 'Lembrete de Check-in', description: 'Enviado 1 dia antes do check-in', icon: 'reminder' },
   welcome: { label: 'Boas-vindas', description: 'Enviado ao criar reserva', icon: 'welcome' },
@@ -38,7 +38,7 @@ const TEAM_PLACEHOLDERS = [
   { placeholder: '{{checkin_time}}', description: 'Horário de check-in' },
   { placeholder: '{{checkout_date}}', description: 'Data de checkout' },
   { placeholder: '{{checkin_date}}', description: 'Data de check-in' },
-  { placeholder: '{{guest_name}}', description: 'Nome do hospede' }
+  { placeholder: '{{guest_name}}', description: 'Nome do funcionário' }
 ];
 
 interface TemplateEditorProps {
@@ -117,7 +117,7 @@ const TemplateEditor = ({ template, onSave, onClose, isDark }: TemplateEditorPro
                   : 'bg-white border-slate-300 text-slate-900'
               }`}
             >
-              <option value="cleaning">Notificacao de Limpeza</option>
+              <option value="cleaning">Notificação de Limpeza</option>
               <option value="checkout_reminder">Lembrete de Checkout</option>
               <option value="checkin_reminder">Lembrete de Check-in</option>
               <option value="custom">Personalizado</option>
@@ -144,7 +144,7 @@ const TemplateEditor = ({ template, onSave, onClose, isDark }: TemplateEditorPro
           <div className={`rounded-lg p-4 ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-slate-50 border border-slate-200'}`}>
             <div className="flex items-center gap-2 mb-3">
               <Info className="w-4 h-4 text-blue-400" />
-              <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Variaveis disponiveis (clique para inserir)</span>
+              <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Variáveis disponíveis (clique para inserir)</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {TEAM_PLACEHOLDERS.map(p => (

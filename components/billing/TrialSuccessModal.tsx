@@ -43,7 +43,7 @@ export const TrialSuccessModal: React.FC<TrialSuccessModalProps> = ({
   const features = [
     { icon: Calendar, text: 'Sincronização de calendários' },
     { icon: Bell, text: 'Notificações automáticas' },
-    { icon: MessageCircle, text: 'Mensagens para hóspedes' },
+    { icon: MessageCircle, text: 'Mensagens para funcionários' },
     { icon: Brush, text: 'Avisos de limpeza' }
   ];
 

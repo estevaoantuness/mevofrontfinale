@@ -291,7 +291,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
       {/* Usage Stats */}
       {profile?.stats && (
         <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Estatisticas</h3>
+          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Estatísticas</h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
@@ -303,8 +303,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
               <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Reservas</p>
             </div>
             <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.guests}</p>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Hóspedes</p>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.employees}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Funcionários</p>
             </div>
             <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
               <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.whatsappInstances}</p>

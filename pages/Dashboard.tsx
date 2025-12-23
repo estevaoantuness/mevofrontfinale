@@ -44,7 +44,7 @@ import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
 import * as api from '../lib/api';
-import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
+import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription, GuestFull } from '../lib/api';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -62,6 +62,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   );
   const [activeTab, setActiveTab] = useState('overview');
   const [properties, setProperties] = useState<Property[]>([]);
+  const [employees, setEmployees] = useState<GuestFull[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({ totalProperties: 0, messagesToday: 0, messagesThisMonth: 0 });
   const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus>({ configured: false, connected: false });
@@ -70,6 +71,18 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const defaultEmployee = useMemo(
+    () => employees.find(employee => employee.isDefault),
+    [employees]
+  );
+  const selectedNewEmployee = useMemo(
+    () => employees.find(employee => String(employee.id) === newProp.employee_id),
+    [employees, newProp.employee_id]
+  );
+  const selectedEditEmployee = useMemo(
+    () => employees.find(employee => employee.id === editProp?.employee_id),
+    [employees, editProp]
+  );
 
   const handleSelectPlan = (planId: 'starter' | 'pro') => {
     navigate(`/dashboard?tab=billing&plan=${planId}`);
@@ -85,7 +98,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   }, [allowedTabs, location.search]);
 
   // New Property Form State
-  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });
+  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_id: '' });
 
   // Edit Property State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -113,11 +126,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     propertyCount?: number;
   }>({ isOpen: false, reason: 'no_subscription' });
 
-  // Default Phone State (localStorage)
-  const [defaultPhone, setDefaultPhone] = useState(() => localStorage.getItem('mevo_default_phone') || '');
-  const [saveAsDefault, setSaveAsDefault] = useState(false);
-  const [phoneChanged, setPhoneChanged] = useState(false);
-
   // Worker Loading State
   const [workerLoading, setWorkerLoading] = useState(false);
 
@@ -144,16 +152,18 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   const fetchData = async () => {
     try {
-      const [propsData, statsData, subData, whatsappData] = await Promise.all([
+      const [propsData, statsData, subData, whatsappData, employeesData] = await Promise.all([
         api.getProperties(),
         api.getStats(),
         api.getSubscription().catch(() => null),
-        api.getWhatsAppStatus().catch(() => ({ configured: false, connected: false }))
+        api.getWhatsAppStatus().catch(() => ({ configured: false, connected: false })),
+        api.getGuests({ limit: 200 }).catch(() => ({ guests: [] }))
       ]);
       setProperties(propsData);
       setStats(statsData);
       if (subData) setSubscription(subData);
       if (whatsappData) setWhatsappStatus(whatsappData);
+      setEmployees(employeesData.guests);
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
@@ -237,16 +247,20 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const property = await api.createProperty(newProp);
-      setProperties([property, ...properties]);
-
-      // Salvar número como padrão se checkbox marcado
-      if (saveAsDefault && newProp.employee_phone) {
-        localStorage.setItem('mevo_default_phone', newProp.employee_phone);
-        setDefaultPhone(newProp.employee_phone);
+      if (!newProp.employee_id) {
+        alert('Selecione um funcionário responsável');
+        return;
       }
 
-      setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: '' });
+      const property = await api.createProperty({
+        name: newProp.name,
+        ical_airbnb: newProp.ical_airbnb,
+        ical_booking: newProp.ical_booking,
+        employee_id: Number(newProp.employee_id)
+      });
+      setProperties([property, ...properties]);
+      const defaultEmployeeId = defaultEmployee ? String(defaultEmployee.id) : '';
+      setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId });
       setIsModalOpen(false);
     } catch (err: any) {
       // Verificar se é erro de assinatura/limite
@@ -298,12 +312,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     if (!editProp) return;
 
     try {
+      if (!editProp.employee_id) {
+        alert('Selecione um funcionário responsável');
+        return;
+      }
+
       const updated = await api.updateProperty(editProp.id, {
         name: editProp.name,
         ical_airbnb: editProp.ical_airbnb,
         ical_booking: editProp.ical_booking,
-        employee_name: editProp.employee_name,
-        employee_phone: editProp.employee_phone
+        employee_id: editProp.employee_id
       });
       setProperties(properties.map(p => p.id === updated.id ? updated : p));
       setIsEditModalOpen(false);
@@ -379,6 +397,17 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     </button>
   );
 
+  // Show full-screen loading while initial data is being fetched
+  if (loading) {
+    return (
+      <LoadingOverlay
+        isVisible={true}
+        title="Carregando Dashboard"
+        subtitle="Sincronizando seus dados..."
+      />
+    );
+  }
+
   return (
     <div className={`flex h-screen font-sans overflow-hidden ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
       {/* Mobile Navigation Drawer */}
@@ -412,7 +441,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <div className={`mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Menu</div>
           <NavItem id="overview" icon={LayoutGrid} label="Visão Geral" />
           <NavItem id="properties" icon={Home} label="Meus Imóveis" />
-          <NavItem id="guests" icon={Users} label="Hóspedes" />
+          <NavItem id="guests" icon={Users} label="Funcionários" />
           <NavItem id="checkout" icon={Bell} label="Checkout Auto" />
           <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
@@ -487,7 +516,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <h2 className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
-            {activeTab === 'guests' && 'Gestão de Hóspedes'}
+            {activeTab === 'guests' && 'Gestão de Funcionários'}
             {activeTab === 'checkout' && 'Checkout Automático'}
             {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
@@ -567,11 +596,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
-                  // Preencher com número padrão se existir
-                  const savedPhone = localStorage.getItem('mevo_default_phone') || '';
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_name: '', employee_phone: savedPhone });
-                  setSaveAsDefault(false);
-                  setPhoneChanged(false);
+                  const defaultEmployeeId = defaultEmployee ? String(defaultEmployee.id) : '';
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel
@@ -583,7 +609,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <thead>
                     <tr className={isDark ? 'border-b border-white/5 bg-white/[0.02]' : 'border-b border-slate-200 bg-slate-50'}>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imóvel</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Responsável</th>
+                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Funcionário</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Telefone</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Calendários</th>
                       <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
@@ -865,52 +891,30 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             value={newProp.name}
             onChange={e => setNewProp({...newProp, name: e.target.value})}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nome do Responsável"
-              placeholder="Ex: Maria"
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-2">Funcionário responsável</label>
+            <select
+              value={newProp.employee_id}
+              onChange={e => setNewProp({ ...newProp, employee_id: e.target.value })}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               required
-              value={newProp.employee_name}
-              onChange={e => setNewProp({...newProp, employee_name: e.target.value})}
-            />
-            <Input
-              label="Telefone (WhatsApp)"
-              placeholder="41999990000"
-              required
-              value={newProp.employee_phone}
-              onChange={e => {
-                const newPhone = e.target.value;
-                setNewProp({...newProp, employee_phone: newPhone});
-                // Detectar se o telefone mudou do padrão salvo
-                const savedPhone = localStorage.getItem('mevo_default_phone') || '';
-                setPhoneChanged(newPhone !== savedPhone && newPhone.length > 0);
-              }}
-            />
+            >
+              <option value="">Selecione um funcionário...</option>
+              {employees.map(employee => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.name}{employee.isDefault ? ' (Padrão)' : ''}
+                </option>
+              ))}
+            </select>
+            {employees.length === 0 && (
+              <p className="text-xs text-amber-400 mt-2">Cadastre um funcionário para vincular ao imóvel.</p>
+            )}
+            {selectedNewEmployee && (
+              <p className="text-xs text-slate-500 mt-2">
+                Contato: {selectedNewEmployee.whatsapp || selectedNewEmployee.phone || 'Sem telefone'}
+              </p>
+            )}
           </div>
-
-          {/* Checkbox para salvar como padrão - aparece se não há padrão ou se mudou */}
-          {(phoneChanged || !defaultPhone) && newProp.employee_phone && (
-            <label className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:bg-white/[0.07] transition-colors">
-              <div
-                onClick={() => setSaveAsDefault(!saveAsDefault)}
-                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                  saveAsDefault
-                    ? 'bg-blue-500 border-blue-500'
-                    : 'border-slate-500 hover:border-slate-400'
-                }`}
-              >
-                {saveAsDefault && <Check size={14} className="text-white" />}
-              </div>
-              <div className="flex-1">
-                <span className="text-sm text-slate-300">Salvar este número como padrão</span>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {defaultPhone
-                    ? `Substituir o padrão atual (${defaultPhone})`
-                    : 'Será preenchido automaticamente nos próximos imóveis'}
-                </p>
-              </div>
-            </label>
-          )}
 
           <Input
             label="Airbnb iCal URL"
@@ -946,21 +950,26 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               value={editProp.name}
               onChange={e => setEditProp({...editProp, name: e.target.value})}
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Nome do Responsável"
-                placeholder="Ex: Maria"
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-2">Funcionário responsável</label>
+              <select
+                value={editProp.employee_id ?? ''}
+                onChange={e => setEditProp({ ...editProp, employee_id: e.target.value ? Number(e.target.value) : undefined })}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 required
-                value={editProp.employee_name}
-                onChange={e => setEditProp({...editProp, employee_name: e.target.value})}
-              />
-              <Input
-                label="Telefone (WhatsApp)"
-                placeholder="41999990000"
-                required
-                value={editProp.employee_phone}
-                onChange={e => setEditProp({...editProp, employee_phone: e.target.value})}
-              />
+              >
+                <option value="">Selecione um funcionário...</option>
+                {employees.map(employee => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name}{employee.isDefault ? ' (Padrão)' : ''}
+                  </option>
+                ))}
+              </select>
+              {selectedEditEmployee && (
+                <p className="text-xs text-slate-500 mt-2">
+                  Contato: {selectedEditEmployee.whatsapp || selectedEditEmployee.phone || 'Sem telefone'}
+                </p>
+              )}
             </div>
             <Input
               label="Airbnb iCal URL"
