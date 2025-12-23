@@ -922,7 +922,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: PROFILE */}
           {activeTab === 'profile' && (
             <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <ProfileTab onLogout={onLogout} />
+              <ProfileTab
+                onLogout={onLogout}
+                properties={properties}
+                onNavigateToWhatsApp={() => setActiveTab('whatsapp')}
+              />
             </div>
           )}
 

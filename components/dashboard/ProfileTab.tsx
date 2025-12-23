@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, Calendar, Loader2, AlertTriangle, Check, CreditCard, Download, ChevronDown, Sparkles, Lock, Eye, EyeOff, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Loader2, AlertTriangle, Check, CreditCard, ChevronDown, ChevronRight,
+  Lock, Eye, EyeOff, X, MessageCircle, Mail, Calendar, Pencil,
+  Globe, Palette, Link2, HelpCircle, Headphones, LogOut
+} from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { CheckoutModal } from '../billing/CheckoutModal';
@@ -14,9 +19,15 @@ import {
   openBillingPortal,
   cancelSubscription,
   changePassword,
+  getWhatsAppStatus,
+  getPreferences,
+  updatePreferences,
   Subscription,
   Invoice,
-  UsageStats
+  UsageStats,
+  WhatsAppStatus,
+  UserPreferences,
+  Property
 } from '../../lib/api';
 import { useTheme } from '../../lib/ThemeContext';
 
@@ -28,7 +39,6 @@ const PLANS = [
     monthlyPrice: 67,
     yearlyPrice: 49,
     propertyLimit: 3,
-    featuresSlim: ['Até 3 propriedades', 'Sync iCal', 'Integração WhatsApp', 'Templates'],
     features: [
       'Até 3 propriedades',
       'Sync iCal (Airbnb/Booking)',
@@ -45,7 +55,6 @@ const PLANS = [
     monthlyPrice: 197,
     yearlyPrice: 149,
     propertyLimit: 10,
-    featuresSlim: ['Até 10 propriedades', 'Calculadora IA', 'Webhooks', 'Suporte prioritário'],
     features: [
       'Até 10 propriedades',
       'Sync iCal (Airbnb/Booking)',
@@ -67,7 +76,6 @@ const PLANS = [
     monthlyPrice: 379,
     yearlyPrice: 289,
     propertyLimit: 30,
-    featuresSlim: ['Até 30 propriedades', 'Maya IA', 'Multi-usuários', 'Gerente dedicado'],
     features: [
       'Até 30 propriedades',
       'Sync iCal (Airbnb/Booking)',
@@ -88,10 +96,13 @@ const PLANS = [
 
 interface ProfileTabProps {
   onLogout: () => void;
+  properties?: Property[];
+  onNavigateToWhatsApp?: () => void;
 }
 
-export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
-  const { isDark } = useTheme();
+export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout, properties = [], onNavigateToWhatsApp }) => {
+  const { isDark, setTheme } = useTheme();
+  const { i18n } = useTranslation();
   const location = useLocation();
 
   // Profile states
@@ -101,9 +112,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
-  // Form state
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  // Edit mode states
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+
+  // WhatsApp status
+  const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus | null>(null);
 
   // Subscription states
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -112,7 +126,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isYearly, setIsYearly] = useState(true);
-  const [showFullFeatures, setShowFullFeatures] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
   const [highlightPlan, setHighlightPlan] = useState<string | null>(null);
   const [checkoutModal, setCheckoutModal] = useState<{ isOpen: boolean; plan: typeof PLANS[0] | null; interval: 'monthly' | 'yearly' }>({
     isOpen: false,
@@ -132,6 +146,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
+  // Calcular integrações iCal
+  const integrations = useMemo(() => {
+    const airbnb = properties.filter(p => p.ical_airbnb).length;
+    const booking = properties.filter(p => p.ical_booking).length;
+    return { airbnb, booking, total: airbnb + booking };
+  }, [properties]);
+
   useEffect(() => {
     loadAllData();
   }, []);
@@ -143,6 +164,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
     if (!plan || !['starter', 'pro', 'agency'].includes(plan)) return;
 
     setHighlightPlan(plan);
+    setShowPlans(true);
     const scrollToPlan = () => {
       const element = document.getElementById(`plan-card-${plan}`);
       if (element) {
@@ -161,19 +183,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
 
   const loadAllData = async () => {
     try {
-      const [profileData, subData, invData, useData] = await Promise.all([
+      const [profileData, subData, invData, useData, whatsappData] = await Promise.all([
         getProfile(),
         getSubscription().catch(() => null),
         getInvoices().catch(() => []),
-        getUsage().catch(() => null)
+        getUsage().catch(() => null),
+        getWhatsAppStatus().catch(() => null)
       ]);
 
       setProfile(profileData);
-      setName(profileData.name || '');
-      setPhone(profileData.phone || '');
+      setEditName(profileData.name || '');
       if (subData) setSubscription(subData);
       setInvoices(invData);
       if (useData) setUsage(useData);
+      if (whatsappData) setWhatsappStatus(whatsappData);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
     } finally {
@@ -219,39 +242,35 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      active: 'bg-green-500/20 text-green-400',
-      trialing: 'bg-purple-500/20 text-purple-400',
-      canceled: 'bg-red-500/20 text-red-400',
-      past_due: 'bg-yellow-500/20 text-yellow-400',
-      inactive: 'bg-slate-500/20 text-slate-400'
+    const config: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+      active: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', dot: 'bg-emerald-400', label: 'Ativo' },
+      trialing: { bg: 'bg-purple-500/20', text: 'text-purple-400', dot: 'bg-purple-400', label: 'Trial' },
+      canceled: { bg: 'bg-red-500/20', text: 'text-red-400', dot: 'bg-red-400', label: 'Cancelado' },
+      past_due: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', dot: 'bg-yellow-400', label: 'Pendente' },
+      inactive: { bg: 'bg-slate-500/20', text: 'text-slate-400', dot: 'bg-slate-400', label: 'Inativo' }
     };
-    const labels: Record<string, string> = {
-      active: 'Ativo',
-      trialing: 'Trial',
-      canceled: 'Cancelado',
-      past_due: 'Pagamento pendente',
-      inactive: 'Inativo'
-    };
+    const c = config[status] || config.inactive;
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || styles.inactive}`}>
-        <span className={`w-1.5 h-1.5 rounded-full ${status === 'active' ? 'bg-green-400' : status === 'trialing' ? 'bg-purple-400' : 'bg-slate-400'}`}></span>
-        {labels[status] || status}
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${c.bg} ${c.text}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+        {c.label}
       </span>
     );
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setSaved(false);
-    setError('');
+  const handleSaveName = async () => {
+    if (!editName.trim() || editName === profile?.name) {
+      setEditingName(false);
+      return;
+    }
 
+    setSaving(true);
     try {
-      const updated = await updateProfile({ name, phone: phone || undefined });
-      setProfile(prev => prev ? { ...prev, ...updated } : null);
+      await updateProfile({ name: editName });
+      setProfile(prev => prev ? { ...prev, name: editName } : null);
+      setEditingName(false);
       setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => setSaved(false), 2000);
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar');
     } finally {
@@ -283,7 +302,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
 
   const getPasswordStrength = (password: string): { level: number; label: string; color: string } => {
     if (!password) return { level: 0, label: '', color: '' };
-
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
@@ -301,44 +319,72 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
     e.preventDefault();
     setPasswordError('');
 
-    // Validations
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('Preencha todos os campos');
       return;
     }
-
     if (newPassword.length < 6) {
       setPasswordError('Nova senha deve ter no mínimo 6 caracteres');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       setPasswordError('As senhas não coincidem');
       return;
     }
-
     if (currentPassword === newPassword) {
       setPasswordError('Nova senha deve ser diferente da atual');
       return;
     }
 
     setPasswordLoading(true);
-
     try {
       await changePassword(currentPassword, newPassword);
       setPasswordSuccess(true);
-      // Update profile to reflect password change
       await loadAllData();
-      // Close modal after 2 seconds
-      setTimeout(() => {
-        closePasswordModal();
-      }, 2000);
+      setTimeout(closePasswordModal, 2000);
     } catch (err: any) {
       setPasswordError(err.message || 'Erro ao alterar senha');
     } finally {
       setPasswordLoading(false);
     }
   };
+
+  const handleLanguageChange = async (lang: string) => {
+    try {
+      i18n.changeLanguage(lang);
+      await updatePreferences({ language: lang as 'pt-BR' | 'en' | 'es-419' });
+    } catch (err) {
+      console.error('Erro ao mudar idioma:', err);
+    }
+  };
+
+  const handleThemeChange = (theme: 'dark' | 'light') => {
+    setTheme(theme);
+    updatePreferences({ theme }).catch(console.error);
+  };
+
+  // Calcular data de membro
+  const memberSince = profile?.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+    : '';
+
+  // Próximo plano sugerido
+  const getUpgradeHint = () => {
+    if (!usage || !subscription) return null;
+    const currentLimit = usage.properties.limit;
+    const used = usage.properties.used;
+    const remaining = currentLimit - used;
+
+    if (subscription.planId === 'starter' && remaining <= 1) {
+      return { nextPlan: 'Pro', limit: 10 };
+    }
+    if (subscription.planId === 'pro' && remaining <= 2) {
+      return { nextPlan: 'Agency', limit: 30 };
+    }
+    return null;
+  };
+
+  const upgradeHint = getUpgradeHint();
 
   if (loading) {
     return (
@@ -348,169 +394,143 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
     );
   }
 
+  const cardClass = `rounded-2xl p-5 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`;
+  const labelClass = `text-xs font-medium uppercase tracking-wide ${isDark ? 'text-slate-500' : 'text-slate-400'}`;
+  const valueClass = `text-sm ${isDark ? 'text-white' : 'text-slate-900'}`;
+  const mutedClass = `text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`;
+
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-4 max-w-lg mx-auto pb-8">
       {/* Error */}
       {error && (
-        <div className={`p-4 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
+        <div className={`p-3 rounded-xl text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
           <AlertTriangle size={16} />
           {error}
+          <button onClick={() => setError('')} className="ml-auto"><X size={14} /></button>
         </div>
       )}
 
-      {/* Profile Info */}
-      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white">
-            {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </div>
-          <div>
-            <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile?.name || 'Usuário'}</h3>
-            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>{profile?.email}</p>
-          </div>
+      {/* Saved Toast */}
+      {saved && (
+        <div className={`p-3 rounded-xl text-sm flex items-center gap-2 ${isDark ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border border-emerald-200 text-emerald-600'}`}>
+          <Check size={16} />
+          Salvo com sucesso!
+        </div>
+      )}
+
+      {/* ========== HEADER ========== */}
+      <div className="text-center pt-4 pb-2">
+        <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-3xl font-bold text-white mb-3">
+          {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
         </div>
 
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Nome"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
+        {editingName ? (
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className={`text-xl font-semibold text-center bg-transparent border-b-2 outline-none ${isDark ? 'border-blue-500 text-white' : 'border-blue-500 text-slate-900'}`}
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
             />
-            <Input
-              label="Telefone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(00) 00000-0000"
-            />
+            <button onClick={handleSaveName} disabled={saving} className="text-blue-500 p-1">
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+            </button>
+            <button onClick={() => { setEditingName(false); setEditName(profile?.name || ''); }} className="text-slate-400 p-1">
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setEditingName(true)}
+            className={`text-xl font-semibold flex items-center justify-center gap-2 mx-auto ${isDark ? 'text-white' : 'text-slate-900'}`}
+          >
+            {profile?.name || 'Usuário'}
+            <Pencil size={14} className="text-slate-400" />
+          </button>
+        )}
+
+        <p className={mutedClass}>
+          Anfitrião desde {memberSince} · {usage?.properties.used || 0} imóveis
+        </p>
+      </div>
+
+      {/* ========== CARD: CONTA ========== */}
+      <div className={cardClass}>
+        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <Mail size={16} className="text-blue-500" />
+          Conta
+        </h3>
+
+        <div className="space-y-4">
+          {/* Email */}
+          <div>
+            <p className={labelClass}>E-mail</p>
+            <p className={valueClass}>{profile?.email}</p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Button type="submit" disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Salvando...
-                </>
+          {/* WhatsApp */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={labelClass}>WhatsApp</p>
+              {whatsappStatus?.connected ? (
+                <div className="flex items-center gap-2">
+                  <p className={valueClass}>{whatsappStatus.phone || 'Conectado'}</p>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" title="Online" />
+                </div>
               ) : (
-                'Salvar Alterações'
+                <p className={mutedClass}>Não conectado</p>
               )}
-            </Button>
-            {saved && (
-              <span className="text-sm text-green-400 flex items-center gap-1">
-                <Check size={16} />
-                Salvo!
-              </span>
+            </div>
+            {!whatsappStatus?.connected && onNavigateToWhatsApp && (
+              <Button variant="secondary" size="sm" onClick={onNavigateToWhatsApp}>
+                Conectar
+              </Button>
             )}
           </div>
-        </form>
-      </div>
-
-      {/* Account Info */}
-      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Informações da Conta</h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className={`flex items-center gap-3 p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-            <Mail className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-            <div>
-              <p className="text-xs text-slate-500">Email</p>
-              <p className={isDark ? 'text-white' : 'text-slate-900'}>{profile?.email}</p>
-            </div>
-          </div>
-
-          <div className={`flex items-center gap-3 p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-            <Calendar className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-            <div>
-              <p className="text-xs text-slate-500">Membro desde</p>
-              <p className={isDark ? 'text-white' : 'text-slate-900'}>
-                {profile?.createdAt
-                  ? new Date(profile.createdAt).toLocaleDateString('pt-BR', {
-                      month: 'long',
-                      year: 'numeric'
-                    })
-                  : '-'}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Security Section */}
-      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        <div className="flex items-center gap-2 mb-4">
-          <Lock className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Segurança</h3>
-        </div>
-
-        <div className={`flex items-center justify-between p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-white/5' : 'bg-slate-200'}`}>
-              <Lock className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-            </div>
-            <div>
-              <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Senha</p>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {profile?.passwordChangedAt
-                  ? `Alterada em ${new Date(profile.passwordChangedAt).toLocaleDateString('pt-BR')}`
-                  : 'Nunca alterada'}
-              </p>
-            </div>
-          </div>
-          <Button variant="secondary" onClick={openPasswordModal}>
-            Alterar Senha
-          </Button>
-        </div>
-      </div>
-
-      {/* ================================================ */}
-      {/* SUBSCRIPTION SECTION */}
-      {/* ================================================ */}
-
-      {/* Current Plan Header */}
-      {subscription?.hasStripeSubscription && (
-        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className={`text-lg font-semibold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Seu Plano</h3>
-              <div className="flex items-center gap-3">
-                <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{subscription?.planName || 'Starter'}</span>
-                {getStatusBadge(subscription?.status || 'inactive')}
-              </div>
-            </div>
-            <Button variant="secondary" onClick={handleOpenPortal} disabled={actionLoading === 'portal'}>
-              {actionLoading === 'portal' ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Gerenciar
-                </>
-              )}
+      {/* ========== CARD: PLANO ========== */}
+      <div className={cardClass}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <CreditCard size={16} className="text-blue-500" />
+            Seu Plano
+          </h3>
+          {subscription?.hasStripeSubscription && (
+            <Button variant="ghost" size="sm" onClick={handleOpenPortal} disabled={actionLoading === 'portal'}>
+              {actionLoading === 'portal' ? <Loader2 size={14} className="animate-spin" /> : 'Gerenciar'}
             </Button>
-          </div>
-
-          {subscription?.trialEndsAt && subscription.status === 'trialing' && (
-            <p className="text-sm text-purple-400 mt-2">
-              Trial termina em {new Date(subscription.trialEndsAt).toLocaleDateString('pt-BR')}
-            </p>
           )}
         </div>
-      )}
 
-      {/* Usage Stats */}
-      {usage && subscription?.hasStripeSubscription && (
-        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Uso Atual</h3>
+        {/* Plano atual */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            {subscription?.planName || 'Free'}
+          </span>
+          {subscription?.status && getStatusBadge(subscription.status)}
+        </div>
 
-          {/* Properties Progress */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Propriedades</span>
-              <span className={`text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.properties.used} / {usage.properties.limit}</span>
+        {/* Trial info */}
+        {subscription?.trialEndsAt && subscription.status === 'trialing' && (
+          <p className="text-sm text-purple-400 mb-3">
+            Trial termina em {new Date(subscription.trialEndsAt).toLocaleDateString('pt-BR')}
+          </p>
+        )}
+
+        {/* Barra de progresso */}
+        {usage && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Imóveis</span>
+              <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {usage.properties.used} / {usage.properties.limit}
+              </span>
             </div>
-            <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
+            <div className={`h-2.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
               <div
                 className={`h-full rounded-full transition-all ${
                   usage.properties.percentage >= 90 ? 'bg-red-500' :
@@ -519,206 +539,311 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
                 style={{ width: `${Math.min(usage.properties.percentage, 100)}%` }}
               />
             </div>
-            {usage.properties.percentage >= 90 && (
-              <p className={`text-xs mt-2 flex items-center gap-1 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                <AlertTriangle size={12} />
-                Você está quase no limite. Considere fazer upgrade.
-              </p>
-            )}
           </div>
+        )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className={`rounded-lg p-4 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.reservationsThisMonth}</p>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Reservas este mês</p>
-            </div>
-            <div className={`rounded-lg p-4 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{usage.messagesThisMonth}</p>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Mensagens enviadas</p>
-            </div>
+        {/* Upgrade hint */}
+        {upgradeHint && (
+          <div className={`p-3 rounded-xl mb-4 ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-100'}`}>
+            <p className={`text-xs ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+              💡 Com o plano <strong>{upgradeHint.nextPlan}</strong> você terá até {upgradeHint.limit} imóveis
+            </p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Meu Plano - Plan Selection */}
-      <div id="subscription-plans" className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        {/* Header with toggles */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-400" />
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Meu Plano</h3>
-          </div>
+        {/* Toggle ver planos */}
+        <button
+          onClick={() => setShowPlans(!showPlans)}
+          className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
+            isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'
+          }`}
+        >
+          <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+            {showPlans ? 'Ocultar planos' : 'Ver todos os planos'}
+          </span>
+          <ChevronDown size={16} className={`transition-transform ${showPlans ? 'rotate-180' : ''} ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+        </button>
 
-          <div className="flex items-center gap-4">
-            {/* Ver mais toggle */}
-            <button
-              onClick={() => setShowFullFeatures(!showFullFeatures)}
-              className={`text-sm flex items-center gap-1 transition-colors ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
-            >
-              {showFullFeatures ? 'Ver menos' : 'Ver mais'}
-              <ChevronDown className={`w-4 h-4 transition-transform ${showFullFeatures ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* Billing Toggle */}
-            <div className="flex items-center gap-2">
+        {/* Planos expandidos */}
+        {showPlans && (
+          <div className="mt-4 space-y-3">
+            {/* Toggle mensal/anual */}
+            <div className="flex items-center justify-center gap-3 mb-4">
               <span className={`text-sm ${!isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}>Mensal</span>
               <button
                 onClick={() => setIsYearly(!isYearly)}
-                className="relative w-11 h-6 rounded-full bg-blue-600 transition-colors"
+                className="relative w-12 h-6 rounded-full bg-blue-600 transition-colors"
               >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-5' : ''}`} />
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-6' : ''}`} />
               </button>
               <span className={`text-sm ${isYearly ? (isDark ? 'text-white' : 'text-slate-900') : 'text-slate-500'}`}>Anual</span>
-              <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">-27%</span>
+              <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">-27%</span>
+            </div>
+
+            {PLANS.map((plan) => {
+              const isCurrentPlan = subscription?.planId === plan.id && subscription?.status === 'active';
+              return (
+                <div
+                  key={plan.id}
+                  id={`plan-card-${plan.id}`}
+                  className={`relative p-4 rounded-xl border transition-all ${
+                    plan.isPopular
+                      ? 'border-blue-500/50 bg-blue-500/5'
+                      : isDark
+                        ? 'border-white/10 bg-[#050509]'
+                        : 'border-slate-200 bg-slate-50'
+                  } ${highlightPlan === plan.id ? 'ring-2 ring-blue-500' : ''}`}
+                >
+                  {plan.isPopular && (
+                    <span className="absolute -top-2 left-4 px-2 py-0.5 text-[10px] font-medium bg-blue-600 text-white rounded-full">
+                      Popular
+                    </span>
+                  )}
+
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h4>
+                    <div className="text-right">
+                      <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        R${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                      </span>
+                      <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>/mês</span>
+                    </div>
+                  </div>
+
+                  {plan.hasTrial && !subscription?.hasStripeSubscription && (
+                    <span className="inline-block mb-2 px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded">
+                      {plan.trialDays} dias grátis
+                    </span>
+                  )}
+
+                  <ul className="space-y-1.5 mb-3">
+                    {plan.features.slice(0, 4).map((f, i) => (
+                      <li key={i} className={`flex items-start gap-2 text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <Check className="w-3 h-3 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                    {plan.features.length > 4 && (
+                      <li className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                        +{plan.features.length - 4} recursos
+                      </li>
+                    )}
+                  </ul>
+
+                  <Button
+                    variant={isCurrentPlan ? 'secondary' : plan.isPopular ? 'primary' : 'secondary'}
+                    className="w-full text-sm"
+                    onClick={() => !isCurrentPlan && openCheckout(plan)}
+                    disabled={isCurrentPlan}
+                  >
+                    {isCurrentPlan ? 'Plano Atual' : plan.hasTrial && !subscription?.hasStripeSubscription ? 'Começar Trial' : 'Assinar'}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ========== CARD: PREFERÊNCIAS ========== */}
+      <div className={cardClass}>
+        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <Globe size={16} className="text-blue-500" />
+          Preferências
+        </h3>
+
+        <div className="space-y-4">
+          {/* Idioma */}
+          <div className="flex items-center justify-between">
+            <span className={mutedClass}>Idioma</span>
+            <select
+              value={i18n.language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className={`text-sm px-3 py-1.5 rounded-lg border outline-none ${
+                isDark
+                  ? 'bg-[#050509] border-white/10 text-white'
+                  : 'bg-slate-50 border-slate-200 text-slate-900'
+              }`}
+            >
+              <option value="pt-BR">Português (BR)</option>
+              <option value="en">English</option>
+              <option value="es-419">Español</option>
+            </select>
+          </div>
+
+          {/* Tema */}
+          <div className="flex items-center justify-between">
+            <span className={mutedClass}>Tema</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handleThemeChange('light')}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  !isDark
+                    ? 'bg-blue-500 text-white'
+                    : isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                Claro
+              </button>
+              <button
+                onClick={() => handleThemeChange('dark')}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  isDark
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                Escuro
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {PLANS.map((plan) => {
-            const isCurrentPlan = subscription?.planId === plan.id && subscription?.status === 'active';
-            const featuresToShow = showFullFeatures ? plan.features : plan.featuresSlim;
+      {/* ========== CARD: INTEGRAÇÕES ========== */}
+      <div className={cardClass}>
+        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <Link2 size={16} className="text-blue-500" />
+          Integrações
+        </h3>
 
-            return (
-              <div
-                key={plan.id}
-                id={`plan-card-${plan.id}`}
-                className={`relative p-5 rounded-xl border transition-all ${
-                  plan.isPopular
-                    ? 'border-blue-500/50 bg-blue-500/5'
-                    : isDark
-                      ? 'border-white/10 bg-[#050509]'
-                      : 'border-slate-200 bg-slate-50'
-                } ${highlightPlan === plan.id ? 'ring-2 ring-blue-500/70 shadow-[0_0_0_4px_rgba(59,130,246,0.15)] scale-[1.01]' : ''}`}
-              >
-                {plan.isPopular && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 text-xs font-medium bg-blue-600 text-white rounded-full">
-                    Popular
-                  </span>
-                )}
-
-                <h4 className={`font-semibold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h4>
-
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    R${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                  </span>
-                  <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>/mês</span>
-                </div>
-
-                {plan.hasTrial && !subscription?.hasStripeSubscription && (
-                  <span className="inline-block mb-3 px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded">
-                    {plan.trialDays} dias grátis
-                  </span>
-                )}
-
-                <ul className={`space-y-2 mb-4 transition-all ${showFullFeatures ? 'min-h-[180px]' : 'min-h-[100px]'}`}>
-                  {featuresToShow.map((f, i) => (
-                    <li key={i} className={`flex items-start gap-2 text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  variant={isCurrentPlan ? 'secondary' : plan.isPopular ? 'primary' : 'secondary'}
-                  className="w-full text-sm"
-                  onClick={() => !isCurrentPlan && openCheckout(plan)}
-                  disabled={isCurrentPlan}
-                >
-                  {isCurrentPlan ? 'Plano Atual' : plan.hasTrial && !subscription?.hasStripeSubscription ? 'Começar Trial' : 'Assinar'}
-                </Button>
+        <div className="space-y-3">
+          {/* Airbnb */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#FF5A5F]/10' : 'bg-[#FF5A5F]/10'}`}>
+                <span className="text-[#FF5A5F] font-bold text-xs">Air</span>
               </div>
-            );
-          })}
+              <div>
+                <p className={valueClass}>Airbnb</p>
+                <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  {integrations.airbnb} imóveis sincronizados
+                </p>
+              </div>
+            </div>
+            {integrations.airbnb > 0 && (
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </div>
+
+          {/* Booking */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#003580]/10' : 'bg-[#003580]/10'}`}>
+                <span className="text-[#003580] font-bold text-xs">B.</span>
+              </div>
+              <div>
+                <p className={valueClass}>Booking.com</p>
+                <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  {integrations.booking} imóveis sincronizados
+                </p>
+              </div>
+            </div>
+            {integrations.booking > 0 && (
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Invoices */}
-      {invoices.length > 0 && (
-        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Histórico de Faturas</h3>
+      {/* ========== CARD: SEGURANÇA ========== */}
+      <div className={cardClass}>
+        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <Lock size={16} className="text-blue-500" />
+          Segurança
+        </h3>
 
-          <div className="space-y-3">
-            {invoices.slice(0, 6).map((invoice) => (
-              <div
-                key={invoice.id}
-                className={`flex items-center justify-between p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}
-              >
-                <div>
-                  <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{invoice.amountFormatted}</p>
-                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {new Date(invoice.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-medium px-2 py-1 rounded ${
-                    invoice.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {invoice.status === 'paid' ? 'Pago' : 'Pendente'}
-                  </span>
-                  {invoice.invoicePdf && (
-                    <a
-                      href={invoice.invoicePdf}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`transition-colors ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
-                    >
-                      <Download size={16} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={valueClass}>Senha</p>
+            <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+              {profile?.passwordChangedAt
+                ? `Alterada em ${new Date(profile.passwordChangedAt).toLocaleDateString('pt-BR')}`
+                : 'Nunca alterada'}
+            </p>
           </div>
+          <Button variant="secondary" size="sm" onClick={openPasswordModal}>
+            Alterar
+          </Button>
         </div>
-      )}
+      </div>
 
-      {/* Cancel Subscription */}
+      {/* ========== FOOTER LINKS ========== */}
+      <div className={`${cardClass} space-y-0`}>
+        <a
+          href="https://mevo.com.br/ajuda"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center justify-between p-3 -mx-5 px-5 transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}
+        >
+          <span className={`flex items-center gap-3 ${mutedClass}`}>
+            <HelpCircle size={18} />
+            Central de ajuda
+          </span>
+          <ChevronRight size={16} className="text-slate-400" />
+        </a>
+
+        <a
+          href="https://wa.me/5511999999999"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center justify-between p-3 -mx-5 px-5 transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'}`}
+        >
+          <span className={`flex items-center gap-3 ${mutedClass}`}>
+            <Headphones size={18} />
+            Falar com suporte
+          </span>
+          <ChevronRight size={16} className="text-slate-400" />
+        </a>
+
+        <div className={`border-t ${isDark ? 'border-white/10' : 'border-slate-200'} my-2`} />
+
+        <button
+          onClick={onLogout}
+          className={`flex items-center justify-between p-3 -mx-5 px-5 w-[calc(100%+2.5rem)] transition-colors text-red-400 ${isDark ? 'hover:bg-red-500/10' : 'hover:bg-red-50'}`}
+        >
+          <span className="flex items-center gap-3">
+            <LogOut size={18} />
+            Sair da conta
+          </span>
+        </button>
+      </div>
+
+      {/* Cancelar assinatura - discreto */}
       {subscription?.hasStripeSubscription && subscription.status !== 'canceled' && (
-        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-red-500/20' : 'bg-white border border-red-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Cancelar Assinatura</h3>
-          <p className={`text-sm mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            Você pode cancelar a qualquer momento. O acesso continua até o fim do período pago.
-          </p>
-
+        <div className="text-center pt-4">
           {!showCancelConfirm ? (
-            <Button
-              variant="secondary"
-              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+            <button
               onClick={() => setShowCancelConfirm(true)}
+              className="text-xs text-slate-500 hover:text-red-400 transition-colors"
             >
-              Cancelar Assinatura
-            </Button>
+              Cancelar assinatura
+            </button>
           ) : (
-            <div className={`rounded-lg p-4 ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}>
-              <p className={`text-sm mb-4 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
-                Tem certeza? Você perderá acesso às funcionalidades premium ao final do período.
+            <div className={`p-4 rounded-xl ${isDark ? 'bg-red-500/10 border border-red-500/20' : 'bg-red-50 border border-red-200'}`}>
+              <p className={`text-sm mb-3 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                Tem certeza? Você perderá acesso às funcionalidades premium.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-2 justify-center">
                 <Button
                   variant="secondary"
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  size="sm"
+                  className="border-red-500/30 text-red-400"
                   onClick={handleCancelSubscription}
                   disabled={actionLoading === 'cancel'}
                 >
-                  {actionLoading === 'cancel' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Sim, cancelar'
-                  )}
+                  {actionLoading === 'cancel' ? <Loader2 size={14} className="animate-spin" /> : 'Confirmar'}
                 </Button>
-                <Button variant="ghost" onClick={() => setShowCancelConfirm(false)}>
-                  Manter assinatura
+                <Button variant="ghost" size="sm" onClick={() => setShowCancelConfirm(false)}>
+                  Manter
                 </Button>
               </div>
             </div>
           )}
         </div>
       )}
+
+      {/* ========== MODALS ========== */}
 
       {/* Checkout Modal */}
       {checkoutModal.plan && (
@@ -732,50 +857,31 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={closePasswordModal}
-          />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePasswordModal} />
 
-          {/* Modal */}
-          <div className={`relative w-full max-w-md mx-4 rounded-xl shadow-2xl ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
-            {/* Header */}
-            <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
-                  <Lock className="w-5 h-5 text-blue-500" />
-                </div>
-                <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Alterar Senha</h3>
-              </div>
-              <button
-                onClick={closePasswordModal}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
-              >
+          <div className={`relative w-full max-w-sm rounded-2xl shadow-2xl ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white'}`}>
+            <div className={`flex items-center justify-between p-5 border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Alterar Senha</h3>
+              <button onClick={closePasswordModal} className="text-slate-400 hover:text-slate-300">
                 <X size={20} />
               </button>
             </div>
 
-            {/* Content */}
-            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
-              {/* Error */}
+            <form onSubmit={handleChangePassword} className="p-5 space-y-4">
               {passwordError && (
-                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
+                <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400">
                   <AlertTriangle size={16} />
                   {passwordError}
                 </div>
               )}
 
-              {/* Success */}
-              {passwordSuccess && (
-                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-green-50 border border-green-200 text-green-600'}`}>
+              {passwordSuccess ? (
+                <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                   <Check size={16} />
                   Senha alterada com sucesso!
                 </div>
-              )}
-
-              {!passwordSuccess && (
+              ) : (
                 <>
                   {/* Current Password */}
                   <div>
@@ -787,17 +893,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
                         type={showCurrentPassword ? 'text' : 'password'}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
-                          isDark
-                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
-                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
-                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                        placeholder="Digite sua senha atual"
+                        className={`w-full px-4 py-2.5 pr-10 rounded-xl border ${
+                          isDark ? 'bg-[#050509] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/40`}
+                        placeholder="Senha atual"
                       />
                       <button
                         type="button"
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                       >
                         {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -814,35 +918,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
                         type={showNewPassword ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
-                          isDark
-                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
-                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
-                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                        placeholder="Digite sua nova senha"
+                        className={`w-full px-4 py-2.5 pr-10 rounded-xl border ${
+                          isDark ? 'bg-[#050509] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/40`}
+                        placeholder="Nova senha"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                       >
                         {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
-                    {/* Password Strength Indicator */}
                     {newPassword && (
-                      <div className="mt-2">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 rounded-full bg-slate-700 overflow-hidden">
-                            <div
-                              className={`h-full transition-all ${getPasswordStrength(newPassword).color}`}
-                              style={{ width: `${getPasswordStrength(newPassword).level * 25}%` }}
-                            />
-                          </div>
-                          <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                            {getPasswordStrength(newPassword).label}
-                          </span>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className={`flex-1 h-1.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-200'} overflow-hidden`}>
+                          <div
+                            className={`h-full ${getPasswordStrength(newPassword).color}`}
+                            style={{ width: `${getPasswordStrength(newPassword).level * 25}%` }}
+                          />
                         </div>
+                        <span className="text-xs text-slate-400">{getPasswordStrength(newPassword).label}</span>
                       </div>
                     )}
                   </div>
@@ -850,60 +947,36 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
                   {/* Confirm Password */}
                   <div>
                     <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                      Confirmar nova senha
+                      Confirmar senha
                     </label>
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
-                          isDark
-                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
-                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
-                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                        placeholder="Confirme sua nova senha"
+                        className={`w-full px-4 py-2.5 pr-10 rounded-xl border ${
+                          isDark ? 'bg-[#050509] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/40`}
+                        placeholder="Confirme a senha"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                       >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
-                    {/* Match indicator */}
                     {confirmPassword && (
-                      <div className="mt-2">
-                        {newPassword === confirmPassword ? (
-                          <span className="text-xs text-green-400 flex items-center gap-1">
-                            <Check size={12} />
-                            Senhas coincidem
-                          </span>
-                        ) : (
-                          <span className="text-xs text-red-400 flex items-center gap-1">
-                            <X size={12} />
-                            Senhas não coincidem
-                          </span>
-                        )}
-                      </div>
+                      <p className={`mt-1.5 text-xs flex items-center gap-1 ${newPassword === confirmPassword ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {newPassword === confirmPassword ? <Check size={12} /> : <X size={12} />}
+                        {newPassword === confirmPassword ? 'Senhas coincidem' : 'Senhas não coincidem'}
+                      </p>
                     )}
                   </div>
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full mt-2"
-                    disabled={passwordLoading}
-                  >
-                    {passwordLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Alterando...
-                      </>
-                    ) : (
-                      'Alterar Senha'
-                    )}
+                  <Button type="submit" className="w-full" disabled={passwordLoading}>
+                    {passwordLoading ? <><Loader2 size={16} className="animate-spin mr-2" />Alterando...</> : 'Alterar Senha'}
                   </Button>
                 </>
               )}
