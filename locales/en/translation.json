@@ -214,11 +214,13 @@
         "description": "For professional hosts",
         "features": [
           "Up to 10 properties",
-          "Everything in Starter",
+          "iCal Sync (Airbnb/Booking)",
+          "WhatsApp integration",
+          "Templates with placeholders",
+          "Checkout alerts",
           "AI Price Calculator",
-          "Advanced multi-channel iCal",
-          "Webhooks for integrations",
-          "Priority execution",
+          "Custom Webhooks",
+          "Up to 3 users",
           "Priority support"
         ]
       },
@@ -227,11 +229,17 @@
         "description": "For managers and agencies",
         "features": [
           "Up to 30 properties",
-          "Everything in Pro",
-          "Maya - AI Consultant (coming soon)",
-          "Multiple users and permissions",
-          "Advanced reports",
-          "Dedicated account manager"
+          "iCal Sync (Airbnb/Booking)",
+          "WhatsApp integration",
+          "Templates with placeholders",
+          "Checkout alerts",
+          "AI Price Calculator",
+          "Custom Webhooks",
+          "Maya AI (coming soon)",
+          "Multi-users (up to 10)",
+          "API Access",
+          "Dedicated support",
+          "Dedicated manager"
         ]
       }
     }

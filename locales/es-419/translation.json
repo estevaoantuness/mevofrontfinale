@@ -214,11 +214,13 @@
         "description": "Para anfitriones profesionales",
         "features": [
           "Hasta 10 propiedades",
-          "Todo de Starter",
-          "Calculadora de Precios con IA",
-          "Multi-canales iCal avanzados",
-          "Webhooks para integraciones",
-          "Prioridad de ejecucion",
+          "Sync iCal (Airbnb/Booking)",
+          "Integracion WhatsApp",
+          "Templates con placeholders",
+          "Avisos de checkout",
+          "Calculadora de Precios IA",
+          "Webhooks personalizados",
+          "Hasta 3 usuarios",
           "Soporte prioritario"
         ]
       },
@@ -227,11 +229,17 @@
         "description": "Para gestores e inmobiliarias",
         "features": [
           "Hasta 30 propiedades",
-          "Todo de Pro",
-          "Maya - Consultora IA (proximamente)",
-          "Multiples usuarios y permisos",
-          "Reportes avanzados",
-          "Gerente de cuenta dedicado"
+          "Sync iCal (Airbnb/Booking)",
+          "Integracion WhatsApp",
+          "Templates con placeholders",
+          "Avisos de checkout",
+          "Calculadora de Precios IA",
+          "Webhooks personalizados",
+          "Maya IA (proximamente)",
+          "Multi-usuarios (hasta 10)",
+          "API Access",
+          "Soporte dedicado",
+          "Gerente dedicado"
         ]
       }
     }
