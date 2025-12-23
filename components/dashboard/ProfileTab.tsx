@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, Calendar, Loader2, AlertTriangle, Check, CreditCard, Download, ChevronDown, Sparkles } from 'lucide-react';
+import { Mail, Calendar, Loader2, AlertTriangle, Check, CreditCard, Download, ChevronDown, Sparkles, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -13,6 +13,7 @@ import {
   getUsage,
   openBillingPortal,
   cancelSubscription,
+  changePassword,
   Subscription,
   Invoice,
   UsageStats
@@ -88,6 +89,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
     plan: null,
     interval: 'yearly'
   });
+
+  // Password change states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -216,6 +229,87 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
     }
   };
 
+  // Password change functions
+  const resetPasswordModal = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError('');
+    setPasswordSuccess(false);
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const openPasswordModal = () => {
+    resetPasswordModal();
+    setShowPasswordModal(true);
+  };
+
+  const closePasswordModal = () => {
+    setShowPasswordModal(false);
+    resetPasswordModal();
+  };
+
+  const getPasswordStrength = (password: string): { level: number; label: string; color: string } => {
+    if (!password) return { level: 0, label: '', color: '' };
+
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 2) return { level: 1, label: 'Fraca', color: 'bg-red-500' };
+    if (strength <= 3) return { level: 2, label: 'Média', color: 'bg-yellow-500' };
+    if (strength <= 4) return { level: 3, label: 'Boa', color: 'bg-blue-500' };
+    return { level: 4, label: 'Forte', color: 'bg-green-500' };
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+
+    // Validations
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Preencha todos os campos');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('Nova senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('As senhas não coincidem');
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordError('Nova senha deve ser diferente da atual');
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      await changePassword(currentPassword, newPassword);
+      setPasswordSuccess(true);
+      // Update profile to reflect password change
+      await loadAllData();
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        closePasswordModal();
+      }, 2000);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Erro ao alterar senha');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -310,6 +404,33 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Security Section */}
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+        <div className="flex items-center gap-2 mb-4">
+          <Lock className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Segurança</h3>
+        </div>
+
+        <div className={`flex items-center justify-between p-4 rounded-lg ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-white/5' : 'bg-slate-200'}`}>
+              <Lock className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+            </div>
+            <div>
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Senha</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                {profile?.passwordChangedAt
+                  ? `Alterada em ${new Date(profile.passwordChangedAt).toLocaleDateString('pt-BR')}`
+                  : 'Nunca alterada'}
+              </p>
+            </div>
+          </div>
+          <Button variant="secondary" onClick={openPasswordModal}>
+            Alterar Senha
+          </Button>
         </div>
       </div>
 
@@ -577,6 +698,188 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onLogout }) => {
           plan={checkoutModal.plan}
           interval={checkoutModal.interval}
         />
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closePasswordModal}
+          />
+
+          {/* Modal */}
+          <div className={`relative w-full max-w-md mx-4 rounded-xl shadow-2xl ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
+            {/* Header */}
+            <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
+                  <Lock className="w-5 h-5 text-blue-500" />
+                </div>
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Alterar Senha</h3>
+              </div>
+              <button
+                onClick={closePasswordModal}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              {/* Error */}
+              {passwordError && (
+                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
+                  <AlertTriangle size={16} />
+                  {passwordError}
+                </div>
+              )}
+
+              {/* Success */}
+              {passwordSuccess && (
+                <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-green-50 border border-green-200 text-green-600'}`}>
+                  <Check size={16} />
+                  Senha alterada com sucesso!
+                </div>
+              )}
+
+              {!passwordSuccess && (
+                <>
+                  {/* Current Password */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                      Senha atual
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
+                          isDark
+                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
+                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                        placeholder="Digite sua senha atual"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                      Nova senha
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
+                          isDark
+                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
+                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                        placeholder="Digite sua nova senha"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {/* Password Strength Indicator */}
+                    {newPassword && (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                            <div
+                              className={`h-full transition-all ${getPasswordStrength(newPassword).color}`}
+                              style={{ width: `${getPasswordStrength(newPassword).level * 25}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                            {getPasswordStrength(newPassword).label}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                      Confirmar nova senha
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={`w-full px-4 py-2.5 pr-10 rounded-lg border transition-colors ${
+                          isDark
+                            ? 'bg-[#050509] border-white/10 text-white focus:border-blue-500'
+                            : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                        placeholder="Confirme sua nova senha"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {/* Match indicator */}
+                    {confirmPassword && (
+                      <div className="mt-2">
+                        {newPassword === confirmPassword ? (
+                          <span className="text-xs text-green-400 flex items-center gap-1">
+                            <Check size={12} />
+                            Senhas coincidem
+                          </span>
+                        ) : (
+                          <span className="text-xs text-red-400 flex items-center gap-1">
+                            <X size={12} />
+                            Senhas não coincidem
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    className="w-full mt-2"
+                    disabled={passwordLoading}
+                  >
+                    {passwordLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Alterando...
+                      </>
+                    ) : (
+                      'Alterar Senha'
+                    )}
+                  </Button>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -11,6 +11,7 @@ export interface User {
   createdAt?: string;
   emailVerified?: boolean;
   emailVerifiedAt?: string;
+  passwordChangedAt?: string;
 }
 
 export interface Property {
@@ -524,6 +525,7 @@ export interface Profile {
   role: string;
   isActive: boolean;
   createdAt: string;
+  passwordChangedAt?: string;
   whatsappConnected: boolean;
   whatsappPhone?: string;
   subscription?: {
@@ -652,6 +654,13 @@ export async function resetPassword(token: string, password: string): Promise<{ 
 
 export async function verifyResetToken(token: string): Promise<{ valid: boolean; error?: string }> {
   return apiFetch<{ valid: boolean; error?: string }>(`/auth/verify-reset-token?token=${token}`);
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/auth/change-password', {
+    method: 'PUT',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 }
 
 // Message Templates Types
