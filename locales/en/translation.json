@@ -16,7 +16,7 @@
       "badge": "Automated Property Management",
       "title": "Your Airbnb Management,",
       "titleGradient": "Elevated to Perfection.",
-      "subtitle": "Automate cleaning with WhatsApp and sync calendars. Never miss a checkout again."
+      "subtitle": "Let AI handle cleaning and calendar via WhatsApp. You'll never forget a checkout again."
     },
     "cta": {
       "createAccount": "Create My Account",
@@ -32,29 +32,32 @@
       "subtitle": "Preparing your dashboard"
     },
     "features": {
-      "icalSync": {
-        "title": "iCal Sync",
-        "desc": "Connect Airbnb, Booking and VRBO in one place. Real-time updates."
+      "multiPlatform": {
+        "title": "Multi-Platform Integration",
+        "desc": "Connect Airbnb, Booking and VRBO in one place. Unified calendar, zero booking conflicts."
       },
-      "autoNotify": {
-        "title": "Auto Notifications",
-        "desc": "Mevo notifies your cleaning team every day at 08:00. Zero human intervention."
+      "autoCleaning": {
+        "title": "Cleaning on Autopilot",
+        "desc": "Every checkout triggers automatic alerts to your team via WhatsApp. No spreadsheets, no forgetting."
+      },
+      "priceCalculator": {
+        "title": "AI Price Calculator",
+        "desc": "Dynamic pricing based on holidays, peak seasons and demand. Maximize your revenue.",
+        "badge": "Pro+"
+      },
+      "smartMessages": {
+        "title": "Smart Messages",
+        "desc": "Automatic replies to repetitive questions. Improve your response rate and reviews."
       },
       "dashboard": {
         "title": "Unified Dashboard",
-        "desc": "Manage multiple properties and cleaning status in a clean interface."
+        "desc": "Manage multiple properties, cleaning status and communication in a clean interface."
       },
-      "automations": {
-        "title": "Smart Automations",
-        "desc": "Check-in, checkout, cleaning and reviews automated. Set up once."
-      },
-      "security": {
-        "title": "Secure & Reliable",
-        "desc": "Your data protected with encryption. 99.9% uptime guaranteed."
-      },
-      "saveTime": {
-        "title": "Save Time",
-        "desc": "Reduce 80% of time spent on manual management. Focus on what matters."
+      "maya": {
+        "title": "Maya - AI Consultant",
+        "desc": "Listing analysis with improvement suggestions for text, photos and rules.",
+        "badge": "Agency",
+        "comingSoon": "Coming soon"
       }
     },
     "howItWorks": {
@@ -196,42 +199,40 @@
       "starter": {
         "name": "Starter",
         "description": "For those just starting",
-        "features": {
-          "properties": "Up to 3 properties",
-          "ical": "iCal Sync (Airbnb/Booking/VRBO)",
-          "automations": "Basic automations",
-          "users": "1 user",
-          "templates": "Templates with placeholders",
-          "whatsapp": "WhatsApp integration",
-          "support": "Email support"
-        }
+        "features": [
+          "Up to 3 properties",
+          "iCal Sync (Airbnb/Booking/VRBO)",
+          "Automatic checkout alerts",
+          "WhatsApp integration",
+          "Templates with placeholders",
+          "1 user",
+          "Email support"
+        ]
       },
       "pro": {
         "name": "Pro",
         "description": "For professional hosts",
-        "features": {
-          "properties": "Up to 10 properties",
-          "includesStarter": "Everything in Starter",
-          "ical": "Advanced multi-channel iCal",
-          "webhooks": "Webhooks for integrations",
-          "priority": "Queue priority",
-          "logs": "Full reports",
-          "support": "Priority support"
-        }
+        "features": [
+          "Up to 10 properties",
+          "Everything in Starter",
+          "AI Price Calculator",
+          "Advanced multi-channel iCal",
+          "Webhooks for integrations",
+          "Priority execution",
+          "Priority support"
+        ]
       },
       "agency": {
         "name": "Agency",
-        "description": "For multi-property managers",
-        "features": {
-          "properties": "Up to 30 properties",
-          "includesPro": "Everything in Pro",
-          "users": "Multiple users and permissions",
-          "audit": "Advanced audit",
-          "sla": "Priority support (SLA)",
-          "api": "Full API",
-          "whiteLabel": "White-label",
-          "manager": "Dedicated account manager"
-        }
+        "description": "For managers and agencies",
+        "features": [
+          "Up to 30 properties",
+          "Everything in Pro",
+          "Maya - AI Consultant (coming soon)",
+          "Multiple users and permissions",
+          "Advanced reports",
+          "Dedicated account manager"
+        ]
       }
     }
   },
@@ -247,15 +248,57 @@
       "profile": "Profile",
       "logout": "Sign Out"
     },
+    "mobileNav": {
+      "overview": "Overview",
+      "properties": "My Properties",
+      "checkout": "Auto Checkout",
+      "pricing": "Calculator",
+      "whatsapp": "WhatsApp",
+      "billing": "Subscription",
+      "profile": "My Profile",
+      "settings": "Settings",
+      "viewSite": "View Site",
+      "logout": "Sign Out"
+    },
     "overview": {
       "title": "Overview",
       "totalProperties": "Total Properties",
+      "activeProperties": "Active Properties",
+      "messagesToday": "Messages Today",
+      "messagesMonth": "Messages This Month",
       "activeReservations": "Active Reservations",
       "checkinsToday": "Check-ins Today",
-      "checkoutsToday": "Checkouts Today"
+      "checkoutsToday": "Checkouts Today",
+      "runWorker": "Run Worker Manually",
+      "runWorkerDesc": "Process checkouts and send messages now (without waiting until 08:00)",
+      "runNow": "Run Now",
+      "whatsappConnected": "Connected",
+      "whatsappDisconnected": "Disconnected"
     },
     "calendar": {
       "title": "Calendar",
+      "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      "today": "Today",
+      "legend": "Legend",
+      "showLegend": "Show legend",
+      "checkin": "Check-in",
+      "checkout": "Check-out",
+      "occupied": "Occupied",
+      "holiday": "Holiday",
+      "weekend": "Weekend",
+      "suggestedPrice": "Suggested price",
+      "allProperties": "All properties",
+      "search": "Search...",
+      "showPrices": "Show prices",
+      "hidePrices": "Hide prices",
+      "noReservations": "No reservations on this day",
+      "reservationsOn": "Reservations",
+      "employee": "Employee",
+      "propertiesLabel": "Properties",
+      "checkoutsLabel": "Checkouts",
+      "checkinsLabel": "Check-ins",
+      "messagesLabel": "Messages",
       "noSubscription": {
         "title": "Synced Calendar",
         "description": "Activate the free trial or subscribe to a plan to view check-ins and checkouts automatically synced with Airbnb, Booking and VRBO.",
