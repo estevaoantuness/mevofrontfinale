@@ -148,9 +148,15 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
   const { isDark } = useTheme();
 
   // Check if user has access (active pro or agency plan)
-  const hasAccess = subscription &&
-    ['active', 'trialing'].includes(subscription.status) &&
-    (subscription.planId === 'pro' || subscription.planId === 'agency');
+  // Free users have: planId='starter', status='inactive'
+  // Trial users have: planId='pro', status='trialing'
+  // Paid users have: planId='pro'|'agency', status='active'
+  const isActiveOrTrialing = subscription?.status === 'active' || subscription?.status === 'trialing';
+  const isProOrAgency = subscription?.planId === 'pro' || subscription?.planId === 'agency';
+  const hasAccess = Boolean(isActiveOrTrialing && isProOrAgency);
+
+  // Debug log
+  console.log('[PricingTab] subscription:', subscription?.planId, subscription?.status, '→ hasAccess:', hasAccess);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
