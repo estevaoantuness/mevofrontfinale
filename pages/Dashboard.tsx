@@ -54,7 +54,7 @@ interface DashboardProps {
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setInitialized } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
     () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings']),
@@ -191,6 +191,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
+      // Signal to AuthContext that dashboard is ready
+      setInitialized();
     }
   };
 
@@ -442,16 +444,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     </button>
   );
 
-  // Show full-screen loading while initial data is being fetched
-  if (loading) {
-    return (
-      <LoadingOverlay
-        isVisible={true}
-        title="Carregando Dashboard"
-        subtitle="Sincronizando seus dados..."
-      />
-    );
-  }
+  // Loading is now handled by ProtectedRoute in App.tsx
+  // This ensures a smooth transition without flashing
 
   return (
     <div className={`flex h-screen font-sans overflow-hidden ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-slate-50 text-slate-700'}`}>

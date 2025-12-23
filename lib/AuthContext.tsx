@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import * as api from './api';
 import type { User } from './api';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
@@ -8,6 +8,8 @@ interface AuthContextType {
     isLoading: boolean;
     isAuthenticated: boolean;
     authTransition: boolean;
+    isInitializing: boolean;
+    setInitialized: () => void;
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -20,6 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [authTransition, setAuthTransition] = useState(false);
+    // Track if the app is still initializing (auth check + initial data load)
+    const [isInitializing, setIsInitializing] = useState(true);
+
+    // Called by Dashboard when initial data is loaded
+    const setInitialized = useCallback(() => {
+        setIsInitializing(false);
+    }, []);
 
     // Check if user is already logged in on mount
     useEffect(() => {
@@ -31,7 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } catch (error) {
                     // Token expired or invalid
                     api.logout();
+                    setIsInitializing(false);
                 }
+            } else {
+                // Not authenticated, no need to wait for dashboard
+                setIsInitializing(false);
             }
             setIsLoading(false);
         };
@@ -42,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (email: string, password: string) => {
         const { user: userData } = await api.login(email, password);
         setUser(userData);
+        setIsInitializing(true); // Reset so dashboard loading shows
         setAuthTransition(true);
         setTimeout(() => setAuthTransition(false), 2000);
     };
@@ -49,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const register = async (name: string, email: string, password: string) => {
         const { user: userData } = await api.register(name, email, password);
         setUser(userData);
+        setIsInitializing(true); // Reset so dashboard loading shows
         setAuthTransition(true);
         setTimeout(() => setAuthTransition(false), 2000);
     };
@@ -56,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         api.logout();
         setUser(null);
+        setIsInitializing(true); // Reset for next login
     };
 
     const updateUser = async (data: Partial<User>) => {
@@ -70,6 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 isAuthenticated: !!user,
                 authTransition,
+                isInitializing,
+                setInitialized,
                 login,
                 register,
                 logout,

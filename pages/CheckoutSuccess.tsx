@@ -2,19 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/Logo';
+import { useAuth } from '../lib/AuthContext';
 
 interface CheckoutSuccessProps {
   onGoToDashboard: () => void;
 }
 
 export const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({ onGoToDashboard }) => {
+  const { setInitialized } = useAuth();
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
+    // Signal that page is ready (no async loading needed)
+    setInitialized();
+
     // Hide confetti after 5 seconds
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [setInitialized]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050509] p-4 relative overflow-hidden">

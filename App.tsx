@@ -15,14 +15,15 @@ import { LoadingOverlay } from './components/ui/LoadingOverlay';
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isInitializing } = useAuth();
 
-  if (isLoading) {
+  // Show loading while checking auth OR while dashboard is loading initial data
+  if (isLoading || (isAuthenticated && isInitializing)) {
     return (
       <LoadingOverlay
         isVisible={true}
-        title="Verificando sessão"
-        subtitle="Aguarde um momento..."
+        title={isLoading ? "Verificando sessão" : "Carregando Dashboard"}
+        subtitle={isLoading ? "Aguarde um momento..." : "Sincronizando seus dados..."}
       />
     );
   }
