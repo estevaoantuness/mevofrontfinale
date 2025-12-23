@@ -370,11 +370,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
       await fetchReservations();
 
       // Mostrar resultado
-      const totalCreated = result.details.reduce((sum, d) => sum + d.reservationsCreated, 0);
-      const totalUpdated = result.details.reduce((sum, d) => sum + d.reservationsUpdated, 0);
-
-      if (totalCreated > 0 || totalUpdated > 0) {
-        alert(`✅ Sincronizado!\n${totalCreated} nova(s) reserva(s)\n${totalUpdated} atualizada(s)`);
+      if (result.created > 0 || result.updated > 0) {
+        alert(`✅ Sincronizado!\n${result.created} nova(s) reserva(s)\n${result.updated} atualizada(s)`);
       } else {
         alert('✅ Calendários sincronizados!\nNenhuma alteração encontrada.');
       }

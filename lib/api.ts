@@ -360,16 +360,13 @@ export async function getReservationsUpcoming(): Promise<Reservation[]> {
 
 // Sync all iCals
 export interface SyncAllResult {
-  success: boolean;
-  synced: number;
-  errors: number;
-  details: Array<{
-    propertyId: number;
-    propertyName: string;
-    reservationsCreated: number;
-    reservationsUpdated: number;
-    error?: string;
-  }>;
+  message: string;
+  properties: number;
+  created: number;
+  updated: number;
+  skipped: number;
+  conflicts: number;
+  errors: string[];
 }
 
 export async function syncAllIcals(): Promise<SyncAllResult> {
