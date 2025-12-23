@@ -27,7 +27,7 @@ type PricingTabProps = {
   subscription: Subscription | null;
 };
 
-// Paywall overlay component
+// Paywall component - mostra quando usuário não tem acesso
 const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
   const [loading, setLoading] = useState(false);
 
@@ -43,18 +43,11 @@ const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
   };
 
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center">
-      {/* Blur overlay */}
-      <div className={`absolute inset-0 backdrop-blur-md ${
-        isDark ? 'bg-black/60' : 'bg-white/60'
-      }`} />
-
-      {/* Content */}
-      <div className={`relative z-10 max-w-md mx-4 rounded-2xl p-8 text-center shadow-2xl ${
-        isDark
-          ? 'bg-gradient-to-b from-[#0B0C15] to-[#050509] border border-white/10'
-          : 'bg-white border border-slate-200'
-      }`}>
+    <div className={`relative max-w-md mx-auto rounded-2xl p-8 text-center shadow-2xl ${
+      isDark
+        ? 'bg-gradient-to-b from-[#0B0C15] to-[#050509] border border-white/10'
+        : 'bg-white border border-slate-200'
+    }`}>
         {/* Glow effect */}
         {isDark && (
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" />
@@ -369,42 +362,35 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
     );
   }
 
-  return (
-    <div className="relative min-h-[500px]">
-      {/* Paywall overlay for non-pro/agency users */}
-      {!hasAccess && <PricingPaywall isDark={isDark} />}
+  // Se não tem acesso, mostra apenas o paywall (sem conteúdo por trás)
+  if (!hasAccess) {
+    return (
+      <div className="min-h-[500px] flex items-center justify-center">
+        <PricingPaywall isDark={isDark} />
+      </div>
+    );
+  }
 
-      <div className={`space-y-6 ${!hasAccess ? 'pointer-events-none select-none' : ''}`}>
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Calculadora de Preços
-            </h3>
-            <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              Configure valores e regras de precificação para cada imóvel
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {!hasAccess && (
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                isDark
-                  ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                  : 'bg-purple-50 text-purple-600 border border-purple-200'
-              }`}>
-                <Lock className="w-3 h-3 inline mr-1" />
-                Pro
-              </div>
-            )}
-            <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-              isDark
-                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                : 'bg-blue-50 text-blue-600 border border-blue-200'
-            }`}>
-              {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'}
-            </div>
-          </div>
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Calculadora de Preços
+          </h3>
+          <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            Configure valores e regras de precificação para cada imóvel
+          </p>
         </div>
+        <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+          isDark
+            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+            : 'bg-blue-50 text-blue-600 border border-blue-200'
+        }`}>
+          {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'}
+        </div>
+      </div>
 
         {/* Property Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -444,7 +430,6 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
             </Button>
           </div>
         ))}
-      </div>
       </div>
 
       {/* Modal */}
