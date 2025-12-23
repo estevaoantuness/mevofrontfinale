@@ -300,6 +300,19 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     }
   };
 
+  const openTestModal = async () => {
+    setIsTestModalOpen(true);
+    // Carrega o telefone padrão das configurações
+    try {
+      const settings = await api.getSettings();
+      if (settings.default_employee_phone && !testPhone) {
+        setTestPhone(settings.default_employee_phone);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar telefone padrão:', err);
+    }
+  };
+
   const handleTestWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
     setTestLoading(true);
@@ -749,7 +762,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 <div className="flex justify-center gap-3">
                   {whatsappStatus.connected ? (
                     <>
-                      <Button onClick={() => setIsTestModalOpen(true)} variant="secondary">
+                      <Button onClick={openTestModal} variant="secondary">
                         <Send size={16} className="mr-2" /> Testar Envio
                       </Button>
                       <Button onClick={handleDisconnectWhatsApp} variant="secondary" className="text-red-400 hover:text-red-300">
