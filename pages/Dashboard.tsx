@@ -28,6 +28,7 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
 import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
@@ -147,6 +148,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   // Email Verification Modal State
   const [emailVerificationModalOpen, setEmailVerificationModalOpen] = useState(false);
 
+  // Confirm Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'danger' | 'warning';
+    onConfirm: () => void;
+    loading?: boolean;
+  }>({ isOpen: false, title: '', message: '', variant: 'danger', onConfirm: () => {} });
+
   // Get plan badge text based on subscription status
   const getPlanBadge = (): { text: string; color: string } => {
     if (!subscription) return { text: 'Free', color: 'slate' };
@@ -245,16 +256,26 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     }
   };
 
-  const handleDisconnectWhatsApp = async () => {
-    if (!confirm('Tem certeza que deseja desconectar o WhatsApp?')) return;
-
-    try {
-      await api.disconnectWhatsApp();
-      setWhatsappStatus({ configured: false, connected: false });
-      setQrCode(null);
-    } catch (err: any) {
-      alert('Erro ao desconectar: ' + err.message);
-    }
+  const handleDisconnectWhatsApp = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Desconectar WhatsApp',
+      message: 'Tem certeza que deseja desconectar o WhatsApp? Você precisará reconectar para enviar mensagens.',
+      variant: 'warning',
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          await api.disconnectWhatsApp();
+          setWhatsappStatus({ configured: false, connected: false });
+          setQrCode(null);
+          setConfirmModal(prev => ({ ...prev, isOpen: false, loading: false }));
+        } catch (err: any) {
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+          alert('Erro ao desconectar: ' + err.message);
+        }
+      }
+    });
   };
 
   const handleAddProperty = async (e: React.FormEvent) => {
@@ -303,15 +324,26 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Tem certeza que deseja excluir este imóvel?')) {
-      try {
-        await api.deleteProperty(id);
-        setProperties(properties.filter(p => p.id !== id));
-      } catch (err: any) {
-        alert(err.message);
+  const handleDelete = (id: number) => {
+    const property = properties.find(p => p.id === id);
+    setConfirmModal({
+      isOpen: true,
+      title: 'Excluir Imóvel',
+      message: `Tem certeza que deseja excluir "${property?.name || 'este imóvel'}"? Esta ação não pode ser desfeita.`,
+      variant: 'danger',
+      loading: false,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, loading: true }));
+        try {
+          await api.deleteProperty(id);
+          setProperties(properties.filter(p => p.id !== id));
+          setConfirmModal(prev => ({ ...prev, isOpen: false, loading: false }));
+        } catch (err: any) {
+          setConfirmModal(prev => ({ ...prev, loading: false }));
+          alert(err.message);
+        }
       }
-    }
+    });
   };
 
   const handleEdit = (property: Property) => {
@@ -1105,6 +1137,17 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         onEmailSent={() => {
           // Optionally refresh user data after email is sent
         }}
+      />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        variant={confirmModal.variant}
+        loading={confirmModal.loading}
       />
 
       {/* iCal Help Modal */}
