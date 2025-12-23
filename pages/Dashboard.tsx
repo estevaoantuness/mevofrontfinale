@@ -16,7 +16,6 @@ import {
   ExternalLink,
   CreditCard,
   User,
-  Users,
   AlertTriangle,
   AlertCircle,
   Mail,
@@ -31,7 +30,6 @@ import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
 import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
 import { PricingTab } from '../components/dashboard/PricingTab';
-import { GuestsTab } from '../components/dashboard/GuestsTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { MobileHeader } from '../components/dashboard/MobileHeader';
@@ -43,7 +41,7 @@ import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
 import * as api from '../lib/api';
-import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription, GuestFull } from '../lib/api';
+import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -56,12 +54,11 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const { user } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
-    () => new Set(['overview', 'properties', 'guests', 'checkout', 'pricing', 'whatsapp', 'billing', 'profile', 'settings']),
+    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'billing', 'profile', 'settings']),
     []
   );
   const [activeTab, setActiveTab] = useState('overview');
   const [properties, setProperties] = useState<Property[]>([]);
-  const [employees, setEmployees] = useState<GuestFull[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({ totalProperties: 0, messagesToday: 0, messagesThisMonth: 0 });
   const [whatsappStatus, setWhatsappStatus] = useState<WhatsAppStatus>({ configured: false, connected: false });
@@ -71,26 +68,12 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // New Property Form State (moved before useMemo that references it)
-  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_id: '' });
+  // New Property Form State
+  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '' });
 
-  // Edit Property State (moved before useMemo that references it)
+  // Edit Property State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editProp, setEditProp] = useState<Property | null>(null);
-
-  // Memoized employee selections
-  const defaultEmployee = useMemo(
-    () => employees.find(employee => employee.isDefault),
-    [employees]
-  );
-  const selectedNewEmployee = useMemo(
-    () => employees.find(employee => String(employee.id) === newProp.employee_id),
-    [employees, newProp.employee_id]
-  );
-  const selectedEditEmployee = useMemo(
-    () => employees.find(employee => employee.id === editProp?.employee_id),
-    [employees, editProp]
-  );
 
   const handleSelectPlan = (planId: 'starter' | 'pro') => {
     navigate(`/dashboard?tab=billing&plan=${planId}`);
@@ -153,33 +136,20 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   const fetchData = async () => {
     try {
-      const [propsData, statsData, subData, whatsappData, employeesData] = await Promise.all([
+      const [propsData, statsData, subData, whatsappData] = await Promise.all([
         api.getProperties(),
         api.getStats(),
         api.getSubscription().catch(() => null),
-        api.getWhatsAppStatus().catch(() => ({ configured: false, connected: false })),
-        api.getGuests({ limit: 200 }).catch(() => ({ guests: [] }))
+        api.getWhatsAppStatus().catch(() => ({ configured: false, connected: false }))
       ]);
       setProperties(propsData);
       setStats(statsData);
       if (subData) setSubscription(subData);
       if (whatsappData) setWhatsappStatus(whatsappData);
-      setEmployees(employeesData.guests);
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const refreshEmployees = async () => {
-    try {
-      const data = await api.getGuests({ limit: 200 });
-      setEmployees(data.guests);
-      return data.guests;
-    } catch (err) {
-      console.error('Erro ao carregar funcionários:', err);
-      return employees;
     }
   };
 
@@ -453,7 +423,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <div className={`mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Menu</div>
           <NavItem id="overview" icon={LayoutGrid} label="Visão Geral" />
           <NavItem id="properties" icon={Home} label="Meus Imóveis" />
-          <NavItem id="guests" icon={Users} label="Funcionários" />
           <NavItem id="checkout" icon={Bell} label="Checkout Auto" />
           <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
@@ -528,7 +497,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <h2 className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
-            {activeTab === 'guests' && 'Gestão de Funcionários'}
             {activeTab === 'checkout' && 'Checkout Automático'}
             {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
@@ -690,13 +658,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
-
-          {/* TAB: GUESTS */}
-          {activeTab === 'guests' && (
-            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <GuestsTab />
             </div>
           )}
 
