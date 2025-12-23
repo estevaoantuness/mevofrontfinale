@@ -70,6 +70,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // New Property Form State (moved before useMemo that references it)
+  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_id: '' });
+
+  // Edit Property State (moved before useMemo that references it)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editProp, setEditProp] = useState<Property | null>(null);
+
+  // Memoized employee selections
   const defaultEmployee = useMemo(
     () => employees.find(employee => employee.isDefault),
     [employees]
@@ -95,13 +104,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       setActiveTab(tab);
     }
   }, [allowedTabs, location.search]);
-
-  // New Property Form State
-  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '', employee_id: '' });
-
-  // Edit Property State
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editProp, setEditProp] = useState<Property | null>(null);
 
   // WhatsApp Test State
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
