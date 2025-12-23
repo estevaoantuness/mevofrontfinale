@@ -186,7 +186,18 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       setProperties(propsData);
       setStats(statsData);
       if (subData) setSubscription(subData);
-      if (whatsappData) setWhatsappStatus(whatsappData);
+      if (whatsappData) {
+        setWhatsappStatus({
+          configured: whatsappData?.configured ?? false,
+          connected: whatsappData?.connected ?? false,
+          phone: whatsappData?.phone,
+          connectedAt: whatsappData?.connectedAt,
+          instance: whatsappData?.instance,
+          state: whatsappData?.state,
+          message: whatsappData?.message,
+          error: whatsappData?.error
+        });
+      }
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
@@ -208,14 +219,26 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const fetchWhatsAppStatus = async () => {
     try {
       const status = await api.getWhatsAppStatus();
-      setWhatsappStatus(status);
+      // Garantir que status tenha as propriedades necessárias
+      setWhatsappStatus({
+        configured: status?.configured ?? false,
+        connected: status?.connected ?? false,
+        phone: status?.phone,
+        connectedAt: status?.connectedAt,
+        instance: status?.instance,
+        state: status?.state,
+        message: status?.message,
+        error: status?.error
+      });
 
       // Se conectou, limpa o QR
-      if (status.connected) {
+      if (status?.connected) {
         setQrCode(null);
       }
     } catch (err) {
       console.error('Erro ao buscar status WhatsApp:', err);
+      // Em caso de erro, manter estado padrão
+      setWhatsappStatus({ configured: false, connected: false });
     }
   };
 
