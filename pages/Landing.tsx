@@ -33,26 +33,37 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
   const { isAuthenticated, user } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [navigationTarget, setNavigationTarget] = useState<'login' | 'register' | 'dashboard' | 'profile' | null>(null);
   const [checkoutModal, setCheckoutModal] = useState<{
     isOpen: boolean;
     plan: typeof PLANS_DATA.starter | null;
     interval: 'monthly' | 'yearly';
   }>({ isOpen: false, plan: null, interval: 'yearly' });
 
-  // Navegação com transição de loading de 1.5 segundos
-  const handleNavigateToDashboard = useCallback(() => {
+  // Navegação com transição de loading
+  const handleNavigate = useCallback((target: 'login' | 'register' | 'dashboard' | 'profile', callback?: () => void) => {
+    setNavigationTarget(target);
     setIsNavigating(true);
     setTimeout(() => {
-      onDashboard?.();
-    }, 1500);
-  }, [onDashboard]);
+      callback?.();
+    }, 800);
+  }, []);
+
+  const handleNavigateToDashboard = useCallback(() => {
+    handleNavigate('dashboard', onDashboard);
+  }, [handleNavigate, onDashboard]);
 
   const handleNavigateToProfile = useCallback(() => {
-    setIsNavigating(true);
-    setTimeout(() => {
-      onProfile?.();
-    }, 1500);
-  }, [onProfile]);
+    handleNavigate('profile', onProfile);
+  }, [handleNavigate, onProfile]);
+
+  const handleNavigateToLogin = useCallback(() => {
+    handleNavigate('login', onLogin);
+  }, [handleNavigate, onLogin]);
+
+  const handleNavigateToRegister = useCallback(() => {
+    handleNavigate('register', onRegister);
+  }, [handleNavigate, onRegister]);
 
   const handleSelectPlan = (planId: string, interval: 'monthly' | 'yearly') => {
     const plan = PLANS_DATA[planId as keyof typeof PLANS_DATA];
@@ -64,7 +75,18 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
     } else {
       // Usuário não logado - salva plano e redireciona para registro
       localStorage.setItem('mevo_pending_plan', JSON.stringify({ planId, interval }));
-      onRegister?.();
+      handleNavigateToRegister();
+    }
+  };
+
+  // Títulos de loading baseado no destino
+  const getLoadingTitle = () => {
+    switch (navigationTarget) {
+      case 'login': return 'Abrindo login...';
+      case 'register': return 'Preparando cadastro...';
+      case 'dashboard': return 'Acessando painel...';
+      case 'profile': return 'Abrindo perfil...';
+      default: return 'Carregando...';
     }
   };
   return (
@@ -134,8 +156,8 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">{t('nav.login')}</Button>
-                <Button variant="primary" onClick={onRegister || onLogin}>{t('nav.register')}</Button>
+                <Button variant="ghost" onClick={handleNavigateToLogin} className="hidden sm:inline-flex">{t('nav.login')}</Button>
+                <Button variant="primary" onClick={handleNavigateToRegister}>{t('nav.register')}</Button>
               </>
             )}
           </div>
@@ -173,10 +195,10 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
             </>
           ) : (
             <>
-              <Button variant="primary" className="h-12 px-8 text-base" onClick={onRegister || onLogin}>
+              <Button variant="primary" className="h-12 px-8 text-base" onClick={handleNavigateToRegister}>
                 {t('landing.cta.createAccount')}
               </Button>
-              <Button variant="secondary" className="h-12 px-8 text-base" onClick={onLogin}>
+              <Button variant="secondary" className="h-12 px-8 text-base" onClick={handleNavigateToLogin}>
                 {t('landing.cta.login')}
               </Button>
             </>
@@ -319,7 +341,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
               </>
             ) : (
               <>
-                <Button variant="primary" className="h-14 px-10 text-lg" onClick={onRegister || onLogin}>
+                <Button variant="primary" className="h-14 px-10 text-lg" onClick={handleNavigateToRegister}>
                   {t('landing.cta.startFree')}
                 </Button>
                 <Button variant="secondary" className="h-14 px-10 text-lg" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
@@ -348,8 +370,7 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
       {/* Loading Overlay para transição */}
       <LoadingOverlay
         isVisible={isNavigating}
-        title={t('landing.loading.title', 'Carregando...')}
-        subtitle={t('landing.loading.subtitle', 'Preparando seu painel')}
+        title={getLoadingTitle()}
       />
     </div>
   );
