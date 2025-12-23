@@ -41,12 +41,9 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
               initial={{ y: -10 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex items-center justify-center gap-2"
+              className="flex items-center justify-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <span className="text-white font-bold text-lg">M</span>
-              </div>
-              <span className={`text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <span className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] to-[#22D3EE]">
                 mevo
               </span>
             </motion.div>
