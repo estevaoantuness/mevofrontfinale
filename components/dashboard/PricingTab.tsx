@@ -147,8 +147,10 @@ const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
 export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription }) => {
   const { isDark } = useTheme();
 
-  // Check if user has access (pro or agency plan)
-  const hasAccess = subscription?.planId === 'pro' || subscription?.planId === 'agency';
+  // Check if user has access (active pro or agency plan)
+  const hasAccess = subscription &&
+    ['active', 'trialing'].includes(subscription.status) &&
+    (subscription.planId === 'pro' || subscription.planId === 'agency');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
