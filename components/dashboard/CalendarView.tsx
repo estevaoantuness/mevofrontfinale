@@ -161,6 +161,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [calendarPricing, setCalendarPricing] = useState<Record<string, CalendarPriceDay>>({});
   const [showPrices, setShowPrices] = useState(true);
+  const [viewMode, setViewMode] = useState<'compact' | 'stacked' | 'details'>('stacked');
 
   // Verificar se usuário tem acesso ao calendário sincronizado
   const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
@@ -437,100 +438,128 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
       )}
 
       {/* Header do Calendário */}
-      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          {/* Navegação do Mês */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+      <div className={`rounded-xl p-4 md:p-6 ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+        <div className="flex flex-col gap-3 mb-4 md:mb-6">
+          {/* Linha 1: Título + Navegação */}
+          <div className="flex items-center justify-between">
+            <h2 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </h2>
+            <div className="flex items-center gap-1">
               <button
                 onClick={goToPreviousMonth}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'}`}
+                className={`p-1.5 md:p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
               >
-                <ChevronLeft size={20} className="text-slate-400" />
+                <ChevronLeft size={18} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
               </button>
-              <h2 className={`text-xl font-semibold min-w-[200px] text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-              </h2>
               <button
                 onClick={goToNextMonth}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'}`}
+                className={`p-1.5 md:p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
               >
-                <ChevronRight size={20} className="text-slate-400" />
+                <ChevronRight size={18} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
               </button>
             </div>
-            <Button variant="secondary" onClick={goToToday} className="text-sm">
-              <Calendar size={16} className="mr-2" />
-              Hoje
-            </Button>
           </div>
 
-          {/* Filtros e Ações - apenas para assinantes */}
-          {hasCalendarAccess && (
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar imóvel..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-48 ${
-                    isDark
-                      ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
-                  }`}
-                />
+          {/* Linha 2: Controles */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToToday}
+                className={`px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${
+                  isDark
+                    ? 'bg-white/5 hover:bg-white/10 text-slate-300'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+              >
+                Hoje
+              </button>
+
+              {/* View Mode Toggle - Segmented Control */}
+              <div className={`flex rounded-lg p-0.5 text-[10px] md:text-xs ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
+                {(['compact', 'stacked', 'details'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md transition-all capitalize ${
+                      viewMode === mode
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {mode === 'compact' ? '•••' : mode === 'stacked' ? 'Pills' : 'Texto'}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              <div className="relative">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="text-sm"
-                >
-                  <Filter size={16} className="mr-2" />
-                  Filtrar
-                  {filterPropertyId && (
-                    <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full" />
-                  )}
-                </Button>
+            {/* Filtros - apenas para assinantes */}
+            {hasCalendarAccess && (
+              <div className="flex items-center gap-2">
+                {/* Busca - escondida no mobile */}
+                <div className="relative hidden md:block">
+                  <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`pl-8 pr-3 py-1.5 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 w-32 ${
+                      isDark
+                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
+                        : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                    }`}
+                  />
+                </div>
 
-                {showFilters && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowFilters(false)} />
-                    <div className={`absolute right-0 mt-2 w-64 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto ${
-                      isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'
-                    }`}>
-                      <button
-                        onClick={() => { setFilterPropertyId(null); setShowFilters(false); }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                          !filterPropertyId
-                            ? 'bg-blue-500/20 text-blue-400'
-                            : isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        Todos os imóveis
-                      </button>
-                      {filteredProperties.map((property, index) => (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`p-1.5 md:p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                      isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
+                    } ${filterPropertyId ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
+                  >
+                    <Filter size={16} />
+                    {filterPropertyId && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                  </button>
+
+                  {showFilters && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowFilters(false)} />
+                      <div className={`absolute right-0 mt-2 w-64 rounded-xl shadow-xl z-50 p-3 max-h-64 overflow-y-auto ${
+                        isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'
+                      }`}>
                         <button
-                          key={property.id}
-                          onClick={() => { setFilterPropertyId(property.id); setShowFilters(false); }}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-                            filterPropertyId === property.id
+                          onClick={() => { setFilterPropertyId(null); setShowFilters(false); }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                            !filterPropertyId
                               ? 'bg-blue-500/20 text-blue-400'
                               : isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'
                           }`}
                         >
-                          <div className={`w-3 h-3 rounded ${PROPERTY_COLORS[index % PROPERTY_COLORS.length].bg}`} />
-                          {property.name}
+                          Todos os imóveis
                         </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                        {filteredProperties.map((property, index) => (
+                          <button
+                            key={property.id}
+                            onClick={() => { setFilterPropertyId(property.id); setShowFilters(false); }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+                              filterPropertyId === property.id
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : isDark ? 'text-slate-300 hover:bg-white/5' : 'text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            <div className={`w-3 h-3 rounded ${PROPERTY_COLORS[index % PROPERTY_COLORS.length].bg}`} />
+                            {property.name}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Grade do Calendário */}
@@ -538,7 +567,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           {/* Header dos dias da semana */}
           <div className={`grid grid-cols-7 ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
             {WEEKDAYS.map((day) => (
-              <div key={day} className={`py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+              <div key={day} className={`py-2 md:py-3 text-center text-[10px] md:text-xs font-medium text-slate-500 uppercase tracking-wider border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
                 {day}
               </div>
             ))}
@@ -549,6 +578,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             {calendarDays.map((date, index) => {
               const dayReservations = hasCalendarAccess ? getDayReservations(date) : [];
               const groupedEvents = hasCalendarAccess ? getGroupedDayEvents(date) : { checkins: [], checkouts: [], stays: [] };
+              const allEvents = [...groupedEvents.checkouts, ...groupedEvents.checkins, ...groupedEvents.stays];
               const today = isToday(date);
               const hasEvents = dayReservations.length > 0;
               const holiday = getHolidayInfo(date);
@@ -560,9 +590,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                   key={index}
                   onClick={() => hasCalendarAccess && date && hasEvents && setSelectedDay(date)}
                   className={`
-                    min-h-[100px] p-2 border-b border-r transition-colors relative
+                    min-h-[70px] md:min-h-[100px] p-1 md:p-2 border-b border-r transition-colors relative
                     ${isDark ? 'border-white/5' : 'border-slate-200'}
-                    ${date ? (hasCalendarAccess && hasEvents ? (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
+                    ${date ? (hasCalendarAccess && hasEvents ? (isDark ? 'hover:bg-white/[0.02] active:bg-white/[0.04]' : 'hover:bg-slate-50 active:bg-slate-100') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
                     ${holiday ? (isDark ? 'bg-amber-500/5' : 'bg-amber-50') : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
@@ -571,8 +601,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                   {date && (
                     <>
                       {/* Número do dia + indicador de feriado */}
-                      <div className="flex items-center justify-between mb-1">
-                        <div className={`text-sm font-medium ${
+                      <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                        <div className={`text-[10px] md:text-sm font-medium ${
                           today ? 'text-blue-400' :
                           holiday ? (isDark ? 'text-amber-400' : 'text-amber-600') :
                           isWeekend ? (isDark ? 'text-purple-400' : 'text-purple-600') :
@@ -581,31 +611,81 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                           {date.getDate()}
                         </div>
                         {holiday && (
-                          <div className="w-2 h-2 rounded-full bg-amber-500" title={holiday.name} />
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-amber-500" title={holiday.name} />
                         )}
                       </div>
 
-                      {/* Nome do feriado */}
+                      {/* Nome do feriado - escondido no mobile */}
                       {holiday && (
-                        <div className={`text-[9px] truncate mb-1 ${isDark ? 'text-amber-400/70' : 'text-amber-600/70'}`}>
+                        <div className={`hidden md:block text-[8px] truncate mb-1 ${isDark ? 'text-amber-400/70' : 'text-amber-600/70'}`}>
                           {holiday.name}
                         </div>
                       )}
 
                       {/* Preço do dia (quando filtrado por imóvel) */}
                       {showPrices && priceInfo && priceInfo.price > 0 && (
-                        <div className={`text-xs font-semibold mb-1 ${getPriceColor(priceInfo.priceType)}`}>
+                        <div className={`text-[9px] md:text-xs font-semibold mb-0.5 md:mb-1 ${getPriceColor(priceInfo.priceType)}`}>
                           {formatPrice(priceInfo.price)}
                         </div>
                       )}
 
-                      {/* Eventos de reservas */}
+                      {/* Eventos de reservas - por modo */}
                       {hasCalendarAccess && hasEvents && (
-                        <div className="flex flex-wrap gap-1">
-                          <EventIndicator items={groupedEvents.checkouts} type="checkout" isDark={isDark} />
-                          <EventIndicator items={groupedEvents.checkins} type="checkin" isDark={isDark} />
-                          <EventIndicator items={groupedEvents.stays} type="stay" isDark={isDark} />
-                        </div>
+                        <>
+                          {/* Modo Compact: apenas dots coloridos */}
+                          {viewMode === 'compact' && (
+                            <div className="flex flex-wrap gap-0.5 mt-0.5">
+                              {allEvents.slice(0, 5).map((e, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${
+                                    e.type === 'checkin' ? 'bg-emerald-500' :
+                                    e.type === 'checkout' ? 'bg-red-500' :
+                                    'bg-blue-500'
+                                  }`}
+                                  title={`${e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'} ${e.propertyName}`}
+                                />
+                              ))}
+                              {allEvents.length > 5 && (
+                                <span className="text-[7px] md:text-[8px] text-slate-500">+{allEvents.length - 5}</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Modo Stacked: pills empilhadas */}
+                          {viewMode === 'stacked' && (
+                            <div className="space-y-0.5 mt-0.5">
+                              {allEvents.slice(0, 3).map((e, i) => (
+                                <div
+                                  key={i}
+                                  className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center truncate ${e.color.bg} ${e.color.text} border ${e.color.border}`}
+                                >
+                                  <span className="flex-shrink-0">
+                                    {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                  </span>
+                                  <span className="ml-0.5 truncate hidden sm:inline">{e.propertyName}</span>
+                                </div>
+                              ))}
+                              {allEvents.length > 3 && (
+                                <div className="text-[7px] md:text-[8px] text-slate-500 pl-1">+{allEvents.length - 3}</div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Modo Details: títulos visíveis */}
+                          {viewMode === 'details' && (
+                            <div className="space-y-px mt-0.5 text-[6px] md:text-[8px]">
+                              {allEvents.slice(0, 4).map((e, i) => (
+                                <div key={i} className={`truncate ${e.color.text}`}>
+                                  {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'} {e.propertyName}
+                                </div>
+                              ))}
+                              {allEvents.length > 4 && (
+                                <div className="text-slate-500">+{allEvents.length - 4}</div>
+                              )}
+                            </div>
+                          )}
+                        </>
                       )}
                     </>
                   )}
@@ -615,19 +695,44 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           </div>
         </div>
 
-        {/* Legenda */}
-        <div className={`flex flex-wrap items-center gap-4 md:gap-6 mt-4 pt-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+        {/* Legenda - Colapsável no Mobile */}
+        <details className={`md:hidden mt-3 pt-3 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+          <summary className="text-[10px] text-slate-500 cursor-pointer select-none">
+            Ver legenda
+          </summary>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[10px] text-slate-400">Check-in</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              <span className="text-[10px] text-slate-400">Check-out</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span className="text-[10px] text-slate-400">Ocupado</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="text-[10px] text-slate-400">Feriado</span>
+            </div>
+          </div>
+        </details>
+
+        {/* Legenda - Sempre visível no Desktop */}
+        <div className={`hidden md:flex flex-wrap items-center gap-4 mt-4 pt-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <span className="text-xs text-slate-500">Legenda:</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-emerald-400 font-bold">IN</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
             <span className="text-xs text-slate-400">Check-in</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-red-400 font-bold">OUT</span>
+            <div className="w-2 h-2 rounded-full bg-red-500" />
             <span className="text-xs text-slate-400">Check-out</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/40" />
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
             <span className="text-xs text-slate-400">Ocupado</span>
           </div>
           <div className="flex items-center gap-2">
@@ -647,60 +752,58 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Home size={20} className="text-blue-400" />
+      {/* Stats Cards - 2x2 no mobile, 4 colunas no desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+              <Home size={16} className="text-blue-400 md:w-5 md:h-5" />
             </div>
-            <div>
-              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalProperties}</p>
-              <p className="text-xs text-slate-500">Imóveis Ativos</p>
+            <div className="min-w-0">
+              <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.totalProperties}</p>
+              <p className="text-[10px] md:text-xs text-slate-500 truncate">Imóveis</p>
             </div>
           </div>
         </div>
 
-        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <span className="text-red-400 font-bold text-sm">OUT</span>
+        <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-red-400 font-bold text-[10px] md:text-sm">OUT</span>
             </div>
-            <div>
-              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="min-w-0">
+              <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? (todayData?.checkouts.length || 0) : '-'}
               </p>
-              <p className="text-xs text-slate-500">Checkouts Hoje</p>
+              <p className="text-[10px] md:text-xs text-slate-500 truncate">Checkouts</p>
             </div>
           </div>
         </div>
 
-        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <span className="text-emerald-400 font-bold text-sm">IN</span>
+        <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-emerald-400 font-bold text-[10px] md:text-sm">IN</span>
             </div>
-            <div>
-              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="min-w-0">
+              <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? (todayData?.checkins.length || 0) : '-'}
               </p>
-              <p className="text-xs text-slate-500">Check-ins Hoje</p>
+              <p className="text-[10px] md:text-xs text-slate-500 truncate">Check-ins</p>
             </div>
           </div>
         </div>
 
-        <div className={`p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <span className="text-purple-400 font-bold text-lg">
-                {hasCalendarAccess ? stats.messagesThisMonth : '-'}
-              </span>
+        <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+              <Calendar size={16} className="text-purple-400 md:w-5 md:h-5" />
             </div>
-            <div>
-              <p className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="min-w-0">
+              <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {hasCalendarAccess ? stats.messagesThisMonth : '-'}
               </p>
-              <p className="text-xs text-slate-500">Msgs Este Mês</p>
+              <p className="text-[10px] md:text-xs text-slate-500 truncate">Mensagens</p>
             </div>
           </div>
         </div>
