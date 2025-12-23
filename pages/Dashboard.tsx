@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
@@ -28,7 +28,6 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
 import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
@@ -57,7 +56,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const { user } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
-    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'billing', 'profile', 'settings']),
+    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings']),
     []
   );
   const [activeTab, setActiveTab] = useState('overview');
@@ -87,9 +86,29 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editProp, setEditProp] = useState<Property | null>(null);
 
+  // Scroll to plans section in profile tab
+  const scrollToPlans = useCallback((planId?: string) => {
+    setActiveTab('profile');
+
+    setTimeout(() => {
+      const plansSection = document.getElementById('subscription-plans');
+      if (plansSection) {
+        plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Add highlight animation
+        plansSection.classList.add('highlight-pulse');
+        setTimeout(() => plansSection.classList.remove('highlight-pulse'), 2000);
+      }
+
+      // If planId provided, highlight specific plan
+      if (planId) {
+        navigate(`/dashboard?tab=profile&plan=${planId}`, { replace: true });
+      }
+    }, 100);
+  }, [navigate]);
+
   const handleSelectPlan = (planId: 'starter' | 'pro') => {
-    navigate(`/dashboard?tab=billing&plan=${planId}`);
-    setActiveTab('billing');
+    scrollToPlans(planId);
   };
 
   useEffect(() => {
@@ -444,7 +463,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="checkout" icon={Bell} label="Checkout Auto" />
           <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
-          <NavItem id="billing" icon={CreditCard} label="Assinatura" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
           <NavItem id="settings" icon={Settings} label="Configurações" />
         </nav>
@@ -519,7 +537,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'checkout' && 'Checkout Automático'}
             {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
-            {activeTab === 'billing' && 'Assinatura'}
             {activeTab === 'profile' && 'Meu Perfil'}
             {activeTab === 'settings' && 'Configurações'}
           </h2>
@@ -549,7 +566,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   </p>
                 </div>
               </div>
-              <Button variant="primary" onClick={() => setActiveTab('billing')}>
+              <Button variant="primary" onClick={() => scrollToPlans()}>
                 Fazer Upgrade
               </Button>
             </div>
@@ -851,16 +868,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             </div>
           )}
 
-          {/* TAB: BILLING */}
-          {activeTab === 'billing' && (
-            <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <BillingTab />
-            </div>
-          )}
-
           {/* TAB: PROFILE */}
           {activeTab === 'profile' && (
-            <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               <ProfileTab onLogout={onLogout} />
             </div>
           )}

@@ -110,6 +110,16 @@
       .theme-text-muted { color: var(--text-muted); }
       .theme-border { border-color: var(--border-default); }
       .theme-border-hover:hover { border-color: var(--border-hover); }
+
+      /* Highlight pulse animation for scroll-to-plans */
+      @keyframes highlight-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        50% { box-shadow: 0 0 20px 10px rgba(59, 130, 246, 0.3); }
+      }
+      .highlight-pulse {
+        animation: highlight-pulse 1s ease-in-out 2;
+        border-radius: 0.75rem;
+      }
     </style>
 
     <!-- Import Map for dependencies -->
