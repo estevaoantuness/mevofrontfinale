@@ -809,7 +809,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: LOGS */}
           {activeTab === 'pricing' && (
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <PricingTab properties={properties} />
+              <PricingTab properties={properties} subscription={subscription} />
             </div>
           )}
 

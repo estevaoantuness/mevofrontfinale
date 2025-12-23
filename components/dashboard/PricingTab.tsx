@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2 } from 'lucide-react';
+import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2, Lock, Sparkles, Zap, Brain, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
-import type { Property } from '../../lib/api';
-import { getPropertyPricingConfig, updatePropertyPricingConfig } from '../../lib/api';
+import type { Property, Subscription } from '../../lib/api';
+import { getPropertyPricingConfig, updatePropertyPricingConfig, createCheckout } from '../../lib/api';
 import type { PropertyPricingConfigInput } from '../../lib/pricing';
 import { getEffectiveHolidayValue } from '../../lib/pricing';
 
@@ -24,10 +24,131 @@ const defaultForm: PropertyPricingConfigInput = {
 
 type PricingTabProps = {
   properties: Property[];
+  subscription: Subscription | null;
 };
 
-export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
+// Paywall overlay component
+const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = async (plan: 'pro' | 'agency') => {
+    setLoading(true);
+    try {
+      const { checkoutUrl } = await createCheckout(plan, 'monthly');
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setLoading(false);
+      alert('Erro ao iniciar checkout. Tente novamente.');
+    }
+  };
+
+  return (
+    <div className="absolute inset-0 z-20 flex items-center justify-center">
+      {/* Blur overlay */}
+      <div className={`absolute inset-0 backdrop-blur-md ${
+        isDark ? 'bg-black/60' : 'bg-white/60'
+      }`} />
+
+      {/* Content */}
+      <div className={`relative z-10 max-w-md mx-4 rounded-2xl p-8 text-center shadow-2xl ${
+        isDark
+          ? 'bg-gradient-to-b from-[#0B0C15] to-[#050509] border border-white/10'
+          : 'bg-white border border-slate-200'
+      }`}>
+        {/* Glow effect */}
+        {isDark && (
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" />
+        )}
+
+        {/* Icon */}
+        <div className={`relative w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center ${
+          isDark
+            ? 'bg-gradient-to-br from-purple-500 to-blue-600'
+            : 'bg-gradient-to-br from-purple-500 to-blue-600'
+        }`}>
+          <Brain className="w-10 h-10 text-white" />
+          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Calculadora Inteligente de Preços
+        </h3>
+
+        {/* Description */}
+        <p className={`text-sm mb-6 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          Nossa calculadora usa <strong className={isDark ? 'text-purple-400' : 'text-purple-600'}>inteligência artificial</strong> para
+          otimizar automaticamente seus preços com base em feriados, alta temporada,
+          demanda do mercado e concorrência — maximizando sua receita sem esforço.
+        </p>
+
+        {/* Features */}
+        <div className={`rounded-xl p-4 mb-6 text-left ${
+          isDark ? 'bg-white/5 border border-white/10' : 'bg-slate-50 border border-slate-200'
+        }`}>
+          <div className="space-y-3">
+            {[
+              { icon: Zap, text: 'Precificação dinâmica automática' },
+              { icon: Calendar, text: 'Feriados e alta temporada integrados' },
+              { icon: TrendingUp, text: 'Reajuste inteligente mês a mês' },
+              { icon: Calculator, text: 'Cálculo otimizado por imóvel' }
+            ].map(({ icon: Icon, text }, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  isDark ? 'bg-purple-500/20' : 'bg-purple-100'
+                }`}>
+                  <Icon className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+                </div>
+                <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Badge */}
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 ${
+          isDark
+            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+            : 'bg-purple-50 text-purple-600 border border-purple-200'
+        }`}>
+          <Lock className="w-3 h-3" />
+          Disponível nos planos Pro e Agency
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="space-y-3">
+          <Button
+            variant="primary"
+            className="w-full h-12 text-base bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
+            onClick={() => handleUpgrade('pro')}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                Fazer Upgrade para Pro
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
+          </Button>
+
+          <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+            A partir de R$ 67/mês • Cancele quando quiser
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription }) => {
   const { isDark } = useTheme();
+
+  // Check if user has access (pro or agency plan)
+  const hasAccess = subscription?.planId === 'pro' || subscription?.planId === 'agency';
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -241,27 +362,43 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            Calculadora de Preços
-          </h3>
-          <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            Configure valores e regras de precificação para cada imóvel
-          </p>
-        </div>
-        <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-          isDark
-            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-            : 'bg-blue-50 text-blue-600 border border-blue-200'
-        }`}>
-          {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'}
-        </div>
-      </div>
+    <div className="relative min-h-[500px]">
+      {/* Paywall overlay for non-pro/agency users */}
+      {!hasAccess && <PricingPaywall isDark={isDark} />}
 
-      {/* Property Cards Grid */}
+      <div className={`space-y-6 ${!hasAccess ? 'pointer-events-none select-none' : ''}`}>
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Calculadora de Preços
+            </h3>
+            <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              Configure valores e regras de precificação para cada imóvel
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!hasAccess && (
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                isDark
+                  ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                  : 'bg-purple-50 text-purple-600 border border-purple-200'
+              }`}>
+                <Lock className="w-3 h-3 inline mr-1" />
+                Pro
+              </div>
+            )}
+            <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+              isDark
+                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                : 'bg-blue-50 text-blue-600 border border-blue-200'
+            }`}>
+              {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'}
+            </div>
+          </div>
+        </div>
+
+        {/* Property Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties.map(property => (
           <div
@@ -299,6 +436,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
             </Button>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Modal */}
