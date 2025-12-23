@@ -18,9 +18,14 @@ export interface Property {
   name: string;
   ical_airbnb?: string;
   ical_booking?: string;
-  employee_name: string;
-  employee_phone: string;
+  employee_name?: string;
+  employee_phone?: string;
   employee_id?: number;
+  checkout_time?: string;
+  // Checkout Auto Config
+  checkout_auto_enabled: boolean;
+  checkout_notify_phone?: string;
+  checkout_notify_time?: string;
   created_at: string;
 }
 
@@ -261,6 +266,22 @@ export async function updateProperty(id: number, data: Partial<PropertyInput>): 
 
 export async function deleteProperty(id: number): Promise<void> {
   await apiFetch<void>(`/properties/${id}`, { method: 'DELETE' });
+}
+
+export interface CheckoutAutoConfig {
+  enabled?: boolean;
+  phone?: string;
+  time?: string;
+}
+
+export async function updatePropertyCheckoutAuto(
+  id: number,
+  config: CheckoutAutoConfig
+): Promise<Property> {
+  return apiFetch<Property>(`/properties/${id}/checkout-auto`, {
+    method: 'PATCH',
+    body: JSON.stringify(config),
+  });
 }
 
 export async function getPropertyPricingConfig(propertyId: number): Promise<PropertyPricingConfig> {
