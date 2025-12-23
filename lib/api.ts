@@ -20,6 +20,7 @@ export interface Property {
   ical_booking?: string;
   employee_name: string;
   employee_phone: string;
+  employee_id?: number;
   created_at: string;
 }
 
@@ -27,8 +28,9 @@ export interface PropertyInput {
   name: string;
   ical_airbnb?: string;
   ical_booking?: string;
-  employee_name: string;
-  employee_phone: string;
+  employee_name?: string;
+  employee_phone?: string;
+  employee_id?: number;
 }
 
 export interface DashboardStats {
@@ -487,7 +489,7 @@ export interface Profile {
   };
   stats: {
     properties: number;
-    guests: number;
+    employees: number;
     reservations: number;
     whatsappInstances: number;
   };
@@ -496,7 +498,7 @@ export interface Profile {
 export interface ProfileStats {
   properties: { count: number; limit: number; percentage: number };
   reservations: { active: number; upcomingCheckins: number };
-  guests: { total: number };
+  employees: { total: number };
   messages: { thisMonth: number; thisWeek: number };
   subscription: {
     plan: string;
@@ -688,9 +690,11 @@ export interface GuestFull {
   notes?: string;
   preferredLanguage?: string;
   isActive: boolean;
+  isDefault?: boolean;
   createdAt: string;
   updatedAt: string;
   reservations?: Reservation[];
+  properties?: { id: number; name: string }[];
 }
 
 export interface GuestsResponse {
