@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -10,11 +10,21 @@ import * as api from '../lib/api';
 interface ResetPasswordPageProps {
   onGoToLogin: () => void;
   onBack?: () => void;
+  onGoToForgotPassword?: () => void;
 }
 
-export const ResetPasswordPage = ({ onGoToLogin, onBack }: ResetPasswordPageProps) => {
+export const ResetPasswordPage = ({ onGoToLogin, onBack, onGoToForgotPassword }: ResetPasswordPageProps) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const token = searchParams.get('token') || '';
+
+  const handleRequestNewLink = () => {
+    if (onGoToForgotPassword) {
+      onGoToForgotPassword();
+    } else {
+      navigate('/forgot-password');
+    }
+  };
   const { translateError } = useTranslatedError();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -107,11 +117,11 @@ export const ResetPasswordPage = ({ onGoToLogin, onBack }: ResetPasswordPageProp
           </p>
 
           <div className="space-y-3">
-            <Button onClick={onGoToLogin} className="w-full">
+            <Button onClick={handleRequestNewLink} className="w-full">
               Solicitar novo link
             </Button>
             <button onClick={onBack || onGoToLogin} className="text-xs text-slate-500 hover:text-white transition-colors w-full">
-              Voltar para Home
+              Voltar para Login
             </button>
           </div>
         </div>
