@@ -10,7 +10,8 @@ import {
   X,
   Lock,
   Sparkles,
-  DollarSign
+  DollarSign,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -163,6 +164,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const [calendarPricing, setCalendarPricing] = useState<Record<string, CalendarPriceDay>>({});
   const [showPrices, setShowPrices] = useState(false);
   const [viewMode, setViewMode] = useState<'compact' | 'stacked' | 'details'>('stacked');
+  const [syncing, setSyncing] = useState(false);
 
   // Verificar se usuário tem acesso ao calendário sincronizado
   const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
@@ -359,6 +361,30 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     setCurrentDate(new Date());
   };
 
+  // Sincronizar todos os iCals
+  const handleSyncAll = async () => {
+    setSyncing(true);
+    try {
+      const result = await api.syncAllIcals();
+      // Recarregar reservas após sync
+      await fetchReservations();
+
+      // Mostrar resultado
+      const totalCreated = result.details.reduce((sum, d) => sum + d.reservationsCreated, 0);
+      const totalUpdated = result.details.reduce((sum, d) => sum + d.reservationsUpdated, 0);
+
+      if (totalCreated > 0 || totalUpdated > 0) {
+        alert(`✅ Sincronizado!\n${totalCreated} nova(s) reserva(s)\n${totalUpdated} atualizada(s)`);
+      } else {
+        alert('✅ Calendários sincronizados!\nNenhuma alteração encontrada.');
+      }
+    } catch (err: any) {
+      alert(`❌ Erro ao sincronizar: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Verificar se é hoje
   const isToday = (date: Date | null) => {
     if (!date) return false;
@@ -552,6 +578,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                     {showPrices && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />}
                   </button>
                 )}
+
+                {/* Botão de Sync */}
+                <button
+                  onClick={handleSyncAll}
+                  disabled={syncing}
+                  className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+                    isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
+                  } ${syncing ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
+                  title="Sincronizar calendários"
+                >
+                  <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                </button>
 
                 {/* Busca - escondida no mobile */}
                 <div className="relative hidden md:block">

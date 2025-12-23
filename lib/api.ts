@@ -358,6 +358,26 @@ export async function getReservationsUpcoming(): Promise<Reservation[]> {
   return normalizeReservationList(response);
 }
 
+// Sync all iCals
+export interface SyncAllResult {
+  success: boolean;
+  synced: number;
+  errors: number;
+  details: Array<{
+    propertyId: number;
+    propertyName: string;
+    reservationsCreated: number;
+    reservationsUpdated: number;
+    error?: string;
+  }>;
+}
+
+export async function syncAllIcals(): Promise<SyncAllResult> {
+  return apiFetch<SyncAllResult>('/reservations/sync', {
+    method: 'POST'
+  });
+}
+
 // Settings
 export async function getSettings(): Promise<Settings> {
   return apiFetch<Settings>('/settings');
