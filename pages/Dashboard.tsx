@@ -546,9 +546,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       </span>
                     </div>
                   </div>
-                  <Button onClick={handleRunWorker} variant="secondary">
-                    <RefreshCw size={16} className="mr-2" /> Executar Worker
-                  </Button>
                 </div>
               </div>
             </div>
@@ -797,6 +794,21 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {activeTab === 'checkout' && (
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               <CheckoutAutoTab />
+
+              {/* Teste Manual do Worker */}
+              <div className={`mt-6 rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Teste Manual</h3>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      Executa o worker manualmente para processar checkouts de hoje
+                    </p>
+                  </div>
+                  <Button onClick={handleRunWorker} variant="secondary">
+                    <RefreshCw size={16} className="mr-2" /> Executar Worker
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 

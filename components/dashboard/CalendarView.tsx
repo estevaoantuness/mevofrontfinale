@@ -314,6 +314,32 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     return map;
   }, [reservations]);
 
+  // Calcular estatísticas do mês atual
+  const monthlyStats = useMemo(() => {
+    let checkinsCount = 0;
+    let checkoutsCount = 0;
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    reservations.forEach(reservation => {
+      const checkin = new Date(reservation.checkinDate);
+      const checkout = new Date(reservation.checkoutDate);
+
+      // Contar check-ins deste mês
+      if (checkin.getFullYear() === year && checkin.getMonth() === month) {
+        checkinsCount++;
+      }
+
+      // Contar checkouts deste mês
+      if (checkout.getFullYear() === year && checkout.getMonth() === month) {
+        checkoutsCount++;
+      }
+    });
+
+    return { checkinsCount, checkoutsCount };
+  }, [reservations, currentDate]);
+
   // Navegação
   const goToPreviousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -652,18 +678,24 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                             </div>
                           )}
 
-                          {/* Modo Stacked: pills empilhadas */}
+                          {/* Modo Stacked: pills empilhadas com cores vivas */}
                           {viewMode === 'stacked' && (
                             <div className="space-y-0.5 mt-0.5">
                               {allEvents.slice(0, 3).map((e, i) => (
                                 <div
                                   key={i}
-                                  className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center truncate ${e.color.bg} ${e.color.text} border ${e.color.border}`}
+                                  className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center truncate font-semibold ${
+                                    e.type === 'checkin'
+                                      ? 'text-emerald-500 bg-emerald-500/10'
+                                      : e.type === 'checkout'
+                                      ? 'text-red-500 bg-red-500/10'
+                                      : `${e.color.text} ${e.color.bg}`
+                                  }`}
                                 >
-                                  <span className="flex-shrink-0">
+                                  <span className="flex-shrink-0 text-[9px] md:text-[10px]">
                                     {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
                                   </span>
-                                  <span className="ml-0.5 truncate hidden sm:inline">{e.propertyName}</span>
+                                  <span className="ml-0.5 truncate hidden sm:inline font-medium">{e.propertyName}</span>
                                 </div>
                               ))}
                               {allEvents.length > 3 && (
@@ -672,12 +704,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                             </div>
                           )}
 
-                          {/* Modo Details: títulos visíveis */}
+                          {/* Modo Details: títulos visíveis com cores vivas */}
                           {viewMode === 'details' && (
-                            <div className="space-y-px mt-0.5 text-[6px] md:text-[8px]">
+                            <div className="space-y-px mt-0.5 text-[6px] md:text-[8px] font-medium">
                               {allEvents.slice(0, 4).map((e, i) => (
-                                <div key={i} className={`truncate ${e.color.text}`}>
-                                  {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'} {e.propertyName}
+                                <div key={i} className={`truncate ${
+                                  e.type === 'checkin'
+                                    ? 'text-emerald-500'
+                                    : e.type === 'checkout'
+                                    ? 'text-red-500'
+                                    : e.color.text
+                                }`}>
+                                  <span className="text-[8px] md:text-[10px]">
+                                    {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                  </span> {e.propertyName}
                                 </div>
                               ))}
                               {allEvents.length > 4 && (
@@ -769,11 +809,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-red-400 font-bold text-[10px] md:text-sm">OUT</span>
+              <span className="text-red-400 font-bold text-[10px] md:text-sm">←</span>
             </div>
             <div className="min-w-0">
               <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {hasCalendarAccess ? (todayData?.checkouts.length || 0) : '-'}
+                {hasCalendarAccess ? monthlyStats.checkoutsCount : '-'}
               </p>
               <p className="text-[10px] md:text-xs text-slate-500 truncate">Checkouts</p>
             </div>
@@ -783,11 +823,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         <div className={`p-3 md:p-5 rounded-xl ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-emerald-400 font-bold text-[10px] md:text-sm">IN</span>
+              <span className="text-emerald-400 font-bold text-[10px] md:text-sm">→</span>
             </div>
             <div className="min-w-0">
               <p className={`text-lg md:text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {hasCalendarAccess ? (todayData?.checkins.length || 0) : '-'}
+                {hasCalendarAccess ? monthlyStats.checkinsCount : '-'}
               </p>
               <p className="text-[10px] md:text-xs text-slate-500 truncate">Check-ins</p>
             </div>
