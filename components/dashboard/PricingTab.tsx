@@ -68,7 +68,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
       });
       setUseManualHolidayValue(!!(config.holidayValueManual && config.holidayValueManual > 0));
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar precificação');
+      setError(err.message || 'Erro ao carregar configuração da calculadora');
       setForm(defaultForm);
       setUseManualHolidayValue(false);
     } finally {
@@ -109,7 +109,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
       await updatePropertyPricingConfig(selectedProperty.id, payload);
       closePricing();
     } catch (err: any) {
-      setError(err.message || 'Erro ao salvar precificação');
+      setError(err.message || 'Erro ao salvar configuração da calculadora');
     } finally {
       setSaving(false);
     }
@@ -119,7 +119,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
     return (
       <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-8 text-center">
         <Calculator className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-        <p className="text-slate-400">Cadastre um imóvel para definir a precificação.</p>
+        <p className="text-slate-400">Cadastre um imóvel para configurar a calculadora.</p>
       </div>
     );
   }
@@ -127,7 +127,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-white">Precificação por imóvel</h3>
+        <h3 className="text-lg font-medium text-white">Calculadora por imóvel</h3>
         <p className="text-sm text-slate-500">Defina valores base e regras de reajuste para cada imóvel.</p>
       </div>
 
@@ -151,7 +151,7 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
       <Modal
         isOpen={isOpen}
         onClose={closePricing}
-        title={selectedProperty ? `Precificação - ${selectedProperty.name}` : 'Precificação'}
+        title={selectedProperty ? `Calculadora - ${selectedProperty.name}` : 'Calculadora'}
       >
         {loading ? (
           <div className="py-10 flex items-center justify-center">

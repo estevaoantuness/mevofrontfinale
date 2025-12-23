@@ -229,10 +229,10 @@ lib/api.ts                               # Adicionar getReservations()
 pages/Dashboard.tsx                      # Substituir overview atual
 ```
 
-### Fase 1.2 - Precificação
+### Fase 1.2 - Calculadora
 ```
-components/dashboard/PricingTab.tsx      # Tab de precificação por imóvel
-lib/api.ts                               # Adicionar endpoints de precificação
+components/dashboard/PricingTab.tsx      # Tab de calculadora por imóvel
+lib/api.ts                               # Adicionar endpoints da calculadora
 ```
 
 ### Fase 1.3 - Reservas
@@ -248,7 +248,7 @@ components/dashboard/ReservationCard.tsx # Card de reserva
 | Feature | Complexidade | Arquivos |
 |---------|--------------|----------|
 | Calendário | Alta | 4-5 |
-| Precificação | Média | 2-3 |
+| Calculadora | Média | 2-3 |
 | Reservas | Média | 2-3 |
 | Mobile | Média | Todos |
 | Onboarding | Baixa | 1-2 |

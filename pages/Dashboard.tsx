@@ -355,7 +355,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="properties" icon={Home} label="Meus Imóveis" />
           <NavItem id="guests" icon={Users} label="Hóspedes" />
           <NavItem id="templates" icon={MessageCircle} label="Templates" />
-          <NavItem id="pricing" icon={Calculator} label="Precificação" />
+          <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
@@ -424,7 +424,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
             {activeTab === 'guests' && 'Gestão de Hóspedes'}
             {activeTab === 'templates' && 'Templates de Mensagens'}
-            {activeTab === 'pricing' && 'Precificação'}
+            {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
             {activeTab === 'profile' && 'Meu Perfil'}
