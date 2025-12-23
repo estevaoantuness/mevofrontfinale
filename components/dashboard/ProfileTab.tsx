@@ -20,7 +20,7 @@ import {
 } from '../../lib/api';
 import { useTheme } from '../../lib/ThemeContext';
 
-// Planos disponíveis com features slim e completas
+// Planos disponíveis com features explícitas
 const PLANS = [
   {
     id: 'starter',
@@ -29,7 +29,14 @@ const PLANS = [
     yearlyPrice: 49,
     propertyLimit: 3,
     featuresSlim: ['Até 3 propriedades', 'Sync iCal', 'Integração WhatsApp', 'Templates'],
-    features: ['Até 3 propriedades', 'Sync iCal (Airbnb/Booking/VRBO)', 'Avisos de checkout automáticos', 'Integração WhatsApp', 'Templates com placeholders', '1 usuário', 'Suporte por email'],
+    features: [
+      'Até 3 propriedades',
+      'Sync iCal (Airbnb/Booking)',
+      'Integração WhatsApp',
+      'Templates com placeholders',
+      'Avisos de checkout',
+      '1 usuário'
+    ],
     hasTrial: false
   },
   {
@@ -38,8 +45,18 @@ const PLANS = [
     monthlyPrice: 197,
     yearlyPrice: 149,
     propertyLimit: 10,
-    featuresSlim: ['Até 10 propriedades', 'Tudo do Starter', 'Calculadora de Preços IA', 'Suporte prioritário'],
-    features: ['Até 10 propriedades', 'Tudo do Starter', 'Calculadora de Preços com IA', 'Multi-canais iCal avançados', 'Webhooks para integrações', 'Prioridade de execução', 'Suporte prioritário'],
+    featuresSlim: ['Até 10 propriedades', 'Calculadora IA', 'Webhooks', 'Suporte prioritário'],
+    features: [
+      'Até 10 propriedades',
+      'Sync iCal (Airbnb/Booking)',
+      'Integração WhatsApp',
+      'Templates com placeholders',
+      'Avisos de checkout',
+      'Calculadora de Preços IA',
+      'Webhooks personalizados',
+      'Até 3 usuários',
+      'Suporte prioritário'
+    ],
     isPopular: true,
     hasTrial: true,
     trialDays: 10
@@ -50,8 +67,21 @@ const PLANS = [
     monthlyPrice: 379,
     yearlyPrice: 289,
     propertyLimit: 30,
-    featuresSlim: ['Até 30 propriedades', 'Tudo do Pro', 'Maya IA (em breve)', 'Multi-usuários'],
-    features: ['Até 30 propriedades', 'Tudo do Pro', 'Maya - Consultora IA (em breve)', 'Múltiplos usuários e permissões', 'Relatórios avançados', 'Gerente de conta dedicado'],
+    featuresSlim: ['Até 30 propriedades', 'Maya IA', 'Multi-usuários', 'Gerente dedicado'],
+    features: [
+      'Até 30 propriedades',
+      'Sync iCal (Airbnb/Booking)',
+      'Integração WhatsApp',
+      'Templates com placeholders',
+      'Avisos de checkout',
+      'Calculadora de Preços IA',
+      'Webhooks personalizados',
+      'Maya IA (em breve)',
+      'Multi-usuários (até 10)',
+      'API Access',
+      'Suporte dedicado',
+      'Gerente dedicado'
+    ],
     hasTrial: false
   }
 ];
