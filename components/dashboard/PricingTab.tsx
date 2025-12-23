@@ -147,13 +147,13 @@ const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
 export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription }) => {
   const { isDark } = useTheme();
 
-  // Check if user has access (active pro or agency plan)
+  // Check if user has access (PAID pro or agency plan only)
   // Free users have: planId='starter', status='inactive'
-  // Trial users have: planId='pro', status='trialing'
-  // Paid users have: planId='pro'|'agency', status='active'
-  const isActiveOrTrialing = subscription?.status === 'active' || subscription?.status === 'trialing';
+  // Trial users have: planId='pro', status='trialing' - NO ACCESS (can only preview with blur)
+  // Paid users have: planId='pro'|'agency', status='active' - FULL ACCESS
+  const isActivePaid = subscription?.status === 'active';
   const isProOrAgency = subscription?.planId === 'pro' || subscription?.planId === 'agency';
-  const hasAccess = Boolean(isActiveOrTrialing && isProOrAgency);
+  const hasAccess = Boolean(isActivePaid && isProOrAgency);
 
   // Debug log
   console.log('[PricingTab] subscription:', subscription?.planId, subscription?.status, '→ hasAccess:', hasAccess);

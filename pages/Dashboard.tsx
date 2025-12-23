@@ -19,7 +19,10 @@ import {
   AlertTriangle,
   AlertCircle,
   Mail,
-  Calculator
+  Calculator,
+  HelpCircle,
+  Phone,
+  X
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -69,7 +72,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // New Property Form State
-  const [newProp, setNewProp] = useState({ name: '', ical_airbnb: '', ical_booking: '' });
+  const [newProp, setNewProp] = useState({
+    name: '',
+    ical_airbnb: '',
+    ical_booking: '',
+    employee_phone: '',
+    makeDefault: false
+  });
+
+  // iCal Help Modal State
+  const [icalHelpModal, setIcalHelpModal] = useState<'airbnb' | 'booking' | null>(null);
 
   // Edit Property State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -229,13 +241,19 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Se marcou para tornar padrão e tem telefone, atualizar settings
+      if (newProp.makeDefault && newProp.employee_phone) {
+        await api.updateSettings({ default_employee_phone: newProp.employee_phone });
+      }
+
       const property = await api.createProperty({
         name: newProp.name,
         ical_airbnb: newProp.ical_airbnb,
-        ical_booking: newProp.ical_booking
+        ical_booking: newProp.ical_booking,
+        employee_phone: newProp.employee_phone || undefined
       });
       setProperties([property, ...properties]);
-      setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
+      setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '', makeDefault: false });
       setIsModalOpen(false);
     } catch (err: any) {
       // Verificar se é erro de assinatura/limite
@@ -489,6 +507,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         {/* Mobile Header - Only visible on mobile */}
         <MobileHeader
           onMenuClick={() => setMobileMenuOpen(true)}
+          onGoToLanding={onGoToLanding}
           userName={user?.name}
         />
 
@@ -517,7 +536,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
         <div className="flex-1 overflow-y-auto p-8 relative">
           {/* Trial Warning Banner - esconde no calendário */}
-          {subscription?.status === 'trialing' && subscription?.trialEndsAt && activeTab !== 'calendar' && (
+          {subscription?.status === 'trialing' && subscription?.trialEndsAt && activeTab !== 'overview' && (
             <div className="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-400" />
@@ -573,7 +592,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '', makeDefault: false });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel
@@ -867,18 +886,100 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             value={newProp.name}
             onChange={e => setNewProp({...newProp, name: e.target.value})}
           />
-          <Input
-            label="Airbnb iCal URL"
-            placeholder="https://airbnb.com/calendar/ical/..."
-            value={newProp.ical_airbnb}
-            onChange={e => setNewProp({...newProp, ical_airbnb: e.target.value})}
-          />
-          <Input
-            label="Booking iCal URL (opcional)"
-            placeholder="https://admin.booking.com/..."
-            value={newProp.ical_booking}
-            onChange={e => setNewProp({...newProp, ical_booking: e.target.value})}
-          />
+
+          {/* Airbnb iCal com botão de ajuda */}
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Airbnb iCal URL
+              </label>
+              <button
+                type="button"
+                onClick={() => setIcalHelpModal('airbnb')}
+                className={`p-0.5 rounded-full transition-colors ${isDark ? 'text-slate-500 hover:text-blue-400 hover:bg-white/5' : 'text-slate-400 hover:text-blue-600 hover:bg-slate-100'}`}
+                title="Como obter o link iCal do Airbnb"
+              >
+                <HelpCircle size={14} />
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="https://airbnb.com/calendar/ical/..."
+              value={newProp.ical_airbnb}
+              onChange={e => setNewProp({...newProp, ical_airbnb: e.target.value})}
+              className={`w-full px-3 py-2 rounded-lg border text-sm transition-colors ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
+                  : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+              } focus:outline-none focus:ring-1 focus:ring-blue-500`}
+            />
+          </div>
+
+          {/* Booking iCal com botão de ajuda */}
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <label className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Booking iCal URL (opcional)
+              </label>
+              <button
+                type="button"
+                onClick={() => setIcalHelpModal('booking')}
+                className={`p-0.5 rounded-full transition-colors ${isDark ? 'text-slate-500 hover:text-blue-400 hover:bg-white/5' : 'text-slate-400 hover:text-blue-600 hover:bg-slate-100'}`}
+                title="Como obter o link iCal do Booking"
+              >
+                <HelpCircle size={14} />
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="https://admin.booking.com/..."
+              value={newProp.ical_booking}
+              onChange={e => setNewProp({...newProp, ical_booking: e.target.value})}
+              className={`w-full px-3 py-2 rounded-lg border text-sm transition-colors ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
+                  : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+              } focus:outline-none focus:ring-1 focus:ring-blue-500`}
+            />
+          </div>
+
+          {/* Telefone do responsável */}
+          <div>
+            <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              Telefone do responsável (opcional)
+            </label>
+            <div className="relative">
+              <Phone size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+              <input
+                type="tel"
+                placeholder="5541999990000"
+                value={newProp.employee_phone}
+                onChange={e => setNewProp({...newProp, employee_phone: e.target.value})}
+                className={`w-full pl-10 pr-3 py-2 rounded-lg border text-sm transition-colors ${
+                  isDark
+                    ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+                } focus:outline-none focus:ring-1 focus:ring-blue-500`}
+              />
+            </div>
+            <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+              Este número receberá os avisos de checkout diários
+            </p>
+
+            {/* Checkbox tornar padrão */}
+            {newProp.employee_phone && (
+              <label className={`flex items-center gap-2 mt-2 cursor-pointer ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                <input
+                  type="checkbox"
+                  checked={newProp.makeDefault}
+                  onChange={e => setNewProp({...newProp, makeDefault: e.target.checked})}
+                  className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-xs">Tornar este número o padrão para novos imóveis</span>
+              </label>
+            )}
+          </div>
+
           <div className="pt-4 flex justify-end gap-3">
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button type="submit">Salvar Imóvel</Button>
@@ -995,6 +1096,56 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           // Optionally refresh user data after email is sent
         }}
       />
+
+      {/* iCal Help Modal */}
+      {icalHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIcalHelpModal(null)} />
+          <div className={`relative w-full max-w-md rounded-2xl p-6 shadow-xl ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {icalHelpModal === 'airbnb' ? 'Como obter o link do Airbnb' : 'Como obter o link do Booking'}
+              </h3>
+              <button
+                onClick={() => setIcalHelpModal(null)}
+                className={`p-1 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className={`space-y-3 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              {icalHelpModal === 'airbnb' ? (
+                <ol className="space-y-2 list-decimal list-inside">
+                  <li>Abra o <strong>app do Airbnb</strong> no celular</li>
+                  <li>Toque em <strong>Anúncios</strong> e escolha o imóvel</li>
+                  <li>Toque em <strong>Calendário</strong></li>
+                  <li>Procure <strong>"Sincronizar calendário"</strong> ou <strong>"Exportar calendário"</strong></li>
+                  <li>Toque em <strong>Copiar</strong> quando aparecer o link</li>
+                  <li>Cole o link aqui no campo acima</li>
+                </ol>
+              ) : (
+                <ol className="space-y-2 list-decimal list-inside">
+                  <li>Abra o <strong>app de anfitrião da Booking</strong> ou a página de parceiros</li>
+                  <li>Vá em <strong>Calendário</strong> ou <strong>Tarifas e disponibilidade</strong></li>
+                  <li>Procure <strong>"Sincronizar calendários"</strong> ou <strong>"Exportar calendário"</strong></li>
+                  <li>Toque em <strong>Copiar</strong> quando aparecer o link</li>
+                  <li>Cole o link aqui no campo acima</li>
+                </ol>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setIcalHelpModal(null)}>
+                Entendi
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
