@@ -195,6 +195,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     const fetchPricing = async () => {
       if (!filterPropertyId) {
         setCalendarPricing({});
+        setShowPrices(false); // Reset when no property selected
         return;
       }
       try {
@@ -206,6 +207,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           pricingMap[day.date] = day;
         });
         setCalendarPricing(pricingMap);
+        // Auto-enable prices when property is selected and has pricing config
+        if (response.hasPricingConfig) {
+          setShowPrices(true);
+        }
       } catch (error) {
         console.error('Erro ao buscar preços:', error);
         setCalendarPricing({});
@@ -395,6 +400,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     if (!date || !filterPropertyId) return null;
     const dateStr = date.toISOString().split('T')[0];
     return calendarPricing[dateStr] || null;
+  };
+
+  // Verificar se o dia está disponível (sem reserva/estadia para o imóvel filtrado)
+  const isDayAvailable = (date: Date | null): boolean => {
+    if (!date || !filterPropertyId) return false;
+    const dayReservations = getDayReservations(date);
+    // Dia disponível = não tem check-in, checkout ou estadia para este imóvel
+    const hasReservationForProperty = dayReservations.some(
+      r => r.reservation.propertyId === filterPropertyId && (r.type === 'checkin' || r.type === 'stay')
+    );
+    return !hasReservationForProperty;
   };
 
   // Formatar preço
@@ -625,6 +641,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               const holiday = getHolidayInfo(date);
               const priceInfo = getPriceForDate(date);
               const isWeekend = date ? (date.getDay() === 0 || date.getDay() === 6) : false;
+              const isAvailable = isDayAvailable(date);
+              const isPastDate = date ? date < new Date(new Date().setHours(0, 0, 0, 0)) : false;
 
               return (
                 <div
@@ -636,12 +654,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                     ${date ? (hasCalendarAccess && hasEvents ? (isDark ? 'hover:bg-white/[0.02] active:bg-white/[0.04]' : 'hover:bg-slate-50 active:bg-slate-100') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
                     ${holiday ? (isDark ? 'bg-amber-500/5' : 'bg-amber-50') : ''}
+                    ${filterPropertyId && isAvailable && !isPastDate && showPrices ? (isDark ? 'bg-emerald-500/5' : 'bg-emerald-50/50') : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
                   `}
                 >
                   {date && (
                     <>
-                      {/* Número do dia + indicador de feriado */}
+                      {/* Número do dia + indicador de feriado/disponível */}
                       <div className="flex items-center justify-between mb-0.5 md:mb-1">
                         <div className={`text-[10px] md:text-sm font-medium ${
                           today ? 'text-blue-400' :
@@ -651,9 +670,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                         }`}>
                           {date.getDate()}
                         </div>
-                        {holiday && (
-                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-amber-500" title={holiday.name} />
-                        )}
+                        <div className="flex items-center gap-0.5">
+                          {holiday && (
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-amber-500" title={holiday.name} />
+                          )}
+                          {filterPropertyId && isAvailable && !isPastDate && (
+                            <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500" title="Disponível" />
+                          )}
+                        </div>
                       </div>
 
                       {/* Nome do feriado - escondido no mobile */}
@@ -663,9 +687,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                         </div>
                       )}
 
-                      {/* Preço do dia (quando filtrado por imóvel) */}
-                      {showPrices && priceInfo && priceInfo.price > 0 && (
-                        <div className={`text-[9px] md:text-xs font-semibold mb-0.5 md:mb-1 ${getPriceColor(priceInfo.priceType)}`}>
+                      {/* Preço do dia - APENAS em dias disponíveis quando imóvel selecionado */}
+                      {showPrices && filterPropertyId && priceInfo && priceInfo.price > 0 && isAvailable && !isPastDate && (
+                        <div className={`text-[9px] md:text-xs font-bold mb-0.5 md:mb-1 px-1 py-0.5 rounded ${
+                          isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                        }`}>
                           {formatPrice(priceInfo.price)}
                         </div>
                       )}
@@ -772,6 +798,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               <span className="text-[10px] text-slate-400">Feriado</span>
             </div>
+            {filterPropertyId && (
+              <div className="flex items-center gap-1">
+                <div className={`w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-emerald-500/50`} />
+                <span className="text-[10px] text-slate-400">Disponível</span>
+              </div>
+            )}
           </div>
         </details>
 
@@ -799,10 +831,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <span className="text-xs text-slate-400">Fim de semana</span>
           </div>
           {filterPropertyId && (
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>R$</span>
-              <span className="text-xs text-slate-400">Preço sugerido</span>
-            </div>
+            <>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30`} />
+                <span className="text-xs text-slate-400">Disponível</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>R$</span>
+                <span className="text-xs text-slate-400">Preço sugerido</span>
+              </div>
+            </>
           )}
         </div>
       </div>
