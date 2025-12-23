@@ -15,7 +15,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
 import * as api from '../../lib/api';
-import type { Reservation, Property, DashboardStats, TodayReservations, Subscription } from '../../lib/api';
+import type { Reservation, Property, DashboardStats, TodayReservations, Subscription, Holiday, CalendarDay as CalendarPriceDay } from '../../lib/api';
 
 // Cores para cada imóvel (gera automaticamente baseado no ID)
 const PROPERTY_COLORS = [
@@ -158,6 +158,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const [filterPropertyId, setFilterPropertyId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [calendarPricing, setCalendarPricing] = useState<Record<string, CalendarPriceDay>>({});
+  const [showPrices, setShowPrices] = useState(true);
 
   // Verificar se usuário tem acesso ao calendário sincronizado
   const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
@@ -170,6 +173,44 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
       setLoading(false);
     }
   }, [currentDate, filterPropertyId, hasCalendarAccess]);
+
+  // Buscar feriados ao montar
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      try {
+        const currentYear = new Date().getFullYear();
+        const response = await api.getHolidays({ startYear: currentYear, endYear: currentYear + 3 });
+        setHolidays(response.holidays);
+      } catch (error) {
+        console.error('Erro ao buscar feriados:', error);
+      }
+    };
+    fetchHolidays();
+  }, []);
+
+  // Buscar preços do calendário quando filtrar por imóvel
+  useEffect(() => {
+    const fetchPricing = async () => {
+      if (!filterPropertyId) {
+        setCalendarPricing({});
+        return;
+      }
+      try {
+        const month = currentDate.getMonth() + 1;
+        const year = currentDate.getFullYear();
+        const response = await api.getCalendarPricing(filterPropertyId, month, year);
+        const pricingMap: Record<string, CalendarPriceDay> = {};
+        response.calendar.forEach(day => {
+          pricingMap[day.date] = day;
+        });
+        setCalendarPricing(pricingMap);
+      } catch (error) {
+        console.error('Erro ao buscar preços:', error);
+        setCalendarPricing({});
+      }
+    };
+    fetchPricing();
+  }, [filterPropertyId, currentDate]);
 
   const fetchReservations = async () => {
     setLoading(true);
@@ -313,6 +354,39 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const filteredProperties = properties.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Verificar se uma data é feriado
+  const getHolidayInfo = (date: Date | null): Holiday | null => {
+    if (!date) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    return holidays.find(h => h.date === dateStr) || null;
+  };
+
+  // Obter preço para uma data
+  const getPriceForDate = (date: Date | null): CalendarPriceDay | null => {
+    if (!date || !filterPropertyId) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    return calendarPricing[dateStr] || null;
+  };
+
+  // Formatar preço
+  const formatPrice = (price: number): string => {
+    return `R$${price}`;
+  };
+
+  // Cor do preço baseado no tipo
+  const getPriceColor = (priceType: string): string => {
+    switch (priceType) {
+      case 'holiday':
+        return isDark ? 'text-amber-400' : 'text-amber-600';
+      case 'highSeason':
+        return isDark ? 'text-orange-400' : 'text-orange-600';
+      case 'weekend':
+        return isDark ? 'text-purple-400' : 'text-purple-600';
+      default:
+        return isDark ? 'text-emerald-400' : 'text-emerald-600';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -477,24 +551,55 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               const groupedEvents = hasCalendarAccess ? getGroupedDayEvents(date) : { checkins: [], checkouts: [], stays: [] };
               const today = isToday(date);
               const hasEvents = dayReservations.length > 0;
+              const holiday = getHolidayInfo(date);
+              const priceInfo = getPriceForDate(date);
+              const isWeekend = date ? (date.getDay() === 0 || date.getDay() === 6) : false;
 
               return (
                 <div
                   key={index}
                   onClick={() => hasCalendarAccess && date && hasEvents && setSelectedDay(date)}
                   className={`
-                    min-h-[100px] p-2 border-b border-r transition-colors
+                    min-h-[100px] p-2 border-b border-r transition-colors relative
                     ${isDark ? 'border-white/5' : 'border-slate-200'}
                     ${date ? (hasCalendarAccess && hasEvents ? (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50') + ' cursor-pointer' : '') : isDark ? 'bg-white/[0.01]' : 'bg-slate-50'}
                     ${today ? 'ring-2 ring-inset ring-blue-500/50' : ''}
+                    ${holiday ? (isDark ? 'bg-amber-500/5' : 'bg-amber-50') : ''}
                     ${index % 7 === 6 ? 'border-r-0' : ''}
                   `}
                 >
                   {date && (
                     <>
-                      <div className={`text-sm font-medium mb-2 ${today ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        {date.getDate()}
+                      {/* Número do dia + indicador de feriado */}
+                      <div className="flex items-center justify-between mb-1">
+                        <div className={`text-sm font-medium ${
+                          today ? 'text-blue-400' :
+                          holiday ? (isDark ? 'text-amber-400' : 'text-amber-600') :
+                          isWeekend ? (isDark ? 'text-purple-400' : 'text-purple-600') :
+                          isDark ? 'text-slate-400' : 'text-slate-600'
+                        }`}>
+                          {date.getDate()}
+                        </div>
+                        {holiday && (
+                          <div className="w-2 h-2 rounded-full bg-amber-500" title={holiday.name} />
+                        )}
                       </div>
+
+                      {/* Nome do feriado */}
+                      {holiday && (
+                        <div className={`text-[9px] truncate mb-1 ${isDark ? 'text-amber-400/70' : 'text-amber-600/70'}`}>
+                          {holiday.name}
+                        </div>
+                      )}
+
+                      {/* Preço do dia (quando filtrado por imóvel) */}
+                      {showPrices && priceInfo && priceInfo.price > 0 && (
+                        <div className={`text-xs font-semibold mb-1 ${getPriceColor(priceInfo.priceType)}`}>
+                          {formatPrice(priceInfo.price)}
+                        </div>
+                      )}
+
+                      {/* Eventos de reservas */}
                       {hasCalendarAccess && hasEvents && (
                         <div className="flex flex-wrap gap-1">
                           <EventIndicator items={groupedEvents.checkouts} type="checkout" isDark={isDark} />
@@ -511,7 +616,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         </div>
 
         {/* Legenda */}
-        <div className={`flex items-center gap-6 mt-4 pt-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+        <div className={`flex flex-wrap items-center gap-4 md:gap-6 mt-4 pt-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <span className="text-xs text-slate-500">Legenda:</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-emerald-400 font-bold">IN</span>
@@ -525,6 +630,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/40" />
             <span className="text-xs text-slate-400">Ocupado</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-xs text-slate-400">Feriado</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>6</span>
+            <span className="text-xs text-slate-400">Fim de semana</span>
+          </div>
+          {filterPropertyId && (
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>R$</span>
+              <span className="text-xs text-slate-400">Preço sugerido</span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -746,4 +746,78 @@ export async function getGuestReservations(id: number, params?: {
   };
 }
 
+// Holidays Types
+export interface Holiday {
+  date: string;
+  year: number;
+  month: number;
+  day: number;
+  name: string;
+  type: 'national' | 'carnival' | 'optional';
+}
+
+export interface FixedHoliday {
+  month: number;
+  day: number;
+  name: string;
+  type: string;
+}
+
+export interface HighSeasonPeriod {
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+  name: string;
+  multiplier: number;
+}
+
+export interface HolidaysResponse {
+  holidays: Holiday[];
+  fixedHolidays: FixedHoliday[];
+  highSeasonPeriods: HighSeasonPeriod[];
+}
+
+export interface CalendarDay {
+  date: string;
+  day: number;
+  dayOfWeek: number;
+  dayName: string;
+  price: number;
+  priceType: 'holiday' | 'highSeason' | 'weekend' | 'weekday';
+  priceReason: string;
+  isHoliday: boolean;
+  holidayName: string | null;
+  isWeekend: boolean;
+}
+
+export interface CalendarPricingResponse {
+  propertyId: number;
+  propertyName: string;
+  month: number;
+  year: number;
+  hasPricingConfig: boolean;
+  pricingConfig: {
+    minValue: number;
+    weekdayNormalValue: number;
+    weekendValue: number;
+    holidayValue: number;
+  } | null;
+  calendar: CalendarDay[];
+}
+
+// Holidays API
+export async function getHolidays(params?: { year?: number; startYear?: number; endYear?: number }): Promise<HolidaysResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.year) searchParams.append('year', params.year.toString());
+  if (params?.startYear) searchParams.append('startYear', params.startYear.toString());
+  if (params?.endYear) searchParams.append('endYear', params.endYear.toString());
+  const query = searchParams.toString();
+  return apiFetch<HolidaysResponse>(`/holidays${query ? `?${query}` : ''}`);
+}
+
+export async function getCalendarPricing(propertyId: number, month: number, year: number): Promise<CalendarPricingResponse> {
+  return apiFetch<CalendarPricingResponse>(`/holidays/calendar/${propertyId}?month=${month}&year=${year}`);
+}
+
 export { API_URL };
