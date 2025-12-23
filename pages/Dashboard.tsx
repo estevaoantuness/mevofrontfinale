@@ -34,6 +34,8 @@ import { TemplatesTab } from '../components/dashboard/TemplatesTab';
 import { PricingTab } from '../components/dashboard/PricingTab';
 import { GuestsTab } from '../components/dashboard/GuestsTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
+import { MobileNav } from '../components/dashboard/MobileNav';
+import { MobileHeader } from '../components/dashboard/MobileHeader';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
 import { EmailVerificationModal } from '../components/billing/EmailVerificationModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
@@ -67,6 +69,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [qrLoading, setQrLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSelectPlan = (planId: 'starter' | 'pro') => {
     navigate(`/dashboard?tab=billing&plan=${planId}`);
@@ -93,6 +96,12 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [testPhone, setTestPhone] = useState('');
   const [testMessage, setTestMessage] = useState('Olá! Esta é uma mensagem de teste do Mevo.');
   const [testLoading, setTestLoading] = useState(false);
+
+  // WhatsApp Connection Method State
+  const [connectionMethod, setConnectionMethod] = useState<'qr' | 'code'>('qr');
+  const [pairingPhoneNumber, setPairingPhoneNumber] = useState('');
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [pairingCodeLoading, setPairingCodeLoading] = useState(false);
 
 
   // Subscription Required Modal State
@@ -189,6 +198,27 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       alert('Erro ao gerar QR Code: ' + err.message);
     } finally {
       setQrLoading(false);
+    }
+  };
+
+  const handleGetPairingCode = async () => {
+    if (!pairingPhoneNumber) {
+      alert('Digite o número do WhatsApp que será conectado');
+      return;
+    }
+    setPairingCodeLoading(true);
+    try {
+      const result = await api.getWhatsAppPairingCode(pairingPhoneNumber);
+      if (result.connected) {
+        setWhatsappStatus({ ...whatsappStatus, connected: true, phone: result.phone });
+        setPairingCode(null);
+      } else {
+        setPairingCode(result.pairingCode || null);
+      }
+    } catch (err: any) {
+      alert('Erro ao gerar código de pareamento: ' + err.message);
+    } finally {
+      setPairingCodeLoading(false);
     }
   };
 
@@ -334,8 +364,20 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   return (
     <div className={`flex h-screen font-sans overflow-hidden ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
-      {/* Sidebar */}
-      <aside className={`w-64 flex-shrink-0 border-r flex flex-col ${isDark ? 'border-white/5 bg-[#080911]' : 'border-slate-200 bg-white'}`}>
+      {/* Mobile Navigation Drawer */}
+      <MobileNav
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={onLogout}
+        onGoToLanding={onGoToLanding}
+        userName={user?.name}
+        userEmail={user?.email}
+      />
+
+      {/* Sidebar - Hidden on mobile */}
+      <aside className={`hidden md:flex w-64 flex-shrink-0 border-r flex-col ${isDark ? 'border-white/5 bg-[#080911]' : 'border-slate-200 bg-white'}`}>
         <div className={`h-14 flex items-center px-6 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <Logo size="text-lg" onClick={onGoToLanding} />
           <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium border ${
@@ -417,8 +459,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
       {/* Main Content */}
       <main className={`flex-1 flex flex-col min-w-0 ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
-        {/* Topbar */}
-        <header className={`h-14 flex items-center justify-between px-8 border-b backdrop-blur-sm z-10 ${isDark ? 'border-white/5 bg-[#050509]/50' : 'border-slate-200 bg-white/80'}`}>
+        {/* Mobile Header - Only visible on mobile */}
+        <MobileHeader
+          onMenuClick={() => setMobileMenuOpen(true)}
+          userName={user?.name}
+        />
+
+        {/* Desktop Topbar - Hidden on mobile */}
+        <header className={`hidden md:flex h-14 items-center justify-between px-8 border-b backdrop-blur-sm z-10 ${isDark ? 'border-white/5 bg-[#050509]/50' : 'border-slate-200 bg-white/80'}`}>
           <h2 className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
@@ -566,14 +614,14 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => handleEdit(p)}
-                                className="p-2 text-slate-600 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-all opacity-0 group-hover:opacity-100"
+                                className="p-2 text-slate-600 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
                                 title="Editar"
                               >
                                 <Pencil size={14} />
                               </button>
                               <button
                                 onClick={() => handleDelete(p.id)}
-                                className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded transition-all opacity-0 group-hover:opacity-100"
+                                className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
                                 title="Excluir"
                               >
                                 <Trash2 size={14} />
@@ -607,18 +655,54 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                 </div>
 
                 <h3 className={`text-xl font-medium mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Conexão WhatsApp</h3>
-                <p className={`text-sm mb-8 max-w-sm mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                <p className={`text-sm mb-6 max-w-sm mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   Conecte seu WhatsApp para enviar mensagens automáticas para sua equipe de limpeza.
                 </p>
 
-                <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-8 ${
+                {/* Toggle QR Code / Código de Pareamento */}
+                {!whatsappStatus.connected && !qrCode && !pairingCode && (
+                  <div className="flex justify-center gap-2 mb-6">
+                    <button
+                      onClick={() => setConnectionMethod('qr')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        connectionMethod === 'qr'
+                          ? 'bg-blue-600 text-white'
+                          : isDark
+                            ? 'bg-white/5 text-slate-400 hover:bg-white/10'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      QR Code
+                    </button>
+                    <button
+                      onClick={() => setConnectionMethod('code')}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        connectionMethod === 'code'
+                          ? 'bg-blue-600 text-white'
+                          : isDark
+                            ? 'bg-white/5 text-slate-400 hover:bg-white/10'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      Código de Pareamento
+                    </button>
+                  </div>
+                )}
+
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-6 ${
                   whatsappStatus.connected
                     ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                    : qrCode
+                    : qrCode || pairingCode
                     ? 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-400'
                     : 'bg-red-500/10 border border-red-500/20 text-red-400'
                 }`}>
-                  {whatsappStatus.connected ? `Conectado: ${whatsappStatus.phone || ''}` : qrCode ? 'Aguardando escaneamento...' : 'Desconectado'}
+                  {whatsappStatus.connected
+                    ? `Conectado: ${whatsappStatus.phone || ''}`
+                    : qrCode
+                    ? 'Aguardando escaneamento...'
+                    : pairingCode
+                    ? 'Digite o código no WhatsApp'
+                    : 'Desconectado'}
                 </div>
 
                 {whatsappStatus.connected ? (
@@ -629,17 +713,44 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                     <span className="text-xs text-slate-600 mt-1">Pronto para enviar mensagens</span>
                   </div>
                 ) : qrCode ? (
-                  <div className="w-64 h-64 mx-auto rounded-xl overflow-hidden mb-6 bg-white p-3">
+                  <div className="w-full max-w-64 aspect-square mx-auto rounded-xl overflow-hidden mb-6 bg-white p-3">
                     <img
                       src={qrCode.startsWith('data:') ? qrCode : `data:image/png;base64,${qrCode}`}
                       alt="QR Code WhatsApp"
                       className="w-full h-full object-contain"
                     />
                   </div>
+                ) : pairingCode ? (
+                  <div className="max-w-sm mx-auto mb-6">
+                    <div className={`p-6 rounded-xl border mb-4 ${isDark ? 'border-blue-500/20 bg-blue-500/5' : 'border-blue-200 bg-blue-50'}`}>
+                      <p className={`text-xs mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        No WhatsApp, vá em <strong>Configurações</strong> → <strong>Dispositivos conectados</strong> → <strong>Conectar dispositivo</strong> → <strong>Conectar com número de telefone</strong>
+                      </p>
+                      <div className="text-4xl font-mono font-bold tracking-[0.3em] text-blue-500 text-center py-4">
+                        {pairingCode}
+                      </div>
+                      <p className={`text-xs text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                        Digite este código no seu WhatsApp
+                      </p>
+                    </div>
+                  </div>
+                ) : connectionMethod === 'code' ? (
+                  <div className="max-w-sm mx-auto mb-6">
+                    <p className={`text-xs mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      Digite o número do WhatsApp que será conectado para gerar o código de pareamento.
+                    </p>
+                    <Input
+                      label="Número do WhatsApp"
+                      placeholder="5541999990000"
+                      value={pairingPhoneNumber}
+                      onChange={(e) => setPairingPhoneNumber(e.target.value)}
+                      className="mb-4"
+                    />
+                  </div>
                 ) : (
-                  <div className={`w-64 h-64 mx-auto border-2 border-dashed rounded-xl flex flex-col items-center justify-center mb-6 ${isDark ? 'border-white/10 bg-black/20' : 'border-slate-300 bg-slate-50'}`}>
+                  <div className={`w-full max-w-64 aspect-square mx-auto border-2 border-dashed rounded-xl flex flex-col items-center justify-center mb-6 ${isDark ? 'border-white/10 bg-black/20' : 'border-slate-300 bg-slate-50'}`}>
                     <Smartphone size={48} className="text-slate-400 mb-4" />
-                    <span className="text-sm text-slate-500">Clique no botao abaixo</span>
+                    <span className="text-sm text-slate-500">Clique no botão abaixo</span>
                     <span className="text-xs text-slate-400 mt-1">para conectar seu WhatsApp</span>
                   </div>
                 )}
@@ -654,9 +765,21 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                         <LogOut size={16} className="mr-2" /> Desconectar
                       </Button>
                     </>
-                  ) : qrCode ? (
-                    <Button onClick={() => setQrCode(null)} variant="secondary">
+                  ) : qrCode || pairingCode ? (
+                    <Button onClick={() => { setQrCode(null); setPairingCode(null); }} variant="secondary">
                       Cancelar
+                    </Button>
+                  ) : connectionMethod === 'code' ? (
+                    <Button onClick={handleGetPairingCode} disabled={pairingCodeLoading || !pairingPhoneNumber}>
+                      {pairingCodeLoading ? (
+                        <>
+                          <RefreshCw size={16} className="mr-2 animate-spin" /> Gerando Código...
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle size={16} className="mr-2" /> Gerar Código de Pareamento
+                        </>
+                      )}
                     </Button>
                   ) : (
                     <Button onClick={handleConnectWhatsApp} disabled={qrLoading}>
@@ -725,7 +848,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             value={newProp.name}
             onChange={e => setNewProp({...newProp, name: e.target.value})}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Nome do Responsável"
               placeholder="Ex: Maria"
@@ -806,7 +929,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               value={editProp.name}
               onChange={e => setEditProp({...editProp, name: e.target.value})}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Nome do Responsável"
                 placeholder="Ex: Maria"

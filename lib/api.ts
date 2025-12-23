@@ -338,6 +338,20 @@ export async function testWhatsApp(phone: string, message: string): Promise<{ su
   });
 }
 
+export interface WhatsAppPairingCodeResponse {
+  connected: boolean;
+  pairingCode?: string;
+  phone?: string;
+  message?: string;
+}
+
+export async function getWhatsAppPairingCode(phoneNumber: string): Promise<WhatsAppPairingCodeResponse> {
+  return apiFetch<WhatsAppPairingCodeResponse>('/whatsapp/pairing-code', {
+    method: 'POST',
+    body: JSON.stringify({ phoneNumber }),
+  });
+}
+
 // Health
 export async function getHealth(): Promise<ApiHealth> {
   return apiFetch<ApiHealth>('/health');

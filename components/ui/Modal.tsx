@@ -21,13 +21,13 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
           ? 'bg-[#0F1019] border border-white/10'
           : 'bg-white border border-slate-200'
       }`}>
-        <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+        <div className={`flex items-center justify-between px-4 md:px-6 py-4 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <h3 className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{title}</h3>
           <button onClick={onClose} className={`transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'}`}>
             <X size={18} />
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="p-4 md:p-6">{children}</div>
       </div>
     </div>
   );
