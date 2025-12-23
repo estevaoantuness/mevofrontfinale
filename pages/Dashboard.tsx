@@ -21,7 +21,6 @@ import {
   Mail,
   Calculator,
   HelpCircle,
-  Phone,
   X
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
@@ -75,9 +74,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [newProp, setNewProp] = useState({
     name: '',
     ical_airbnb: '',
-    ical_booking: '',
-    employee_phone: '',
-    makeDefault: false
+    ical_booking: ''
   });
 
   // iCal Help Modal State
@@ -281,19 +278,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Se marcou para tornar padrão e tem telefone, atualizar settings
-      if (newProp.makeDefault && newProp.employee_phone) {
-        await api.updateSettings({ default_employee_phone: newProp.employee_phone });
-      }
-
       const property = await api.createProperty({
         name: newProp.name,
         ical_airbnb: newProp.ical_airbnb,
-        ical_booking: newProp.ical_booking,
-        employee_phone: newProp.employee_phone || undefined
+        ical_booking: newProp.ical_booking
       });
       setProperties([property, ...properties]);
-      setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '', makeDefault: false });
+      setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
       setIsModalOpen(false);
     } catch (err: any) {
       // Verificar se é erro de assinatura/limite
@@ -641,7 +632,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={() => {
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '', makeDefault: false });
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel
@@ -983,43 +974,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
               } focus:outline-none focus:ring-1 focus:ring-blue-500`}
             />
-          </div>
-
-          {/* Telefone do responsável */}
-          <div>
-            <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Telefone do responsável (opcional)
-            </label>
-            <div className="relative">
-              <Phone size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-              <input
-                type="tel"
-                placeholder="5541999990000"
-                value={newProp.employee_phone}
-                onChange={e => setNewProp({...newProp, employee_phone: e.target.value})}
-                className={`w-full pl-10 pr-3 py-2 rounded-lg border text-sm transition-colors ${
-                  isDark
-                    ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
-                } focus:outline-none focus:ring-1 focus:ring-blue-500`}
-              />
-            </div>
-            <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-              Este número receberá os avisos de checkout diários
-            </p>
-
-            {/* Checkbox tornar padrão */}
-            {newProp.employee_phone && (
-              <label className={`flex items-center gap-2 mt-2 cursor-pointer ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                <input
-                  type="checkbox"
-                  checked={newProp.makeDefault}
-                  onChange={e => setNewProp({...newProp, makeDefault: e.target.checked})}
-                  className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-xs">Tornar este número o padrão para novos imóveis</span>
-              </label>
-            )}
           </div>
 
           <div className="pt-4 flex justify-end gap-3">
