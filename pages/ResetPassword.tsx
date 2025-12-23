@@ -3,6 +3,7 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Lock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useTranslatedError } from '../hooks/useTranslatedError';
 import * as api from '../lib/api';
 
 interface ResetPasswordPageProps {
@@ -12,6 +13,7 @@ interface ResetPasswordPageProps {
 }
 
 export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordPageProps) => {
+  const { translateError } = useTranslatedError();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
         }
       } catch (err: any) {
         setTokenValid(false);
-        setError('Erro ao verificar token');
+        setError(translateError(err));
       } finally {
         setVerifying(false);
       }
@@ -44,7 +46,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
       setTokenValid(false);
       setError('Token não fornecido');
     }
-  }, [token]);
+  }, [token, translateError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +68,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
       await api.resetPassword(token, password);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Erro ao redefinir senha. Tente novamente.');
+      setError(translateError(err));
     } finally {
       setLoading(false);
     }

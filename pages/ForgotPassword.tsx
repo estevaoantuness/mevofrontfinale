@@ -3,6 +3,8 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useTheme } from '../lib/ThemeContext';
+import { useTranslatedError } from '../hooks/useTranslatedError';
 import * as api from '../lib/api';
 
 interface ForgotPasswordPageProps {
@@ -11,6 +13,8 @@ interface ForgotPasswordPageProps {
 }
 
 export const ForgotPasswordPage = ({ onBack, onGoToLogin }: ForgotPasswordPageProps) => {
+  const { isDark } = useTheme();
+  const { translateError } = useTranslatedError();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,7 +29,7 @@ export const ForgotPasswordPage = ({ onBack, onGoToLogin }: ForgotPasswordPagePr
       await api.forgotPassword(email);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Erro ao enviar email. Tente novamente.');
+      setError(translateError(err));
     } finally {
       setLoading(false);
     }
