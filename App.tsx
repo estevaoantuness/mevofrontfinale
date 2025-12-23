@@ -105,6 +105,7 @@ function AppRoutes() {
           <PublicRoute>
             <ResetPasswordPage
               onGoToLogin={() => navigate('/login')}
+              onBack={() => navigate('/')}
             />
           </PublicRoute>
         }

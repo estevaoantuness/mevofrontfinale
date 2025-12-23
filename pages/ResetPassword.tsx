@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -7,12 +8,13 @@ import { useTranslatedError } from '../hooks/useTranslatedError';
 import * as api from '../lib/api';
 
 interface ResetPasswordPageProps {
-  token: string;
   onGoToLogin: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordPageProps) => {
+export const ResetPasswordPage = ({ onGoToLogin, onBack }: ResetPasswordPageProps) => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') || '';
   const { translateError } = useTranslatedError();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -108,7 +110,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
             <Button onClick={onGoToLogin} className="w-full">
               Solicitar novo link
             </Button>
-            <button onClick={onBack} className="text-xs text-slate-500 hover:text-white transition-colors w-full">
+            <button onClick={onBack || onGoToLogin} className="text-xs text-slate-500 hover:text-white transition-colors w-full">
               Voltar para Home
             </button>
           </div>
@@ -190,7 +192,7 @@ export const ResetPasswordPage = ({ token, onGoToLogin, onBack }: ResetPasswordP
         </form>
 
         <div className="mt-6 text-center">
-          <button onClick={onBack} className="text-xs text-slate-500 hover:text-white transition-colors">
+          <button onClick={onBack || onGoToLogin} className="text-xs text-slate-500 hover:text-white transition-colors">
             Voltar para Home
           </button>
         </div>
