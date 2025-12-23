@@ -348,6 +348,13 @@ export async function updateSetting(key: string, value: string): Promise<void> {
   });
 }
 
+export async function updateSettings(settings: Partial<Settings>): Promise<void> {
+  const promises = Object.entries(settings).map(([key, value]) =>
+    updateSetting(key, String(value))
+  );
+  await Promise.all(promises);
+}
+
 // WhatsApp
 export async function getWhatsAppStatus(): Promise<WhatsAppStatus> {
   return apiFetch<WhatsAppStatus>('/whatsapp/status');
