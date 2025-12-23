@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, CheckCircle, Loader2 } from 'lucide-react';
+import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { useTheme } from '../../lib/ThemeContext';
 import type { Property } from '../../lib/api';
 import { getPropertyPricingConfig, updatePropertyPricingConfig } from '../../lib/api';
 import type { PropertyPricingConfigInput } from '../../lib/pricing';
@@ -26,6 +27,7 @@ type PricingTabProps = {
 };
 
 export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
+  const { isDark } = useTheme();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -115,120 +117,275 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
     }
   };
 
+  // Styled input component for consistency
+  const PricingInput = ({ label, value, onChange, placeholder, icon: Icon }: {
+    label: string;
+    value: number | string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder?: string;
+    icon?: React.ElementType;
+  }) => (
+    <div>
+      <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+        {label}
+      </label>
+      <div className="relative">
+        {Icon && (
+          <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            <Icon size={16} />
+          </div>
+        )}
+        <input
+          type="number"
+          min="0"
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={`w-full rounded-lg px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+            Icon ? 'pl-10' : ''
+          } ${
+            isDark
+              ? 'bg-white/5 border border-white/10 text-white placeholder-slate-500'
+              : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400'
+          }`}
+        />
+      </div>
+    </div>
+  );
+
+  // Styled select component
+  const PricingSelect = ({ label, value, onChange, options }: {
+    label: string;
+    value: number;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    options: { value: number; label: string }[];
+  }) => (
+    <div>
+      <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={onChange}
+        className={`w-full rounded-lg px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+          isDark
+            ? 'bg-white/5 border border-white/10 text-white'
+            : 'bg-slate-50 border border-slate-200 text-slate-900'
+        }`}
+      >
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value} className={isDark ? 'bg-slate-800' : 'bg-white'}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  // Styled checkbox component
+  const PricingCheckbox = ({ checked, onChange, children }: {
+    checked: boolean;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    children: React.ReactNode;
+  }) => (
+    <label className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+      isDark
+        ? 'hover:bg-white/5'
+        : 'hover:bg-slate-50'
+    }`}>
+      <div className="relative">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          className="sr-only"
+        />
+        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+          checked
+            ? 'bg-blue-500 border-blue-500'
+            : isDark
+              ? 'border-slate-600 bg-transparent'
+              : 'border-slate-300 bg-white'
+        }`}>
+          {checked && (
+            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </div>
+      </div>
+      <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{children}</span>
+    </label>
+  );
+
   if (properties.length === 0) {
     return (
-      <div className="bg-[#0B0C15] border border-white/10 rounded-xl p-8 text-center">
-        <Calculator className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-        <p className="text-slate-400">Cadastre um imóvel para configurar a calculadora.</p>
+      <div className={`rounded-xl p-12 text-center ${
+        isDark
+          ? 'bg-[#0B0C15] border border-white/5'
+          : 'bg-white border border-slate-200 shadow-sm'
+      }`}>
+        <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 ${
+          isDark ? 'bg-white/5' : 'bg-slate-100'
+        }`}>
+          <Calculator className={`w-8 h-8 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+        </div>
+        <h3 className={`text-lg font-medium mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          Nenhum imóvel cadastrado
+        </h3>
+        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          Cadastre um imóvel para configurar a calculadora de preços.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium text-white">Calculadora por imóvel</h3>
-        <p className="text-sm text-slate-500">Defina valores base e regras de reajuste para cada imóvel.</p>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Calculadora de Preços
+          </h3>
+          <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            Configure valores e regras de precificação para cada imóvel
+          </p>
+        </div>
+        <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+          isDark
+            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+            : 'bg-blue-50 text-blue-600 border border-blue-200'
+        }`}>
+          {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Property Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties.map(property => (
           <div
             key={property.id}
-            className="bg-[#0B0C15] border border-white/10 rounded-xl p-5 flex items-center justify-between"
+            className={`group rounded-xl p-5 transition-all hover:shadow-lg ${
+              isDark
+                ? 'bg-[#0B0C15] border border-white/5 hover:border-white/10'
+                : 'bg-white border border-slate-200 hover:border-slate-300 shadow-sm'
+            }`}
           >
-            <div>
-              <p className="text-white font-medium">{property.name}</p>
-              <p className="text-xs text-slate-500">Configuração individual de preços</p>
+            <div className="flex items-start justify-between mb-4">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                isDark ? 'bg-blue-500/10' : 'bg-blue-50'
+              }`}>
+                <Calculator className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              </div>
+              <Settings2 className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${
+                isDark ? 'text-slate-500' : 'text-slate-400'
+              }`} />
             </div>
-            <Button variant="secondary" onClick={() => openPricing(property)}>
-              Configurar
+
+            <h4 className={`font-medium mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {property.name}
+            </h4>
+            <p className={`text-xs mb-4 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+              Configuração individual de preços
+            </p>
+
+            <Button
+              variant="secondary"
+              onClick={() => openPricing(property)}
+              className="w-full justify-center"
+            >
+              Configurar Preços
             </Button>
           </div>
         ))}
       </div>
 
+      {/* Modal */}
       <Modal
         isOpen={isOpen}
         onClose={closePricing}
         title={selectedProperty ? `Calculadora - ${selectedProperty.name}` : 'Calculadora'}
       >
         {loading ? (
-          <div className="py-10 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          <div className="py-12 flex flex-col items-center justify-center">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
+            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              Carregando configurações...
+            </p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Diária mínima aceitável (R$)</label>
-                <input
-                  type="number"
-                  min="0"
+            {/* Valores Base */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <DollarSign className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Valores Base
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <PricingInput
+                  label="Diária mínima (R$)"
                   value={form.minValue}
                   onChange={e => setForm({ ...form, minValue: toInt(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  icon={DollarSign}
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Diária seg–qui (R$)</label>
-                <input
-                  type="number"
-                  min="0"
+                <PricingInput
+                  label="Seg–Qui (R$)"
                   value={form.weekdayNormalValue}
                   onChange={e => setForm({ ...form, weekdayNormalValue: toInt(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  icon={DollarSign}
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Diária sex–dom (R$)</label>
-                <input
-                  type="number"
-                  min="0"
+                <PricingInput
+                  label="Sex–Dom (R$)"
                   value={form.weekendValue}
                   onChange={e => setForm({ ...form, weekendValue: toInt(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  icon={DollarSign}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Multiplicador de datas especiais</label>
-                <select
+            {/* Configurações Avançadas */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Ajustes e Multiplicadores
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <PricingSelect
+                  label="Multiplicador datas especiais"
                   value={form.holidayMultiplier}
                   onChange={e => setForm({ ...form, holidayMultiplier: Number(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                >
-                  {HOLIDAY_MULTIPLIERS.map(multiplier => (
-                    <option key={multiplier} value={multiplier}>{multiplier}x</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-2">Reajuste anual (%)</label>
-                <select
+                  options={HOLIDAY_MULTIPLIERS.map(m => ({ value: m, label: `${m}x` }))}
+                />
+                <PricingSelect
+                  label="Reajuste anual"
                   value={form.annualAdjustmentPercent}
                   onChange={e => setForm({ ...form, annualAdjustmentPercent: Number(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                >
-                  {ANNUAL_ADJUSTMENTS.map(percent => (
-                    <option key={percent} value={percent}>{percent}%</option>
-                  ))}
-                </select>
+                  options={ANNUAL_ADJUSTMENTS.map(p => ({ value: p, label: `${p}%` }))}
+                />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 text-sm text-slate-300">
-                <input
-                  type="checkbox"
+            {/* Opções */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className={`w-4 h-4 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
+                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Opções Adicionais
+                </span>
+              </div>
+              <div className={`rounded-lg border ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                <PricingCheckbox
                   checked={useManualHolidayValue}
                   onChange={e => {
                     const enabled = e.target.checked;
@@ -237,60 +394,96 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties }) => {
                       setForm(prev => ({ ...prev, holidayValueManual: null }));
                     }
                   }}
-                  className="h-4 w-4 rounded border border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/40"
-                />
-                Definir valor específico para datas especiais
-              </label>
+                >
+                  Definir valor fixo para datas especiais
+                </PricingCheckbox>
 
-              {useManualHolidayValue && (
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Valor caríssimo (R$)"
-                  value={form.holidayValueManual ?? ''}
-                  onChange={e => setForm({ ...form, holidayValueManual: toInt(e.target.value) })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                />
-              )}
-            </div>
+                {useManualHolidayValue && (
+                  <div className="px-3 pb-3">
+                    <PricingInput
+                      label="Valor datas especiais (R$)"
+                      value={form.holidayValueManual ?? ''}
+                      onChange={e => setForm({ ...form, holidayValueManual: toInt(e.target.value) })}
+                      placeholder="Ex: 500"
+                      icon={DollarSign}
+                    />
+                  </div>
+                )}
 
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 text-sm text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={form.applyMonthlyAdjustment}
-                  onChange={e => setForm({ ...form, applyMonthlyAdjustment: e.target.checked })}
-                  className="h-4 w-4 rounded border border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/40"
-                />
-                Aplicar correção automaticamente todo mês
-              </label>
-              <label className="flex items-center gap-3 text-sm text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={form.applyMonthlyCostsToCalendar}
-                  onChange={e => setForm({ ...form, applyMonthlyCostsToCalendar: e.target.checked })}
-                  className="h-4 w-4 rounded border border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/40"
-                />
-                Adicionar custos mensais no calendário deste imóvel
-              </label>
-            </div>
+                <div className={`border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                  <PricingCheckbox
+                    checked={form.applyMonthlyAdjustment}
+                    onChange={e => setForm({ ...form, applyMonthlyAdjustment: e.target.checked })}
+                  >
+                    Aplicar correção automaticamente todo mês
+                  </PricingCheckbox>
+                </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-sm text-slate-300">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
-                <span className="font-medium">Resumo calculado</span>
+                <div className={`border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                  <PricingCheckbox
+                    checked={form.applyMonthlyCostsToCalendar}
+                    onChange={e => setForm({ ...form, applyMonthlyCostsToCalendar: e.target.checked })}
+                  >
+                    Adicionar custos mensais no calendário
+                  </PricingCheckbox>
+                </div>
               </div>
-              <p>
-                Mínimo: R$ {pricingSummary.minValue}, Normal (seg–qui): R$ {pricingSummary.weekdayNormalValue}, Fim de semana: R$ {pricingSummary.weekendValue}, Datas especiais: R$ {pricingSummary.holidayValue}.
-              </p>
             </div>
 
+            {/* Resumo */}
+            <div className={`rounded-lg p-4 ${
+              isDark
+                ? 'bg-emerald-500/10 border border-emerald-500/20'
+                : 'bg-emerald-50 border border-emerald-200'
+            }`}>
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                <span className={`text-sm font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                  Resumo dos Valores
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Mínimo</p>
+                  <p className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    R$ {pricingSummary.minValue}
+                  </p>
+                </div>
+                <div>
+                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Seg–Qui</p>
+                  <p className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    R$ {pricingSummary.weekdayNormalValue}
+                  </p>
+                </div>
+                <div>
+                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Sex–Dom</p>
+                  <p className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    R$ {pricingSummary.weekendValue}
+                  </p>
+                </div>
+                <div>
+                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Especiais</p>
+                  <p className={`text-lg font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                    R$ {pricingSummary.holidayValue}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="secondary" onClick={closePricing}>
                 Cancelar
               </Button>
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Salvando...' : 'Salvar'}
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar Configuração'
+                )}
               </Button>
             </div>
           </div>
