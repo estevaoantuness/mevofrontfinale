@@ -76,10 +76,16 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
 
     setSaving(true);
     try {
+      const employee = await api.createGuest({
+        name: propertyData.employee_name,
+        phone: propertyData.employee_phone,
+        whatsapp: propertyData.employee_phone,
+        isDefault: true
+      });
+
       await api.createProperty({
         name: propertyData.name,
-        employee_name: propertyData.employee_name,
-        employee_phone: propertyData.employee_phone,
+        employee_id: employee.id,
         ical_airbnb: propertyData.ical_airbnb || undefined
       });
       setCurrentStep('complete');
@@ -255,13 +261,13 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Responsável *"
+                    label="Funcionário responsável *"
                     placeholder="Ex: Maria"
                     value={propertyData.employee_name}
                     onChange={e => setPropertyData({ ...propertyData, employee_name: e.target.value })}
                   />
                   <Input
-                    label="WhatsApp *"
+                    label="Telefone (WhatsApp) *"
                     placeholder="41999990000"
                     value={propertyData.employee_phone}
                     onChange={e => setPropertyData({ ...propertyData, employee_phone: e.target.value })}

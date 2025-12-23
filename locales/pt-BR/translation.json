@@ -239,7 +239,7 @@
     "sidebar": {
       "overview": "Visão Geral",
       "properties": "Imóveis",
-      "guests": "Hóspedes",
+      "guests": "Funcionários",
       "templates": "Templates",
       "pricing": "Calculadora",
       "settings": "Configurações",
@@ -297,12 +297,12 @@
       }
     },
     "guests": {
-      "title": "Hóspedes",
-      "add": "Adicionar Hóspede",
-      "empty": "Nenhum hóspede cadastrado",
-      "emptyDesc": "Hóspedes aparecerão aqui quando houver reservas",
+      "title": "Funcionários",
+      "add": "Adicionar Funcionário",
+      "empty": "Nenhum funcionário cadastrado",
+      "emptyDesc": "Funcionários aparecerão aqui quando forem cadastrados",
       "form": {
-        "name": "Nome do hóspede",
+        "name": "Nome do funcionário",
         "email": "Email",
         "phone": "Telefone",
         "property": "Imóvel",
@@ -334,7 +334,7 @@
         "cancel": "Cancelar"
       },
       "placeholders": {
-        "guestName": "Nome do hóspede",
+        "guestName": "Nome do funcionário",
         "propertyName": "Nome do imóvel",
         "checkinDate": "Data de check-in",
         "checkoutDate": "Data de checkout",
@@ -370,7 +370,7 @@
         "automation": {
           "title": "Automação",
           "subtitle": "Ative ou desative funcionalidades automáticas",
-          "autoCreateGuests": "Criar hóspedes automaticamente de reservas",
+          "autoCreateGuests": "Criar funcionários automaticamente de reservas",
           "autoSendWelcome": "Enviar mensagem de boas-vindas automaticamente",
           "autoSendReminders": "Enviar lembretes de check-in automaticamente"
         },

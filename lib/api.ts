@@ -153,27 +153,47 @@ const normalizeReservationList = (reservations: Reservation[]) =>
 // Base fetch helper
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch (networkError) {
+    // Network error (offline, CORS, server unreachable)
+    const error = new Error('Erro de conexão. Verifique sua internet e tente novamente.') as Error & { code?: string };
+    error.code = 'NETWORK_ERROR';
+    throw error;
+  }
 
   const text = await response.text();
 
   if (!text) {
-    if (!response.ok) throw new Error('Erro na requisicao');
+    if (!response.ok) {
+      const error = new Error('Erro na requisição') as Error & { code?: string };
+      error.code = 'SERVER_ERROR';
+      throw error;
+    }
     return {} as T;
   }
 
-  const data = JSON.parse(text);
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    const error = new Error('Resposta inválida do servidor') as Error & { code?: string };
+    error.code = 'SERVER_ERROR';
+    throw error;
+  }
 
   if (!response.ok) {
     // Criar erro com dados adicionais para o frontend tratar
-    const error = new Error(data.error || 'Erro na requisicao') as Error & { code?: string; response?: { data: typeof data } };
+    const error = new Error(data.error || 'Erro na requisição') as Error & { code?: string; response?: { data: typeof data } };
     error.code = data.code;
     error.response = { data };
     throw error;

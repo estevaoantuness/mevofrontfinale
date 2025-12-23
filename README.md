@@ -10,14 +10,14 @@
 
 ## Sobre
 
-Frontend do **Mevo** - plataforma SaaS para anfitriões de aluguel por temporada. Interface moderna e responsiva para gerenciar propriedades, reservas, hóspedes e automações de comunicação.
+Frontend do **Mevo** - plataforma SaaS para anfitriões de aluguel por temporada. Interface moderna e responsiva para gerenciar propriedades, reservas, funcionários e automações de comunicação.
 
 ### Funcionalidades
 
 - **Landing Page** moderna com animações Framer Motion
 - **Dashboard** completo para gestão de propriedades
 - **Calendário** visual de reservas
-- **Gestão de Hóspedes** com histórico de reservas
+- **Gestão de Funcionários** com histórico de reservas
 - **Templates de Mensagens** com preview em tempo real
 - **Automações** configuráveis (check-in, checkout, limpeza, review)
 - **Integração WhatsApp** com QR Code para conexão
@@ -151,10 +151,10 @@ mevofrontfinale/
 | Calendar | Calendário visual de reservas |
 | Reservations | Lista de todas as reservas |
 | Properties | Gestão de propriedades e calendários iCal |
-| Guests | Base de hóspedes com histórico |
+| Guests | Base de funcionários com histórico |
 | Templates | Templates de mensagens |
 | Settings | Automações e configurações |
-| Logs | Histórico de mensagens enviadas |
+| Pricing | Calculadora por imóvel |
 | Profile | Perfil do usuário e preferências |
 | Billing | Plano, assinatura e upgrade |
 

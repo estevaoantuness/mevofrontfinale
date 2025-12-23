@@ -18,7 +18,6 @@ import {
   User,
   Users,
   AlertTriangle,
-  Check,
   AlertCircle,
   Mail,
   Calculator
@@ -168,6 +167,17 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       console.error('Erro ao carregar dados:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshEmployees = async () => {
+    try {
+      const data = await api.getGuests({ limit: 200 });
+      setEmployees(data.guests);
+      return data.guests;
+    } catch (err) {
+      console.error('Erro ao carregar funcionários:', err);
+      return employees;
     }
   };
 
@@ -595,9 +605,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
-                <Button onClick={() => {
-                  const defaultEmployeeId = defaultEmployee ? String(defaultEmployee.id) : '';
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId });
+                <Button onClick={async () => {
+                  const list = await refreshEmployees();
+                  const defaultEmployeeId = list.find(employee => employee.isDefault)?.id;
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId ? String(defaultEmployeeId) : '' });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel

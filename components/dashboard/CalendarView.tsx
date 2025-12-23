@@ -733,7 +733,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 </div>
                 {dayRes.reservation.guestName && (
                   <p className="text-sm text-slate-400">
-                    Hóspede: {dayRes.reservation.guestName}
+                    Funcionário: {dayRes.reservation.guestName}
                   </p>
                 )}
                 <p className="text-xs text-slate-500 mt-1">
