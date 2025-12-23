@@ -71,11 +71,11 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
     <div className={`min-h-screen font-sans selection:bg-blue-500/30 ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-[#F8FAFC] text-slate-700'}`}>
       {/* Navbar */}
       <nav className={`fixed top-0 w-full z-40 border-b backdrop-blur-md ${isDark ? 'border-white/5 bg-[#050509]/80' : 'border-slate-200 bg-white/80'}`}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Logo />
-          <div className="flex gap-3 items-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <Logo size="text-xl sm:text-2xl" />
+          <div className="flex gap-2 sm:gap-3 items-center">
             {/* Language and Theme Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <LanguageSwitcher compact />
               <ThemeToggle />
             </div>

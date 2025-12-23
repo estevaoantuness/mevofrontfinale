@@ -43,7 +43,7 @@ export const LoginPage = ({ onLoginSuccess, onBack, onGoToRegister, onGoToForgot
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden ${isDark ? 'bg-[#050509]' : 'bg-[#F8FAFC]'}`}>
       {/* Language/Theme Controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-10">
         <LanguageSwitcher compact />
         <ThemeToggle />
       </div>

@@ -39,12 +39,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+        className="flex items-center gap-1 sm:gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors p-1.5 sm:p-0"
         aria-label="Change language"
         aria-expanded={isOpen}
       >
-        <Globe size={16} />
-        <span className="font-mono text-xs uppercase">{currentLang.label}</span>
+        <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <span className="font-mono text-[10px] sm:text-xs uppercase">{currentLang.label}</span>
       </button>
 
       {isOpen && (
