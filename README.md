@@ -83,7 +83,7 @@ mevofrontfinale/
 │   ├── dashboard/       # Componentes do Dashboard
 │   │   ├── CalendarView.tsx
 │   │   ├── GuestsTab.tsx
-│   │   ├── LogsTab.tsx
+│   │   ├── PricingTab.tsx
 │   │   ├── ProfileTab.tsx
 │   │   ├── PropertiesTab.tsx
 │   │   ├── ReservationCard.tsx

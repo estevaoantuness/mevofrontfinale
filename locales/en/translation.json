@@ -215,7 +215,7 @@
           "ical": "Advanced multi-channel iCal",
           "webhooks": "Webhooks for integrations",
           "priority": "Queue priority",
-          "logs": "Full logs",
+          "logs": "Full reports",
           "support": "Priority support"
         }
       },
@@ -226,7 +226,7 @@
           "properties": "Up to 30 properties",
           "includesPro": "Everything in Pro",
           "users": "Multiple users and permissions",
-          "audit": "Audit and advanced logs",
+          "audit": "Advanced audit",
           "sla": "Priority support (SLA)",
           "api": "Full API",
           "whiteLabel": "White-label",
@@ -241,7 +241,7 @@
       "properties": "Properties",
       "guests": "Guests",
       "templates": "Templates",
-      "logs": "Logs",
+      "pricing": "Pricing",
       "settings": "Settings",
       "billing": "Billing",
       "profile": "Profile",
@@ -340,25 +340,6 @@
         "checkoutDate": "Checkout date",
         "checkinTime": "Check-in time",
         "checkoutTime": "Checkout time"
-      }
-    },
-    "logs": {
-      "title": "Activity Logs",
-      "empty": "No logs available",
-      "emptyDesc": "Activity logs will appear here",
-      "filters": {
-        "all": "All",
-        "message": "Messages",
-        "sync": "Sync",
-        "error": "Errors"
-      },
-      "types": {
-        "message_sent": "Message sent",
-        "sync_completed": "Sync completed",
-        "sync_failed": "Sync failed",
-        "property_created": "Property created",
-        "property_updated": "Property updated",
-        "reservation_created": "Reservation created"
       }
     },
     "settings": {

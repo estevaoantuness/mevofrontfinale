@@ -215,7 +215,7 @@
           "ical": "Multi-canais iCal avançados",
           "webhooks": "Webhooks para integrações",
           "priority": "Prioridade de fila",
-          "logs": "Logs completos",
+          "logs": "Relatórios completos",
           "support": "Suporte prioritário"
         }
       },
@@ -226,7 +226,7 @@
           "properties": "Até 30 propriedades",
           "includesPro": "Tudo do Pro",
           "users": "Múltiplos usuários e permissões",
-          "audit": "Auditoria e logs avançados",
+          "audit": "Auditoria avançada",
           "sla": "Suporte prioritário (SLA)",
           "api": "API completa",
           "whiteLabel": "White-label",
@@ -241,7 +241,7 @@
       "properties": "Imóveis",
       "guests": "Hóspedes",
       "templates": "Templates",
-      "logs": "Logs",
+      "pricing": "Precificação",
       "settings": "Configurações",
       "billing": "Cobrança",
       "profile": "Perfil",
@@ -340,25 +340,6 @@
         "checkoutDate": "Data de checkout",
         "checkinTime": "Horário de check-in",
         "checkoutTime": "Horário de checkout"
-      }
-    },
-    "logs": {
-      "title": "Logs de Atividade",
-      "empty": "Nenhum log disponível",
-      "emptyDesc": "Os logs de atividade aparecerão aqui",
-      "filters": {
-        "all": "Todos",
-        "message": "Mensagens",
-        "sync": "Sincronização",
-        "error": "Erros"
-      },
-      "types": {
-        "message_sent": "Mensagem enviada",
-        "sync_completed": "Sincronização concluída",
-        "sync_failed": "Falha na sincronização",
-        "property_created": "Imóvel criado",
-        "property_updated": "Imóvel atualizado",
-        "reservation_created": "Reserva criada"
       }
     },
     "settings": {

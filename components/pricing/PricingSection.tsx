@@ -49,7 +49,6 @@ const PLANS: PricingPlan[] = [
       'Multi-canais iCal avançados',
       'Webhooks para integrações',
       'Prioridade de fila',
-      'Logs completos',
       'Suporte prioritário'
     ],
     isPopular: true,
@@ -67,7 +66,7 @@ const PLANS: PricingPlan[] = [
       'Até 30 propriedades',
       'Tudo do Pro',
       'Múltiplos usuários e permissões',
-      'Auditoria e logs avançados',
+      'Auditoria avançada',
       'Suporte prioritário (SLA)',
       'API completa',
       'White-label',

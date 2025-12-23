@@ -229,11 +229,10 @@ lib/api.ts                               # Adicionar getReservations()
 pages/Dashboard.tsx                      # Substituir overview atual
 ```
 
-### Fase 1.2 - Logs
+### Fase 1.2 - Precificação
 ```
-components/dashboard/LogsTab.tsx         # Tab de logs
-components/dashboard/LogItem.tsx         # Item individual
-lib/api.ts                               # Adicionar getLogs()
+components/dashboard/PricingTab.tsx      # Tab de precificação por imóvel
+lib/api.ts                               # Adicionar endpoints de precificação
 ```
 
 ### Fase 1.3 - Reservas
@@ -249,7 +248,7 @@ components/dashboard/ReservationCard.tsx # Card de reserva
 | Feature | Complexidade | Arquivos |
 |---------|--------------|----------|
 | Calendário | Alta | 4-5 |
-| Logs | Média | 2-3 |
+| Precificação | Média | 2-3 |
 | Reservas | Média | 2-3 |
 | Mobile | Média | Todos |
 | Onboarding | Baixa | 1-2 |

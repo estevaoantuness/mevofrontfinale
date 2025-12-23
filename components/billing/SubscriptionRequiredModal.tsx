@@ -154,7 +154,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
                   currentPlan === 'starter' ? 'Até 10 imóveis' : 'Até 30 imóveis',
                   'Webhooks para integrações',
                   'Suporte prioritário',
-                  'Logs completos'
+                  'Relatórios completos'
                 ] : [
                   '10 dias grátis sem compromisso',
                   'Até 10 imóveis cadastrados',

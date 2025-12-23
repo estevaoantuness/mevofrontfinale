@@ -1,3 +1,5 @@
+import type { PropertyPricingConfig, PropertyPricingConfigInput } from './pricing';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Types
@@ -33,24 +35,6 @@ export interface DashboardStats {
   totalProperties: number;
   messagesToday: number;
   messagesThisMonth: number;
-}
-
-export interface MessageLog {
-  id: number;
-  property_id?: number | null;
-  property_name?: string | null;
-  employee_phone?: string | null;
-  recipient?: string | null;
-  message: string;
-  sent_at: string;
-  status: string;
-}
-
-export interface LogsResponse {
-  logs: MessageLog[];
-  total: number;
-  limit: number;
-  offset: number;
 }
 
 export interface Guest {
@@ -257,18 +241,23 @@ export async function deleteProperty(id: number): Promise<void> {
   await apiFetch<void>(`/properties/${id}`, { method: 'DELETE' });
 }
 
+export async function getPropertyPricingConfig(propertyId: number): Promise<PropertyPricingConfig> {
+  return apiFetch<PropertyPricingConfig>(`/properties/${propertyId}/pricing-config`);
+}
+
+export async function updatePropertyPricingConfig(
+  propertyId: number,
+  data: PropertyPricingConfigInput
+): Promise<PropertyPricingConfig> {
+  return apiFetch<PropertyPricingConfig>(`/properties/${propertyId}/pricing-config`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 // Dashboard
 export async function getStats(): Promise<DashboardStats> {
   return apiFetch<DashboardStats>('/dashboard/stats');
-}
-
-export async function getLogs(params?: { limit?: number; offset?: number }): Promise<LogsResponse> {
-  const searchParams = new URLSearchParams();
-  if (params?.limit !== undefined) searchParams.append('limit', params.limit.toString());
-  if (params?.offset !== undefined) searchParams.append('offset', params.offset.toString());
-
-  const query = searchParams.toString();
-  return apiFetch<LogsResponse>(`/dashboard/logs${query ? `?${query}` : ''}`);
 }
 
 export async function runWorker(): Promise<void> {
@@ -658,56 +647,6 @@ export async function previewTemplate(id: number, data?: object): Promise<{ subj
 
 export async function duplicateTemplate(id: number): Promise<MessageTemplate> {
   return apiFetch<MessageTemplate>(`/templates/${id}/duplicate`, { method: 'POST' });
-}
-
-// Notification Logs Types
-export interface NotificationLog {
-  id: number;
-  type: string;
-  channel: string;
-  recipient: string;
-  subject?: string;
-  message: string;
-  status: 'pending' | 'sent' | 'delivered' | 'failed';
-  errorMessage?: string;
-  sentAt?: string;
-  createdAt: string;
-}
-
-export interface NotificationStats {
-  totalSent: number;
-  sentToday: number;
-  sentThisMonth: number;
-  failedThisMonth: number;
-  byChannel: Record<string, number>;
-  byType: Record<string, number>;
-}
-
-export interface NotificationLogsResponse {
-  notifications: NotificationLog[];
-  total: number;
-  limit: number;
-  offset: number;
-}
-
-// Notification Logs API
-export async function getNotificationLogs(params?: {
-  type?: string;
-  status?: string;
-  limit?: number;
-  offset?: number;
-}): Promise<NotificationLogsResponse> {
-  const searchParams = new URLSearchParams();
-  if (params?.type) searchParams.append('type', params.type);
-  if (params?.status) searchParams.append('status', params.status);
-  if (params?.limit) searchParams.append('limit', params.limit.toString());
-  if (params?.offset) searchParams.append('offset', params.offset.toString());
-  const query = searchParams.toString();
-  return apiFetch<NotificationLogsResponse>(`/automation/notifications${query ? `?${query}` : ''}`);
-}
-
-export async function getNotificationStats(): Promise<NotificationStats> {
-  return apiFetch<NotificationStats>('/automation/notifications/stats');
 }
 
 // Guests Types
