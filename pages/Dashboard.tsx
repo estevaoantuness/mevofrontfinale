@@ -249,11 +249,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       if (result.connected) {
         setWhatsappStatus({ ...whatsappStatus, connected: true, phone: result.phone });
         setQrCode(null);
+      } else if (result.qr) {
+        setQrCode(result.qr);
       } else {
-        setQrCode(result.qr || null);
+        // QR Code não veio na resposta - mostra erro
+        throw new Error('Não foi possível gerar o QR Code. Tente novamente.');
       }
     } catch (err: any) {
       alert('Erro ao gerar QR Code: ' + err.message);
+      setQrCode(null); // Reset do estado para voltar à tela inicial
     } finally {
       setQrLoading(false);
     }
