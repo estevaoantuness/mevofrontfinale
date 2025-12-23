@@ -1,510 +1,270 @@
 import React, { useState, useEffect } from 'react';
-import {
-  MessageSquare,
-  Plus,
-  Edit3,
-  Trash2,
-  Copy,
-  Eye,
-  CheckCircle,
-  XCircle,
-  X,
-  Save,
-  Info,
-  Clock,
-  Loader2
-} from 'lucide-react';
+import { Sun, Moon, Trash2, Loader2, AlertTriangle, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { getProfile, deleteAccount, updatePreferences, Profile } from '../../lib/api';
 import { useTheme } from '../../lib/ThemeContext';
-import * as api from '../../lib/api';
-import type { MessageTemplate, TemplateType, TemplatePlaceholder } from '../../lib/api';
+import { useTranslation } from 'react-i18next';
 
-// Template type labels for display
-const TYPE_LABELS: Record<string, { label: string; description: string; icon: string }> = {
-  cleaning: { label: 'Aviso de Limpeza', description: 'Enviado para funcionários no dia do checkout', icon: 'cleaning' },
-  checkout_reminder: { label: 'Lembrete de Checkout', description: 'Enviado 1 dia antes do checkout', icon: 'reminder' },
-  checkin_reminder: { label: 'Lembrete de Check-in', description: 'Enviado 1 dia antes do check-in', icon: 'reminder' },
-  welcome: { label: 'Boas-vindas', description: 'Enviado ao criar reserva', icon: 'welcome' },
-  review_request: { label: 'Solicitação de Avaliação', description: 'Enviado 1 dia após o checkout', icon: 'review' },
-  custom: { label: 'Personalizado', description: 'Template customizado para uso manual', icon: 'custom' }
-};
-
-// Placeholders for team messages
-const TEAM_PLACEHOLDERS = [
-  { placeholder: '{{employee_name}}', description: 'Nome do funcionário' },
-  { placeholder: '{{property_name}}', description: 'Nome do imóvel' },
-  { placeholder: '{{checkout_time}}', description: 'Horário de checkout' },
-  { placeholder: '{{checkin_time}}', description: 'Horário de check-in' },
-  { placeholder: '{{checkout_date}}', description: 'Data de checkout' },
-  { placeholder: '{{checkin_date}}', description: 'Data de check-in' },
-  { placeholder: '{{guest_name}}', description: 'Nome do funcionário' }
-];
-
-interface TemplateEditorProps {
-  template?: MessageTemplate;
-  onSave: (data: { name: string; type: string; content: string; isActive: boolean }) => Promise<void>;
-  onClose: () => void;
-  isDark: boolean;
+interface SettingsTabProps {
+  onLogout: () => void;
 }
 
-const TemplateEditor = ({ template, onSave, onClose, isDark }: TemplateEditorProps) => {
-  const [name, setName] = useState(template?.name || '');
-  const [type, setType] = useState(template?.type || 'cleaning');
-  const [content, setContent] = useState(template?.content || '');
-  const [isActive, setIsActive] = useState(template?.isActive ?? true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+export const SettingsTab: React.FC<SettingsTabProps> = ({ onLogout }) => {
+  const { theme, setTheme, isDark } = useTheme();
+  const { i18n } = useTranslation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !content.trim()) {
-      setError('Nome e conteúdo são obrigatórios');
-      return;
-    }
-
-    setSaving(true);
-    setError('');
-
-    try {
-      await onSave({ name, type, content, isActive });
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao salvar template');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const insertPlaceholder = (placeholder: string) => {
-    setContent(prev => prev + placeholder);
-  };
-
-  return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${isDark ? 'bg-black/70' : 'bg-black/40'}`}>
-      <div className={`relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
-        {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
-          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            {template ? 'Editar Template' : 'Novo Template'}
-          </h3>
-          <button
-            onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
-          <Input
-            label="Nome do Template"
-            placeholder="Ex: Aviso de Checkout Padrão"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-          />
-
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Tipo</label>
-            <select
-              value={type}
-              onChange={e => setType(e.target.value)}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
-                isDark
-                  ? 'bg-white/5 border-white/10 text-white'
-                  : 'bg-white border-slate-300 text-slate-900'
-              }`}
-            >
-              <option value="cleaning">Notificação de Limpeza</option>
-              <option value="checkout_reminder">Lembrete de Checkout</option>
-              <option value="checkin_reminder">Lembrete de Check-in</option>
-              <option value="custom">Personalizado</option>
-            </select>
-          </div>
-
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Mensagem</label>
-            <textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              rows={6}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none ${
-                isDark
-                  ? 'bg-white/5 border-white/10 text-white placeholder:text-slate-500'
-                  : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400'
-              }`}
-              placeholder="Digite sua mensagem aqui..."
-              required
-            />
-          </div>
-
-          {/* Placeholders */}
-          <div className={`rounded-lg p-4 ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-slate-50 border border-slate-200'}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <Info className="w-4 h-4 text-blue-400" />
-              <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Variáveis disponíveis (clique para inserir)</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {TEAM_PLACEHOLDERS.map(p => (
-                <button
-                  key={p.placeholder}
-                  type="button"
-                  onClick={() => insertPlaceholder(p.placeholder)}
-                  className="px-2.5 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-md hover:bg-blue-500/20 transition-colors border border-blue-500/20"
-                  title={p.description}
-                >
-                  {p.placeholder}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Active toggle */}
-          <div className={`flex items-center justify-between p-4 rounded-lg ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-slate-50 border border-slate-200'}`}>
-            <div>
-              <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Template Ativo</span>
-              <p className="text-xs text-slate-500 mt-0.5">Templates ativos serão usados no envio automático</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                isActive ? 'bg-emerald-500' : isDark ? 'bg-white/10' : 'bg-slate-300'
-              }`}
-            >
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                isActive ? 'left-7' : 'left-1'
-              }`} />
-            </button>
-          </div>
-
-          {error && (
-            <div className={`p-3 rounded-lg text-sm ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
-              {error}
-            </div>
-          )}
-        </form>
-
-        {/* Footer */}
-        <div className={`flex items-center justify-end gap-3 px-6 py-4 border-t ${isDark ? 'border-white/5 bg-black/20' : 'border-slate-200 bg-slate-50'}`}>
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
-            {saving ? (
-              <>
-                <Loader2 size={16} className="mr-2 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save size={16} className="mr-2" />
-                Salvar Template
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const SettingsTab = () => {
-  const { isDark } = useTheme();
-  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [editingTemplate, setEditingTemplate] = useState<MessageTemplate | null>(null);
-  const [showEditor, setShowEditor] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState<MessageTemplate | null>(null);
-  const [previewContent, setPreviewContent] = useState<string>('');
-  const [previewLoading, setPreviewLoading] = useState(false);
+
+  // Preferences state
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefsSaved, setPrefsSaved] = useState(false);
+
+  // Delete state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    loadTemplates();
+    loadProfile();
   }, []);
 
-  const loadTemplates = async () => {
+  const loadProfile = async () => {
     try {
-      setLoading(true);
-      const data = await api.getTemplates({ channel: 'whatsapp' });
-      setTemplates(data);
+      const data = await getProfile();
+      setProfile(data);
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar templates');
+      setError(err.message || 'Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTemplate = async (data: { name: string; type: string; content: string; isActive: boolean }) => {
-    await api.createTemplate({
-      ...data,
-      channel: 'whatsapp'
-    });
-    await loadTemplates();
-  };
-
-  const handleUpdateTemplate = async (data: { name: string; type: string; content: string; isActive: boolean }) => {
-    if (!editingTemplate) return;
-    await api.updateTemplate(editingTemplate.id, data);
-    await loadTemplates();
-    setEditingTemplate(null);
-  };
-
-  const handleDeleteTemplate = async (id: number) => {
-    if (!confirm('Tem certeza que deseja excluir este template?')) return;
+  const handleThemeChange = async (newTheme: 'dark' | 'light') => {
+    setSavingPrefs(true);
     try {
-      await api.deleteTemplate(id);
-      await loadTemplates();
+      setTheme(newTheme);
+      await updatePreferences({ theme: newTheme });
+      setPrefsSaved(true);
+      setTimeout(() => setPrefsSaved(false), 2000);
     } catch (err: any) {
-      alert('Erro ao excluir: ' + err.message);
-    }
-  };
-
-  const handleDuplicateTemplate = async (id: number) => {
-    try {
-      await api.duplicateTemplate(id);
-      await loadTemplates();
-    } catch (err: any) {
-      alert('Erro ao duplicar: ' + err.message);
-    }
-  };
-
-  const handleToggleActive = async (template: MessageTemplate) => {
-    try {
-      await api.updateTemplate(template.id, { isActive: !template.isActive });
-      await loadTemplates();
-    } catch (err: any) {
-      alert('Erro ao alternar: ' + err.message);
-    }
-  };
-
-  const handlePreview = async (template: MessageTemplate) => {
-    setPreviewTemplate(template);
-    setPreviewLoading(true);
-    try {
-      const result = await api.previewTemplate(template.id);
-      setPreviewContent(result.content);
-    } catch {
-      setPreviewContent(template.content);
+      setError(err.message || 'Erro ao salvar preferências');
     } finally {
-      setPreviewLoading(false);
+      setSavingPrefs(false);
+    }
+  };
+
+  const handleLanguageChange = async (newLang: 'pt-BR' | 'en' | 'es-419') => {
+    setSavingPrefs(true);
+    try {
+      i18n.changeLanguage(newLang);
+      await updatePreferences({ language: newLang });
+      setPrefsSaved(true);
+      setTimeout(() => setPrefsSaved(false), 2000);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao salvar preferências');
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deleteConfirmText !== 'DELETE_MY_ACCOUNT') {
+      setError('Digite DELETE_MY_ACCOUNT para confirmar');
+      return;
+    }
+
+    setDeleting(true);
+    setError('');
+
+    try {
+      await deleteAccount('DELETE_MY_ACCOUNT');
+      onLogout();
+    } catch (err: any) {
+      setError(err.message || 'Erro ao deletar conta');
+      setDeleting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Templates de Mensagem</h2>
-          <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Configure os templates de mensagem para sua equipe</p>
-        </div>
-        <Button onClick={() => { setEditingTemplate(null); setShowEditor(true); }}>
-          <Plus size={16} className="mr-2" />
-          Novo Template
-        </Button>
-      </div>
-
+    <div className="space-y-6 max-w-2xl">
+      {/* Error */}
       {error && (
-        <div className={`p-4 rounded-lg text-sm ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
+        <div className={`p-4 rounded-lg text-sm flex items-center gap-2 ${isDark ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-red-50 border border-red-200 text-red-600'}`}>
+          <AlertTriangle size={16} />
           {error}
         </div>
       )}
 
-      {/* Templates List */}
-      <div className="space-y-4">
-        {templates.length === 0 ? (
-          <div className={`text-center py-12 rounded-xl ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-            <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <h3 className={`text-lg font-medium mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Nenhum template ainda</h3>
-            <p className="text-sm text-slate-500 mb-4">Crie seu primeiro template de mensagem</p>
-            <Button onClick={() => { setEditingTemplate(null); setShowEditor(true); }}>
-              <Plus size={16} className="mr-2" />
-              Criar Template
-            </Button>
-          </div>
-        ) : (
-          templates.map(template => {
-            const typeInfo = TYPE_LABELS[template.type] || TYPE_LABELS.custom;
+      {/* Preferences */}
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Preferências</h3>
+          {prefsSaved && (
+            <span className="text-sm text-green-400 flex items-center gap-1">
+              <Check size={16} />
+              Salvo!
+            </span>
+          )}
+        </div>
 
-            return (
-              <div
-                key={template.id}
-                className={`rounded-xl overflow-hidden transition-colors ${
-                  isDark
-                    ? 'bg-[#0B0C15] border border-white/5 hover:border-white/10'
-                    : 'bg-white border border-slate-200 hover:border-slate-300 shadow-sm'
+        <div className="space-y-6">
+          {/* Theme Selection */}
+          <div>
+            <label className={`block text-sm mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Tema</label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleThemeChange('dark')}
+                disabled={savingPrefs}
+                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                  theme === 'dark'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                    : isDark
+                      ? 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
-                {/* Template Header */}
-                <div className={`flex items-start justify-between p-4 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2.5 rounded-lg ${template.isActive ? 'bg-emerald-500/10' : isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
-                      <MessageSquare className={`w-5 h-5 ${template.isActive ? 'text-emerald-400' : 'text-slate-500'}`} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{template.name}</h4>
-                        {template.isActive ? (
-                          <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/20">
-                            <CheckCircle className="w-3 h-3" />
-                            Ativo
-                          </span>
-                        ) : (
-                          <span className={`flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${isDark ? 'bg-white/5 text-slate-500 border-white/10' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-                            <XCircle className="w-3 h-3" />
-                            Inativo
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-slate-500">{typeInfo.label}</span>
-                        <span className={isDark ? 'text-slate-700' : 'text-slate-300'}>|</span>
-                        <span className="text-xs text-slate-500">{typeInfo.description}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handlePreview(template)}
-                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-blue-400 hover:bg-blue-500/10' : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50'}`}
-                      title="Visualizar"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDuplicateTemplate(template.id)}
-                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10' : 'text-slate-500 hover:text-cyan-600 hover:bg-cyan-50'}`}
-                      title="Duplicar"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => { setEditingTemplate(template); setShowEditor(true); }}
-                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-yellow-400 hover:bg-yellow-500/10' : 'text-slate-500 hover:text-yellow-600 hover:bg-yellow-50'}`}
-                      title="Editar"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTemplate(template.id)}
-                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10' : 'text-slate-500 hover:text-red-600 hover:bg-red-50'}`}
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Template Content Preview */}
-                <div className="p-4">
-                  <div className={`rounded-lg p-3 ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-slate-50 border border-slate-200'}`}>
-                    <pre className={`text-sm whitespace-pre-wrap font-sans line-clamp-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {template.content}
-                    </pre>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className={`flex items-center justify-between px-4 py-3 border-t ${isDark ? 'bg-black/20 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Clock className="w-3.5 h-3.5" />
-                    Atualizado em {new Date(template.updatedAt).toLocaleDateString('pt-BR')}
-                  </div>
-                  <button
-                    onClick={() => handleToggleActive(template)}
-                    className={`text-xs font-medium px-3 py-1 rounded-md transition-colors ${
-                      template.isActive
-                        ? 'text-yellow-400 hover:bg-yellow-500/10'
-                        : 'text-emerald-400 hover:bg-emerald-500/10'
-                    }`}
-                  >
-                    {template.isActive ? 'Desativar' : 'Ativar'}
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Placeholders Reference */}
-      <div className={`rounded-xl p-5 ${isDark ? 'bg-white/[0.02] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
-        <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          <Info className="w-4 h-4 text-blue-400" />
-          Variaveis Disponiveis (Equipe)
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {TEAM_PLACEHOLDERS.map(p => (
-            <div key={p.placeholder} className={`p-3 rounded-lg ${isDark ? 'bg-black/20' : 'bg-slate-50'}`}>
-              <code className="text-xs text-blue-400 font-mono">{p.placeholder}</code>
-              <p className="text-xs text-slate-500 mt-1">{p.description}</p>
+                <Moon size={20} />
+                <span className="font-medium">Dark</span>
+              </button>
+              <button
+                onClick={() => handleThemeChange('light')}
+                disabled={savingPrefs}
+                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                  theme === 'light'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                    : isDark
+                      ? 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                <Sun size={20} />
+                <span className="font-medium">Light</span>
+              </button>
             </div>
-          ))}
+          </div>
+
+          {/* Language Selection */}
+          <div>
+            <label className={`block text-sm mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Idioma</label>
+            <div className="flex gap-2">
+              {[
+                { code: 'pt-BR', label: '(pt-br)' },
+                { code: 'en', label: '(en)' },
+                { code: 'es-419', label: '(es)' }
+              ].map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code as 'pt-BR' | 'en' | 'es-419')}
+                  disabled={savingPrefs}
+                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border transition-all ${
+                    i18n.language === lang.code
+                      ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                      : isDark
+                        ? 'bg-[#050509] border-white/10 text-slate-400 hover:border-white/20'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  <span className="font-medium">{lang.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Template Editor Modal */}
-      {showEditor && (
-        <TemplateEditor
-          template={editingTemplate || undefined}
-          onSave={editingTemplate ? handleUpdateTemplate : handleCreateTemplate}
-          onClose={() => { setShowEditor(false); setEditingTemplate(null); }}
-          isDark={isDark}
-        />
+      {/* Usage Stats */}
+      {profile?.stats && (
+        <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Estatísticas</h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.properties}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Propriedades</p>
+            </div>
+            <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.reservations}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Reservas</p>
+            </div>
+            <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.employees}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Funcionários</p>
+            </div>
+            <div className={`rounded-lg p-4 text-center ${isDark ? 'bg-[#050509]' : 'bg-slate-50'}`}>
+              <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile.stats.whatsappInstances}</p>
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>WhatsApps</p>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Preview Modal */}
-      {previewTemplate && (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${isDark ? 'bg-black/70' : 'bg-black/40'}`}>
-          <div className={`relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'}`}>
-            <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
-              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Preview: {previewTemplate.name}</h3>
-              <button
-                onClick={() => setPreviewTemplate(null)}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
+      {/* Danger Zone */}
+      <div className={`rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-red-500/20' : 'bg-white border border-red-200 shadow-sm'}`}>
+        <h3 className={`text-lg font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <AlertTriangle className="w-5 h-5 text-red-400" />
+          Zona de Perigo
+        </h3>
+        <p className={`text-sm mb-4 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          Ações irreversíveis. Prossiga com cuidado.
+        </p>
+
+        {!showDeleteConfirm ? (
+          <Button
+            variant="secondary"
+            className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Deletar Minha Conta
+          </Button>
+        ) : (
+          <div className={`rounded-lg p-4 space-y-4 ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}>
+            <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+              Esta ação irá deletar permanentemente sua conta, todas as propriedades, reservas e dados.
+              Digite <code className={`px-1 py-0.5 rounded ${isDark ? 'bg-red-500/20' : 'bg-red-100'}`}>DELETE_MY_ACCOUNT</code> para confirmar.
+            </p>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE_MY_ACCOUNT"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                onClick={handleDelete}
+                disabled={deleting || deleteConfirmText !== 'DELETE_MY_ACCOUNT'}
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              {previewLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-                </div>
-              ) : (
-                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                      <MessageSquare className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <span className="text-sm font-medium text-emerald-400">WhatsApp</span>
-                  </div>
-                  <p className={`text-sm whitespace-pre-wrap ${isDark ? 'text-white' : 'text-slate-900'}`}>{previewContent}</p>
-                </div>
-              )}
-            </div>
-            <div className={`px-6 py-4 border-t ${isDark ? 'border-white/5 bg-black/20' : 'border-slate-200 bg-slate-50'}`}>
-              <Button variant="secondary" className="w-full" onClick={() => setPreviewTemplate(null)}>
-                Fechar
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Confirmar Deleção'
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmText('');
+                }}
+              >
+                Cancelar
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

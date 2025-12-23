@@ -846,7 +846,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
-            <SettingsTab />
+            <SettingsTab onLogout={onLogout} />
           )}
         </div>
       </main>
