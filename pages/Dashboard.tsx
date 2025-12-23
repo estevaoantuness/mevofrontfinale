@@ -444,8 +444,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     </button>
   );
 
-  // Loading is now handled by ProtectedRoute in App.tsx
-  // This ensures a smooth transition without flashing
+  // Show loading while fetching initial data
+  if (loading) {
+    return (
+      <LoadingOverlay
+        isVisible={true}
+        title="Carregando Dashboard"
+        subtitle="Sincronizando seus dados..."
+      />
+    );
+  }
 
   return (
     <div className={`flex h-screen font-sans overflow-hidden ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
