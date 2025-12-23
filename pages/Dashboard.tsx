@@ -229,20 +229,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!newProp.employee_id) {
-        alert('Selecione um funcionário responsável');
-        return;
-      }
-
       const property = await api.createProperty({
         name: newProp.name,
         ical_airbnb: newProp.ical_airbnb,
-        ical_booking: newProp.ical_booking,
-        employee_id: Number(newProp.employee_id)
+        ical_booking: newProp.ical_booking
       });
       setProperties([property, ...properties]);
-      const defaultEmployeeId = defaultEmployee ? String(defaultEmployee.id) : '';
-      setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId });
+      setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
       setIsModalOpen(false);
     } catch (err: any) {
       // Verificar se é erro de assinatura/limite
@@ -294,16 +287,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     if (!editProp) return;
 
     try {
-      if (!editProp.employee_id) {
-        alert('Selecione um funcionário responsável');
-        return;
-      }
-
       const updated = await api.updateProperty(editProp.id, {
         name: editProp.name,
         ical_airbnb: editProp.ical_airbnb,
-        ical_booking: editProp.ical_booking,
-        employee_id: editProp.employee_id
+        ical_booking: editProp.ical_booking
       });
       setProperties(properties.map(p => p.id === updated.id ? updated : p));
       setIsEditModalOpen(false);
@@ -575,10 +562,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
-                <Button onClick={async () => {
-                  const list = await refreshEmployees();
-                  const defaultEmployeeId = list.find(employee => employee.isDefault)?.id;
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_id: defaultEmployeeId ? String(defaultEmployeeId) : '' });
+                <Button onClick={() => {
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '' });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel
@@ -590,8 +575,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <thead>
                     <tr className={isDark ? 'border-b border-white/5 bg-white/[0.02]' : 'border-b border-slate-200 bg-slate-50'}>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Imóvel</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Funcionário</th>
-                      <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Telefone</th>
                       <th className="py-3 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Calendários</th>
                       <th className="py-3 px-6 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Ações</th>
                     </tr>
@@ -599,7 +582,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <tbody className={isDark ? 'divide-y divide-white/5' : 'divide-y divide-slate-200'}>
                     {properties.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
+                        <td colSpan={3} className="py-12 text-center text-sm text-slate-500">
                           Nenhum imóvel cadastrado. Adicione o primeiro acima.
                         </td>
                       </tr>
@@ -613,12 +596,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                               </div>
                               <span className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{p.name}</span>
                             </div>
-                          </td>
-                          <td className={`py-4 px-6 text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                            {p.employee_name}
-                          </td>
-                          <td className={`py-4 px-6 font-mono text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                            {p.employee_phone}
                           </td>
                           <td className="py-4 px-6">
                             <div className="flex gap-2">
@@ -865,31 +842,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             value={newProp.name}
             onChange={e => setNewProp({...newProp, name: e.target.value})}
           />
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">Funcionário responsável</label>
-            <select
-              value={newProp.employee_id}
-              onChange={e => setNewProp({ ...newProp, employee_id: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-              required
-            >
-              <option value="">Selecione um funcionário...</option>
-              {employees.map(employee => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.name}{employee.isDefault ? ' (Padrão)' : ''}
-                </option>
-              ))}
-            </select>
-            {employees.length === 0 && (
-              <p className="text-xs text-amber-400 mt-2">Cadastre um funcionário para vincular ao imóvel.</p>
-            )}
-            {selectedNewEmployee && (
-              <p className="text-xs text-slate-500 mt-2">
-                Contato: {selectedNewEmployee.whatsapp || selectedNewEmployee.phone || 'Sem telefone'}
-              </p>
-            )}
-          </div>
-
           <Input
             label="Airbnb iCal URL"
             placeholder="https://airbnb.com/calendar/ical/..."
@@ -924,27 +876,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               value={editProp.name}
               onChange={e => setEditProp({...editProp, name: e.target.value})}
             />
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2">Funcionário responsável</label>
-              <select
-                value={editProp.employee_id ?? ''}
-                onChange={e => setEditProp({ ...editProp, employee_id: e.target.value ? Number(e.target.value) : undefined })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                required
-              >
-                <option value="">Selecione um funcionário...</option>
-                {employees.map(employee => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}{employee.isDefault ? ' (Padrão)' : ''}
-                  </option>
-                ))}
-              </select>
-              {selectedEditEmployee && (
-                <p className="text-xs text-slate-500 mt-2">
-                  Contato: {selectedEditEmployee.whatsapp || selectedEditEmployee.phone || 'Sem telefone'}
-                </p>
-              )}
-            </div>
             <Input
               label="Airbnb iCal URL"
               placeholder="https://airbnb.com/calendar/ical/..."
