@@ -516,8 +516,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 relative">
-          {/* Trial Warning Banner */}
-          {subscription?.status === 'trialing' && subscription?.trialEndsAt && (
+          {/* Trial Warning Banner - esconde no calendário */}
+          {subscription?.status === 'trialing' && subscription?.trialEndsAt && activeTab !== 'calendar' && (
             <div className="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-400" />
