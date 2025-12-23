@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
   Home,
-  MessageCircle,
+  Bell,
   LogOut,
   Plus,
   Trash2,
@@ -30,7 +30,7 @@ import { Modal } from '../components/ui/Modal';
 import { BillingTab } from '../components/dashboard/BillingTab';
 import { ProfileTab } from '../components/dashboard/ProfileTab';
 import { CalendarView } from '../components/dashboard/CalendarView';
-import { TemplatesTab } from '../components/dashboard/TemplatesTab';
+import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
 import { PricingTab } from '../components/dashboard/PricingTab';
 import { GuestsTab } from '../components/dashboard/GuestsTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
@@ -57,7 +57,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const { user } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
-    () => new Set(['overview', 'properties', 'guests', 'templates', 'pricing', 'whatsapp', 'billing', 'profile', 'settings']),
+    () => new Set(['overview', 'properties', 'guests', 'checkout', 'pricing', 'whatsapp', 'billing', 'profile', 'settings']),
     []
   );
   const [activeTab, setActiveTab] = useState('overview');
@@ -413,7 +413,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="overview" icon={LayoutGrid} label="Visão Geral" />
           <NavItem id="properties" icon={Home} label="Meus Imóveis" />
           <NavItem id="guests" icon={Users} label="Hóspedes" />
-          <NavItem id="templates" icon={MessageCircle} label="Templates" />
+          <NavItem id="checkout" icon={Bell} label="Checkout Auto" />
           <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
           <NavItem id="billing" icon={CreditCard} label="Assinatura" />
@@ -488,7 +488,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'overview' && 'Visão Geral'}
             {activeTab === 'properties' && 'Gerenciar Imóveis'}
             {activeTab === 'guests' && 'Gestão de Hóspedes'}
-            {activeTab === 'templates' && 'Templates de Mensagens'}
+            {activeTab === 'checkout' && 'Checkout Automático'}
             {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
             {activeTab === 'billing' && 'Assinatura'}
@@ -816,10 +816,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             </div>
           )}
 
-          {/* TAB: TEMPLATES */}
-          {activeTab === 'templates' && (
-            <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <TemplatesTab />
+          {/* TAB: CHECKOUT AUTO */}
+          {activeTab === 'checkout' && (
+            <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <CheckoutAutoTab />
             </div>
           )}
 
