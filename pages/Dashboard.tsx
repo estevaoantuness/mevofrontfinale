@@ -333,12 +333,29 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleRunWorker = async () => {
     setWorkerLoading(true);
     try {
-      await api.runWorker();
-      // Aguarda 2 segundos mostrando o loading
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await api.runWorker();
+      // Aguarda 1 segundo mostrando o loading
+      await new Promise(resolve => setTimeout(resolve, 1000));
       fetchData();
+
+      // Mostra resultado
+      if (result.success) {
+        const details = result.details;
+        let message = result.message;
+        if (details) {
+          message = `✅ ${details.propertiesChecked} imóvel(is) verificado(s)\n`;
+          message += `📅 ${details.checkoutsFound} checkout(s) para hoje\n`;
+          if (details.messagesSent > 0) {
+            message += `📨 ${details.messagesSent} mensagem(ns) enviada(s)`;
+          }
+          if (details.messagesFailed > 0) {
+            message += `\n❌ ${details.messagesFailed} falha(s)`;
+          }
+        }
+        alert(message);
+      }
     } catch (err: any) {
-      alert(err.message);
+      alert(`❌ Erro: ${err.message}`);
     } finally {
       setWorkerLoading(false);
     }

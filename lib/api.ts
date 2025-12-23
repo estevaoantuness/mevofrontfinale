@@ -260,8 +260,20 @@ export async function getStats(): Promise<DashboardStats> {
   return apiFetch<DashboardStats>('/dashboard/stats');
 }
 
-export async function runWorker(): Promise<void> {
-  await apiFetch<void>('/dashboard/run-worker', { method: 'POST' });
+export interface WorkerResult {
+  success: boolean;
+  message: string;
+  details?: {
+    propertiesChecked: number;
+    checkoutsFound: number;
+    messagesSent: number;
+    messagesFailed: number;
+  };
+  error?: string;
+}
+
+export async function runWorker(): Promise<WorkerResult> {
+  return apiFetch<WorkerResult>('/dashboard/run-worker', { method: 'POST' });
 }
 
 // Reservations
