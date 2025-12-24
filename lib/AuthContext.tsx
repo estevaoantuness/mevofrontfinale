@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import * as api from './api';
 import type { User } from './api';
-import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 
 interface AuthContextType {
     user: User | null;
@@ -95,11 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }}
         >
             {children}
-            <LoadingOverlay
-                isVisible={authTransition}
-                title="Entrando na sua conta"
-                subtitle="Sincronizando suas preferencias..."
-            />
+            {/* LoadingOverlay removido daqui - centralizado no Dashboard */}
         </AuthContext.Provider>
     );
 }

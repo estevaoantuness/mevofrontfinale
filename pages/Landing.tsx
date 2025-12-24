@@ -5,7 +5,6 @@ import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
-import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { PricingSection } from '../components/pricing/PricingSection';
 import { CheckoutModal } from '../components/billing/CheckoutModal';
 import { useAuth } from '../lib/AuthContext';
@@ -32,21 +31,15 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
   const { isDark } = useTheme();
   const { isAuthenticated, user } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [navigationTarget, setNavigationTarget] = useState<'login' | 'register' | 'dashboard' | 'profile' | null>(null);
   const [checkoutModal, setCheckoutModal] = useState<{
     isOpen: boolean;
     plan: typeof PLANS_DATA.starter | null;
     interval: 'monthly' | 'yearly';
   }>({ isOpen: false, plan: null, interval: 'yearly' });
 
-  // Navegação com transição de loading
-  const handleNavigate = useCallback((target: 'login' | 'register' | 'dashboard' | 'profile', callback?: () => void) => {
-    setNavigationTarget(target);
-    setIsNavigating(true);
-    setTimeout(() => {
-      callback?.();
-    }, 800);
+  // Navegação direta (sem delay - Dashboard já tem loading overlay)
+  const handleNavigate = useCallback((_target: 'login' | 'register' | 'dashboard' | 'profile', callback?: () => void) => {
+    callback?.();
   }, []);
 
   const handleNavigateToDashboard = useCallback(() => {
@@ -79,16 +72,6 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
     }
   };
 
-  // Títulos de loading baseado no destino
-  const getLoadingTitle = () => {
-    switch (navigationTarget) {
-      case 'login': return 'Abrindo login...';
-      case 'register': return 'Preparando cadastro...';
-      case 'dashboard': return 'Acessando painel...';
-      case 'profile': return 'Abrindo perfil...';
-      default: return 'Carregando...';
-    }
-  };
   return (
     <div className={`min-h-screen font-sans selection:bg-blue-500/30 ${isDark ? 'bg-[#050509] text-slate-300' : 'bg-[#F8FAFC] text-slate-700'}`}>
       {/* Navbar */}
@@ -378,12 +361,6 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
           interval={checkoutModal.interval}
         />
       )}
-
-      {/* Loading Overlay para transição */}
-      <LoadingOverlay
-        isVisible={isNavigating}
-        title={getLoadingTitle()}
-      />
     </div>
   );
 };

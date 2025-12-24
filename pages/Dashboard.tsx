@@ -54,7 +54,7 @@ interface DashboardProps {
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, setInitialized } = useAuth();
+  const { user, setInitialized, authTransition } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
     () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings']),
@@ -471,13 +471,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     </button>
   );
 
-  // Show loading while fetching initial data
-  if (loading) {
+  // Show loading while fetching initial data or auth transition
+  if (loading || authTransition) {
     return (
       <LoadingOverlay
         isVisible={true}
-        title="Carregando Dashboard"
-        subtitle="Sincronizando seus dados..."
+        title={authTransition ? "Entrando na sua conta" : "Carregando Dashboard"}
+        subtitle={authTransition ? "Sincronizando suas preferências..." : "Sincronizando seus dados..."}
       />
     );
   }
