@@ -59,11 +59,12 @@ i18n
       'en': { translation: en },
       'es-419': { translation: es419 }
     },
+    lng: 'pt-BR', // Força português como padrão
     supportedLngs: ['pt-BR', 'en', 'es-419'],
     fallbackLng: 'pt-BR',
     detection: {
-      // Check localStorage first, then use our custom navigator detector
-      order: ['localStorage', 'customNavigator'],
+      // Só usa localStorage (se usuário mudou manualmente)
+      order: ['localStorage'],
       caches: ['localStorage'],
       lookupLocalStorage: 'mevo_language'
     },
