@@ -910,4 +910,158 @@ export async function getCalendarPricing(propertyId: number, month: number, year
   return apiFetch<CalendarPricingResponse>(`/holidays/calendar/${propertyId}?month=${month}&year=${year}`);
 }
 
+// =============================================
+// ADMIN API Types
+// =============================================
+
+export interface AdminMetrics {
+  users: {
+    total: number;
+    newToday: number;
+    newWeek: number;
+    newMonth: number;
+    verified: number;
+    verificationRate: number;
+    free: number;
+  };
+  subscriptions: {
+    byPlan: Record<string, number>;
+    byStatus: Record<string, number>;
+    active: number;
+    total: number;
+    trialConversions: number;
+  };
+  revenue: {
+    mrr: number;
+    mrrFormatted: string;
+  };
+  properties: {
+    total: number;
+    avgPerUser: number;
+    withAirbnb: number;
+    withBooking: number;
+  };
+  whatsapp: {
+    usersConnected: number;
+    instances: number;
+    messagesToday: number;
+    messagesMonth: number;
+    messagesSent: number;
+    messagesFailed: number;
+    successRate: number;
+  };
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  isActive: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  whatsappConnected: boolean;
+  propertyCount: number;
+  subscription?: {
+    planId: string;
+    status: string;
+    propertyLimit: number;
+    trialEndsAt?: string;
+  };
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface AdminListItem {
+  id: number;
+  email: string;
+  name: string;
+  createdAt: string;
+  isSuperadmin: boolean;
+}
+
+export interface AdminListResponse {
+  admins: AdminListItem[];
+  isSuperadmin: boolean;
+}
+
+// =============================================
+// ADMIN API Functions
+// =============================================
+
+export async function getAdminMetrics(): Promise<AdminMetrics> {
+  return apiFetch<AdminMetrics>('/admin/metrics');
+}
+
+export async function getAdminUsers(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  planId?: string;
+  status?: string;
+}): Promise<AdminUsersResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  if (params?.search) searchParams.append('search', params.search);
+  if (params?.planId) searchParams.append('planId', params.planId);
+  if (params?.status) searchParams.append('status', params.status);
+  const query = searchParams.toString();
+  return apiFetch<AdminUsersResponse>(`/admin/users${query ? `?${query}` : ''}`);
+}
+
+export async function getAdminUserDetails(userId: number): Promise<AdminUser> {
+  return apiFetch<AdminUser>(`/admin/users/${userId}`);
+}
+
+export async function changeUserPlan(userId: number, planId: string | null, status: string = 'active'): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>(`/admin/users/${userId}/plan`, {
+    method: 'PUT',
+    body: JSON.stringify({ planId, status }),
+  });
+}
+
+export async function changeUserRole(userId: number, role: 'admin' | 'user'): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>(`/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ role }),
+  });
+}
+
+export async function toggleUserStatus(userId: number): Promise<{ success: boolean; isActive: boolean }> {
+  return apiFetch<{ success: boolean; isActive: boolean }>(`/admin/users/${userId}/status`, {
+    method: 'PUT',
+  });
+}
+
+export async function testAdminPlan(planId: string | null, status: string = 'active'): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>('/admin/test-plan', {
+    method: 'PUT',
+    body: JSON.stringify({ planId, status }),
+  });
+}
+
+export async function getAdminList(): Promise<AdminListResponse> {
+  return apiFetch<AdminListResponse>('/admin/admins');
+}
+
+export async function promoteToAdmin(email: string): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>('/admin/admins', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function demoteAdmin(userId: number): Promise<{ success: boolean; message: string }> {
+  return apiFetch<{ success: boolean; message: string }>(`/admin/admins/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
 export { API_URL };

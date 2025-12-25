@@ -10,6 +10,7 @@ import {
   Pencil,
   Smartphone,
   ShieldCheck,
+  Shield,
   RefreshCw,
   Settings,
   Send,
@@ -34,6 +35,7 @@ import { CalendarView } from '../components/dashboard/CalendarView';
 import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
 import { PricingTab } from '../components/dashboard/PricingTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
+import { AdminTab } from '../components/dashboard/AdminTab';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { MobileHeader } from '../components/dashboard/MobileHeader';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
@@ -57,7 +59,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const { user, setInitialized, authTransition } = useAuth();
   const { isDark } = useTheme();
   const allowedTabs = useMemo(
-    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings']),
+    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings', 'admin']),
     []
   );
   const [activeTab, setActiveTab] = useState('overview');
@@ -520,6 +522,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
           <NavItem id="settings" icon={Settings} label="Configurações" />
+          {user?.role === 'admin' && (
+            <NavItem id="admin" icon={Shield} label="Admin" />
+          )}
         </nav>
 
         <div className={`p-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
@@ -937,6 +942,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
             <SettingsTab onLogout={onLogout} />
+          )}
+
+          {/* TAB: ADMIN */}
+          {activeTab === 'admin' && user?.role === 'admin' && (
+            <div className="max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <AdminTab />
+            </div>
           )}
         </div>
       </main>
