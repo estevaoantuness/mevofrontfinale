@@ -155,8 +155,6 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
   const isProOrAgency = subscription?.planId === 'pro' || subscription?.planId === 'agency';
   const hasAccess = Boolean(isActivePaid && isProOrAgency);
 
-  // Debug log
-  console.log('[PricingTab] subscription:', subscription?.planId, subscription?.status, '→ hasAccess:', hasAccess);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);

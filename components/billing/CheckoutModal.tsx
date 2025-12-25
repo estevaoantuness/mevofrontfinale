@@ -30,6 +30,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState('');
+  const [trialSuccess, setTrialSuccess] = useState(false);
 
   // Email verification state
   const [checkingEmail, setCheckingEmail] = useState(true);
@@ -73,9 +74,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   if (!isOpen) return null;
 
   const price = interval === 'yearly' ? plan.yearlyPrice : plan.monthlyPrice;
-
-  // State for trial success
-  const [trialSuccess, setTrialSuccess] = useState(false);
 
   const handleCheckout = async () => {
     // Double-check email verification before proceeding
