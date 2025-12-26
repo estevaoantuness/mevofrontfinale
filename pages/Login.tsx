@@ -23,14 +23,23 @@ export const LoginPage = ({ onBack }: LoginPageProps) => {
       {/* Background gradient */}
       <div className={`absolute inset-0 -z-10 ${isDark ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#050509] to-[#050509]' : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-[#F8FAFC] to-[#F8FAFC]'}`} />
 
-      {/* Clerk SignIn Component with custom theme */}
-      <SignIn
-        appearance={getClerkAppearance(isDark)}
-        routing="path"
-        path="/login"
-        signUpUrl="/register"
-        forceRedirectUrl="/dashboard"
-      />
+      <div className="flex flex-col items-center">
+        {/* Logo Mevo */}
+        <div className="mb-8">
+          <span className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] to-[#22D3EE]">
+            mevo
+          </span>
+        </div>
+
+        {/* Clerk SignIn Component with custom theme */}
+        <SignIn
+          appearance={getClerkAppearance(isDark)}
+          routing="path"
+          path="/login"
+          signUpUrl="/register"
+          forceRedirectUrl="/dashboard"
+        />
+      </div>
 
       {/* Back to home link */}
       {onBack && (
