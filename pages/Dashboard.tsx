@@ -385,7 +385,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       const updated = await api.updateProperty(editProp.id, {
         name: editProp.name,
         ical_airbnb: editProp.ical_airbnb,
-        ical_booking: editProp.ical_booking
+        ical_booking: editProp.ical_booking,
+        employee_phone: editProp.employee_phone || undefined
       });
       setProperties(properties.map(p => p.id === updated.id ? updated : p));
       setIsEditModalOpen(false);
@@ -1057,6 +1058,29 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
               value={editProp.ical_booking || ''}
               onChange={e => setEditProp({...editProp, ical_booking: e.target.value})}
             />
+            {/* Telefone do responsável */}
+            <div>
+              <label className={`block text-sm font-medium mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Telefone do responsável
+              </label>
+              <div className="relative">
+                <Phone size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                <input
+                  type="tel"
+                  placeholder="5541999990000"
+                  value={editProp.employee_phone || ''}
+                  onChange={e => setEditProp({...editProp, employee_phone: e.target.value})}
+                  className={`w-full pl-10 pr-3 py-2 rounded-lg border text-sm transition-colors ${
+                    isDark
+                      ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+                  } focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+              </div>
+              <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                Este número receberá os avisos de checkout diários
+              </p>
+            </div>
             <div className="pt-4 flex justify-end gap-3">
               <Button type="button" variant="secondary" onClick={() => { setIsEditModalOpen(false); setEditProp(null); }}>Cancelar</Button>
               <Button type="submit">Atualizar</Button>
