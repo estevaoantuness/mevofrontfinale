@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Layers, Sparkles, Calculator, MessageCircle, LayoutGrid, Bot, Building2, User, ChevronDown } from 'lucide-react';
+import { Layers, Sparkles, Calculator, MessageCircle, LayoutGrid, Bot, Building2, User, ChevronDown, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -24,9 +24,10 @@ interface LandingPageProps {
   onRegister?: () => void;
   onDashboard?: () => void;
   onProfile?: () => void;
+  onLogout?: () => void;
 }
 
-export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: LandingPageProps) => {
+export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile, onLogout }: LandingPageProps) => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
   const { isAuthenticated, user } = useAuth();
@@ -132,6 +133,18 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile }: Lan
                           <User size={16} />
                           {t('nav.myProfile')}
                         </button>
+                        {onLogout && (
+                          <>
+                            <div className={`my-1 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`} />
+                            <button
+                              onClick={() => { onLogout(); setUserMenuOpen(false); }}
+                              className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 ${isDark ? 'text-red-400 hover:bg-white/5' : 'text-red-600 hover:bg-slate-100'}`}
+                            >
+                              <LogOut size={16} />
+                              {t('nav.logout', 'Sair')}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </>
                   )}

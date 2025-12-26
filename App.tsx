@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { SignedIn, SignedOut, RedirectToSignIn, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn, useUser, useClerk } from '@clerk/clerk-react';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { ThemeProvider } from './lib/ThemeContext';
 import './lib/i18n'; // Initialize i18n
@@ -11,6 +11,7 @@ import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
 import { ToastProvider } from './components/ui/ToastContext';
 import { AuthTransition } from './components/AuthTransition';
+import { AppLoader } from './components/AppLoader';
 
 // Protected Route Component - uses Clerk with transition
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -62,6 +63,19 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+// App wrapper that shows loader while Clerk initializes
+function AppWithLoader({ children }: { children: React.ReactNode }) {
+  const { loaded } = useClerk();
+  const { isLoading } = useAuth();
+
+  // Show loader while Clerk or Auth is initializing
+  if (!loaded || isLoading) {
+    return <AppLoader />;
+  }
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -82,6 +96,7 @@ function AppRoutes() {
             onRegister={() => navigate('/register')}
             onDashboard={() => navigate('/dashboard')}
             onProfile={() => navigate('/dashboard?tab=profile')}
+            onLogout={handleLogout}
           />
         }
       />
@@ -139,7 +154,9 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AppRoutes />
+            <AppWithLoader>
+              <AppRoutes />
+            </AppWithLoader>
           </AuthProvider>
         </BrowserRouter>
       </ToastProvider>
