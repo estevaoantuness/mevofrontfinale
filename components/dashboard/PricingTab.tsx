@@ -1,17 +1,40 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2, Lock, Sparkles, Zap, Brain, ArrowRight } from 'lucide-react';
+import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2, Lock, Sparkles, Zap, Brain, ArrowRight, Plus, Trash2, Sun } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
 import { useToast } from '../ui/ToastContext';
 import type { Property, Subscription } from '../../lib/api';
 import { getPropertyPricingConfig, updatePropertyPricingConfig, createCheckout } from '../../lib/api';
-import type { PropertyPricingConfigInput } from '../../lib/pricing';
+import type { PropertyPricingConfigInput, CustomSeason } from '../../lib/pricing';
 import { getEffectiveHolidayValue } from '../../lib/pricing';
 
 const HOLIDAY_MULTIPLIERS = [1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 const ANNUAL_ADJUSTMENTS = [0, 3, 5, 7, 10, 12, 15, 20, 25, 30];
+const SEASON_MULTIPLIERS = [1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.75, 2, 2.25, 2.5, 3];
+
+// Temporadas padrão do sistema
+const DEFAULT_SEASONS: CustomSeason[] = [
+  { name: 'Alta Temporada Verão', startMonth: 12, startDay: 15, endMonth: 2, endDay: 28, multiplier: 1.75 },
+  { name: 'Réveillon', startMonth: 12, startDay: 26, endMonth: 1, endDay: 5, multiplier: 2 },
+  { name: 'Férias de Julho', startMonth: 7, startDay: 10, endMonth: 7, endDay: 25, multiplier: 1.3 }
+];
+
+const MONTHS = [
+  { value: 1, label: 'Janeiro' },
+  { value: 2, label: 'Fevereiro' },
+  { value: 3, label: 'Março' },
+  { value: 4, label: 'Abril' },
+  { value: 5, label: 'Maio' },
+  { value: 6, label: 'Junho' },
+  { value: 7, label: 'Julho' },
+  { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Setembro' },
+  { value: 10, label: 'Outubro' },
+  { value: 11, label: 'Novembro' },
+  { value: 12, label: 'Dezembro' }
+];
 
 const defaultForm: PropertyPricingConfigInput = {
   minValue: 0,
@@ -166,6 +189,8 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
   const [error, setError] = useState('');
   const [useManualHolidayValue, setUseManualHolidayValue] = useState(false);
   const [form, setForm] = useState<PropertyPricingConfigInput>(defaultForm);
+  const [useCustomSeasons, setUseCustomSeasons] = useState(false);
+  const [customSeasons, setCustomSeasons] = useState<CustomSeason[]>([]);
 
   const pricingSummary = useMemo(() => {
     const holidayValue = getEffectiveHolidayValue({
@@ -200,10 +225,20 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
         applyMonthlyCostsToCalendar: config.applyMonthlyCostsToCalendar ?? false
       });
       setUseManualHolidayValue(!!(config.holidayValueManual && config.holidayValueManual > 0));
+      // Carregar temporadas customizadas
+      if (config.customSeasons && Array.isArray(config.customSeasons) && config.customSeasons.length > 0) {
+        setUseCustomSeasons(true);
+        setCustomSeasons(config.customSeasons as CustomSeason[]);
+      } else {
+        setUseCustomSeasons(false);
+        setCustomSeasons([]);
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar configuração da calculadora');
       setForm(defaultForm);
       setUseManualHolidayValue(false);
+      setUseCustomSeasons(false);
+      setCustomSeasons([]);
     } finally {
       setLoading(false);
     }
@@ -217,6 +252,8 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
     setLoading(false);
     setForm(defaultForm);
     setUseManualHolidayValue(false);
+    setUseCustomSeasons(false);
+    setCustomSeasons([]);
   };
 
   const toInt = (value: string) => {
@@ -237,7 +274,8 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
     try {
       const payload: PropertyPricingConfigInput = {
         ...form,
-        holidayValueManual: useManualHolidayValue ? form.holidayValueManual ?? null : null
+        holidayValueManual: useManualHolidayValue ? form.holidayValueManual ?? null : null,
+        customSeasons: useCustomSeasons && customSeasons.length > 0 ? customSeasons : null
       };
       await updatePropertyPricingConfig(selectedProperty.id, payload);
       closePricing();
@@ -246,6 +284,24 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
     } finally {
       setSaving(false);
     }
+  };
+
+  // Funções para gerenciar temporadas
+  const addSeason = () => {
+    setCustomSeasons([
+      ...customSeasons,
+      { name: '', startMonth: 1, startDay: 1, endMonth: 1, endDay: 31, multiplier: 1.5 }
+    ]);
+  };
+
+  const removeSeason = (index: number) => {
+    setCustomSeasons(customSeasons.filter((_, i) => i !== index));
+  };
+
+  const updateSeason = (index: number, field: keyof CustomSeason, value: string | number) => {
+    const updated = [...customSeasons];
+    updated[index] = { ...updated[index], [field]: value };
+    setCustomSeasons(updated);
   };
 
   // Styled input component for consistency
@@ -575,6 +631,187 @@ export const PricingTab: React.FC<PricingTabProps> = ({ properties, subscription
                     Adicionar Preços no calendário
                   </PricingCheckbox>
                 </div>
+              </div>
+            </div>
+
+            {/* Temporadas Personalizadas */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Sun className={`w-4 h-4 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Temporadas de Alta Demanda
+                </span>
+              </div>
+              <div className={`rounded-lg border ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                <PricingCheckbox
+                  checked={useCustomSeasons}
+                  onChange={e => {
+                    const enabled = e.target.checked;
+                    setUseCustomSeasons(enabled);
+                    if (enabled && customSeasons.length === 0) {
+                      // Iniciar com temporadas padrão
+                      setCustomSeasons([...DEFAULT_SEASONS]);
+                    }
+                  }}
+                >
+                  Personalizar períodos de alta temporada
+                </PricingCheckbox>
+
+                {useCustomSeasons && (
+                  <div className={`px-3 pb-3 space-y-3 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                    <p className={`text-xs pt-3 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      Configure seus próprios períodos de alta temporada com multiplicadores de preço.
+                    </p>
+
+                    {customSeasons.map((season, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-slate-50'}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <input
+                            type="text"
+                            value={season.name}
+                            onChange={e => updateSeason(index, 'name', e.target.value)}
+                            placeholder="Nome da temporada"
+                            className={`flex-1 text-sm font-medium bg-transparent border-none outline-none ${
+                              isDark ? 'text-white placeholder-slate-500' : 'text-slate-900 placeholder-slate-400'
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeSeason(index)}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              isDark
+                                ? 'hover:bg-red-500/20 text-red-400'
+                                : 'hover:bg-red-50 text-red-500'
+                            }`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                          <div>
+                            <label className={`block text-[10px] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              Início - Mês
+                            </label>
+                            <select
+                              value={season.startMonth}
+                              onChange={e => updateSeason(index, 'startMonth', Number(e.target.value))}
+                              className={`w-full text-xs rounded px-2 py-1.5 ${
+                                isDark
+                                  ? 'bg-white/5 border border-white/10 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-900'
+                              }`}
+                            >
+                              {MONTHS.map(m => (
+                                <option key={m.value} value={m.value} className={isDark ? 'bg-slate-800' : 'bg-white'}>
+                                  {m.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              Início - Dia
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="31"
+                              value={season.startDay}
+                              onChange={e => updateSeason(index, 'startDay', Number(e.target.value))}
+                              className={`w-full text-xs rounded px-2 py-1.5 ${
+                                isDark
+                                  ? 'bg-white/5 border border-white/10 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-900'
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              Fim - Mês
+                            </label>
+                            <select
+                              value={season.endMonth}
+                              onChange={e => updateSeason(index, 'endMonth', Number(e.target.value))}
+                              className={`w-full text-xs rounded px-2 py-1.5 ${
+                                isDark
+                                  ? 'bg-white/5 border border-white/10 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-900'
+                              }`}
+                            >
+                              {MONTHS.map(m => (
+                                <option key={m.value} value={m.value} className={isDark ? 'bg-slate-800' : 'bg-white'}>
+                                  {m.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              Fim - Dia
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="31"
+                              value={season.endDay}
+                              onChange={e => updateSeason(index, 'endDay', Number(e.target.value))}
+                              className={`w-full text-xs rounded px-2 py-1.5 ${
+                                isDark
+                                  ? 'bg-white/5 border border-white/10 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-900'
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              Multiplicador
+                            </label>
+                            <select
+                              value={season.multiplier}
+                              onChange={e => updateSeason(index, 'multiplier', Number(e.target.value))}
+                              className={`w-full text-xs rounded px-2 py-1.5 ${
+                                isDark
+                                  ? 'bg-white/5 border border-white/10 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-900'
+                              }`}
+                            >
+                              {SEASON_MULTIPLIERS.map(m => (
+                                <option key={m} value={m} className={isDark ? 'bg-slate-800' : 'bg-white'}>
+                                  {m}x
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={addSeason}
+                      className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isDark
+                          ? 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                      }`}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar Temporada
+                    </button>
+                  </div>
+                )}
+
+                {!useCustomSeasons && (
+                  <div className={`px-3 pb-3 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+                    <p className={`text-xs pt-3 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      Usando temporadas padrão do sistema: Verão (1.75x), Réveillon (2x), Julho (1.3x)
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

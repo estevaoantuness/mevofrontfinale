@@ -773,11 +773,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
 
                       {/* Preço do dia - APENAS em dias disponíveis quando imóvel selecionado */}
                       {showPrices && filterPropertyId && priceInfo && priceInfo.price > 0 && isAvailable && !isPastDate && (
-                        <div className={`text-[9px] md:text-xs font-bold mb-0.5 md:mb-1 px-1 py-0.5 rounded ${
-                          isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                        <span className={`text-[9px] md:text-xs font-semibold ${
+                          isDark ? 'text-blue-400' : 'text-blue-600'
                         }`}>
-                          {formatPrice(priceInfo.price)}
-                        </div>
+                          R${priceInfo.price}
+                        </span>
                       )}
 
                       {/* Eventos de reservas - por modo */}

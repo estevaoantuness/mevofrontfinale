@@ -1,3 +1,13 @@
+// Interface para temporadas customizadas
+export interface CustomSeason {
+  name: string;
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+  multiplier: number;
+}
+
 export type PropertyPricingConfig = {
   propertyId: string;
   minValue: number;
@@ -10,6 +20,7 @@ export type PropertyPricingConfig = {
   applyMonthlyCostsToCalendar: boolean;
   lastAdjustmentAppliedAt?: string | Date | null;
   holidayValue?: number;
+  customSeasons?: CustomSeason[] | null;
 };
 
 export type PropertyPricingConfigInput = {
@@ -21,6 +32,7 @@ export type PropertyPricingConfigInput = {
   annualAdjustmentPercent: number;
   applyMonthlyAdjustment: boolean;
   applyMonthlyCostsToCalendar: boolean;
+  customSeasons?: CustomSeason[] | null;
 };
 
 export type MonthlyCostEvent = {
