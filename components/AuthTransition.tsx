@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../lib/ThemeContext';
 
 interface AuthTransitionProps {
   onComplete: () => void;
 }
 
 export const AuthTransition = ({ onComplete }: AuthTransitionProps) => {
+  const { isDark } = useTheme();
   const [stage, setStage] = useState<'logo' | 'expand' | 'fade'>('logo');
 
   useEffect(() => {
@@ -26,16 +28,18 @@ export const AuthTransition = ({ onComplete }: AuthTransitionProps) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#050509] transition-opacity duration-500 ${
-        stage === 'fade' ? 'opacity-0' : 'opacity-100'
-      }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${
+        isDark ? 'bg-[#050509]' : 'bg-[#F8FAFC]'
+      } ${stage === 'fade' ? 'opacity-0' : 'opacity-100'}`}
     >
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden">
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-600/20 to-cyan-400/20 blur-3xl transition-all duration-1000 ${
-            stage === 'logo' ? 'w-32 h-32' : 'w-[200vw] h-[200vh]'
-          }`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl transition-all duration-1000 ${
+            isDark
+              ? 'bg-gradient-to-r from-blue-600/20 to-cyan-400/20'
+              : 'bg-gradient-to-r from-blue-400/30 to-cyan-300/30'
+          } ${stage === 'logo' ? 'w-32 h-32' : 'w-[200vw] h-[200vh]'}`}
         />
       </div>
 
@@ -59,9 +63,18 @@ export const AuthTransition = ({ onComplete }: AuthTransitionProps) => {
       {/* Loading dots */}
       {stage === 'logo' && (
         <div className="absolute bottom-1/3 flex gap-2">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div
+            className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-blue-500' : 'bg-blue-600'}`}
+            style={{ animationDelay: '0ms' }}
+          />
+          <div
+            className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-blue-400' : 'bg-blue-500'}`}
+            style={{ animationDelay: '150ms' }}
+          />
+          <div
+            className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-cyan-400' : 'bg-cyan-500'}`}
+            style={{ animationDelay: '300ms' }}
+          />
         </div>
       )}
     </div>
