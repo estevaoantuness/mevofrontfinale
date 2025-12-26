@@ -34,7 +34,7 @@
     "features": {
       "multiPlatform": {
         "title": "Multi-Platform Integration",
-        "desc": "Connect Airbnb, Booking and VRBO in one place. Unified calendar, zero booking conflicts."
+        "desc": "Connect Airbnb and Booking in one place. Unified calendar, zero booking conflicts."
       },
       "autoCleaning": {
         "title": "Cleaning on Autopilot",
@@ -65,7 +65,7 @@
       "subtitle": "Start automating in 3 simple steps",
       "step1": {
         "title": "Connect your calendars",
-        "desc": "Paste iCal links from Airbnb, Booking or VRBO. Instant sync."
+        "desc": "Paste iCal links from Airbnb or Booking. Instant sync."
       },
       "step2": {
         "title": "Set up your team",
@@ -101,8 +101,8 @@
         "answer": "No! Mevo works 100% in your browser. Just log in and start using."
       },
       "q2": {
-        "question": "Does it work with Booking.com and VRBO?",
-        "answer": "Yes! We integrate via iCal with Airbnb, Booking.com, VRBO and any platform that supports iCal calendars."
+        "question": "Does it work with Booking.com?",
+        "answer": "Yes! We integrate via iCal with Airbnb, Booking.com and any platform that supports iCal calendars."
       },
       "q3": {
         "question": "Can I cancel anytime?",
@@ -201,7 +201,7 @@
         "description": "For those just starting",
         "features": [
           "Up to 3 properties",
-          "iCal Sync (Airbnb/Booking/VRBO)",
+          "iCal Sync (Airbnb/Booking)",
           "Automatic checkout alerts",
           "WhatsApp integration",
           "Templates with placeholders",
@@ -309,7 +309,7 @@
       "messagesLabel": "Messages",
       "noSubscription": {
         "title": "Synced Calendar",
-        "description": "Activate the free trial or subscribe to a plan to view check-ins and checkouts automatically synced with Airbnb, Booking and VRBO.",
+        "description": "Activate the free trial or subscribe to a plan to view check-ins and checkouts automatically synced with Airbnb and Booking.",
         "cta": "Start Free Trial"
       },
       "filters": {

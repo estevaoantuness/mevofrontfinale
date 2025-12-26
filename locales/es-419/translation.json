@@ -34,7 +34,7 @@
     "features": {
       "multiPlatform": {
         "title": "Integracion Multi-Plataforma",
-        "desc": "Conecta Airbnb, Booking y VRBO en un solo lugar. Calendario unificado, cero conflictos de reservas."
+        "desc": "Conecta Airbnb y Booking en un solo lugar. Calendario unificado, cero conflictos de reservas."
       },
       "autoCleaning": {
         "title": "Limpieza en Piloto Automatico",
@@ -65,7 +65,7 @@
       "subtitle": "Comienza a automatizar en 3 simples pasos",
       "step1": {
         "title": "Conecta tus calendarios",
-        "desc": "Pega los links iCal de Airbnb, Booking o VRBO. Sincronizacion instantanea."
+        "desc": "Pega los links iCal de Airbnb o Booking. Sincronizacion instantanea."
       },
       "step2": {
         "title": "Configura tu equipo",
@@ -101,8 +101,8 @@
         "answer": "No! Mevo funciona 100% en el navegador. Solo inicia sesion y comienza a usar."
       },
       "q2": {
-        "question": "Funciona con Booking.com y VRBO?",
-        "answer": "Si! Integramos via iCal con Airbnb, Booking.com, VRBO y cualquier plataforma que soporte calendario iCal."
+        "question": "Funciona con Booking.com?",
+        "answer": "Si! Integramos via iCal con Airbnb, Booking.com y cualquier plataforma que soporte calendario iCal."
       },
       "q3": {
         "question": "Puedo cancelar en cualquier momento?",
@@ -201,7 +201,7 @@
         "description": "Para quienes estan comenzando",
         "features": [
           "Hasta 3 propiedades",
-          "Sync iCal (Airbnb/Booking/VRBO)",
+          "Sync iCal (Airbnb/Booking)",
           "Avisos de checkout automaticos",
           "Integracion WhatsApp",
           "Templates con placeholders",
@@ -309,7 +309,7 @@
       "messagesLabel": "Mensajes",
       "noSubscription": {
         "title": "Calendario Sincronizado",
-        "description": "Activa el trial gratuito o suscribete a un plan para ver check-ins y checkouts automaticamente sincronizados con Airbnb, Booking y VRBO.",
+        "description": "Activa el trial gratuito o suscribete a un plan para ver check-ins y checkouts automaticamente sincronizados con Airbnb y Booking.",
         "cta": "Activar Trial Gratuito"
       },
       "filters": {
