@@ -120,26 +120,26 @@ const PropertyCard = ({ property, onToggle, onEdit, onHide, isHidden, loading }:
       isDark ? 'bg-[#0B0C15] border-white/10' : 'bg-white border-slate-200 shadow-sm'
     }`}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${
             isDark ? 'bg-blue-500/10' : 'bg-blue-50'
           }`}>
             <Home className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
           </div>
-          <div>
-            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <div className="min-w-0">
+            <h3 className={`font-medium truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {property.name}
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
-              <StatusIcon className={`w-3.5 h-3.5 text-${status.color}-500`} />
+              <StatusIcon className={`w-3.5 h-3.5 flex-shrink-0 text-${status.color}-500`} />
               <span className={`text-xs text-${status.color}-500`}>{status.text}</span>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={onHide}
             className={`p-1.5 rounded-lg transition-colors ${
@@ -244,14 +244,13 @@ interface ConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
   property: Property | null;
-  onSave: (phone: string, time: string, dispatchWindow: number) => Promise<void>;
+  onSave: (phone: string, dispatchWindow: number) => Promise<void>;
 }
 
 const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) => {
   const { isDark } = useTheme();
   const { t } = useTranslation();
   const [phone, setPhone] = useState('');
-  const [time, setTime] = useState('08:00');
   const [dispatchWindow, setDispatchWindow] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -259,8 +258,8 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
   // Reset form when property changes
   useEffect(() => {
     if (property) {
-      setPhone(property.checkout_notify_phone || '');
-      setTime(property.checkout_notify_time || '08:00');
+      // Use checkout_notify_phone, fallback to employee_phone from "Meus Imóveis"
+      setPhone(property.checkout_notify_phone || property.employee_phone || '');
       setDispatchWindow(property.checkout_dispatch_window ?? 0);
       setError('');
     }
@@ -276,7 +275,7 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
     setSaving(true);
     setError('');
     try {
-      await onSave(phone, time, dispatchWindow);
+      await onSave(phone, dispatchWindow);
       onClose();
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar');
@@ -318,26 +317,6 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
           <p className={`text-xs mt-1.5 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
             Este número receberá os avisos de checkout diários
           </p>
-        </div>
-
-        {/* Time */}
-        <div>
-          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-            Horário do envio
-          </label>
-          <div className="relative">
-            <Clock className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
-                isDark
-                  ? 'bg-white/5 border-white/10 text-white'
-                  : 'bg-white border-slate-200 text-slate-900'
-              }`}
-            />
-          </div>
         </div>
 
         {/* Dispatch Window */}
@@ -471,13 +450,12 @@ export const CheckoutAutoTab: React.FC = () => {
   };
 
   // Save config from modal
-  const handleSaveConfig = async (phone: string, time: string, dispatchWindow: number) => {
+  const handleSaveConfig = async (phone: string, dispatchWindow: number) => {
     if (!configModal.property) return;
 
     const updated = await api.updatePropertyCheckoutAuto(configModal.property.id, {
       enabled: true,
       phone,
-      time,
       dispatch_window: dispatchWindow
     });
 
