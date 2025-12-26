@@ -43,22 +43,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 try {
                     // Get Clerk session token
                     const token = await getToken();
+                    console.log('[AuthContext] Token Clerk obtido:', token ? `${token.substring(0, 30)}...` : 'null');
+
                     if (token) {
                         api.setToken(token);
+                    } else {
+                        console.warn('[AuthContext] Token Clerk é null!');
                     }
 
                     // Try to get user from backend
                     try {
+                        console.log('[AuthContext] Chamando API /me...');
                         const userData = await api.getMe();
+                        console.log('[AuthContext] API /me sucesso:', userData);
                         // Always use Clerk's email verification status
                         setUser({
                             ...userData,
                             emailVerified: clerkEmailVerified,
                         });
-                    } catch (error) {
+                    } catch (error: any) {
                         // User might not exist in backend yet (webhook delay)
                         // Create a temporary user object from Clerk data
-                        console.log('User not in backend yet, using Clerk data');
+                        console.log('[AuthContext] API /me falhou:', error?.message || error);
+                        console.log('[AuthContext] Usando dados do Clerk como fallback');
                         setUser({
                             id: 0,
                             email: clerkUser.primaryEmailAddress?.emailAddress || '',
@@ -68,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         } as User);
                     }
                 } catch (error) {
-                    console.error('Error syncing user:', error);
+                    console.error('[AuthContext] Erro ao sincronizar:', error);
                 }
             } else {
                 setUser(null);
