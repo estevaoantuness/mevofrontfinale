@@ -15,7 +15,8 @@ import {
   Loader2,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -202,11 +203,11 @@ const PropertyCard = ({ property, onToggle, onEdit, onHide, isHidden, loading }:
             </button>
           </div>
 
-          {/* Time */}
+          {/* Time + Dispatch Window */}
           <div className="flex items-center gap-2">
             <Clock className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
             <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Enviar às {property.checkout_notify_time || '08:00'}
+              Janela: {DISPATCH_WINDOWS[property.checkout_dispatch_window ?? 0]?.label || '08:00 - 08:10'}
             </span>
           </div>
 
@@ -229,17 +230,29 @@ const PropertyCard = ({ property, onToggle, onEdit, onHide, isHidden, loading }:
 // CONFIG MODAL COMPONENT
 // ============================================
 
+// Dispatch window options
+const DISPATCH_WINDOWS = [
+  { id: 0, label: '08:00 - 08:10' },
+  { id: 1, label: '08:10 - 08:20' },
+  { id: 2, label: '08:20 - 08:30' },
+  { id: 3, label: '08:30 - 08:40' },
+  { id: 4, label: '08:40 - 08:50' },
+  { id: 5, label: '08:50 - 09:00' },
+];
+
 interface ConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
   property: Property | null;
-  onSave: (phone: string, time: string) => Promise<void>;
+  onSave: (phone: string, time: string, dispatchWindow: number) => Promise<void>;
 }
 
 const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) => {
   const { isDark } = useTheme();
+  const { t } = useTranslation();
   const [phone, setPhone] = useState('');
   const [time, setTime] = useState('08:00');
+  const [dispatchWindow, setDispatchWindow] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -248,6 +261,7 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
     if (property) {
       setPhone(property.checkout_notify_phone || '');
       setTime(property.checkout_notify_time || '08:00');
+      setDispatchWindow(property.checkout_dispatch_window ?? 0);
       setError('');
     }
   }, [property]);
@@ -255,14 +269,14 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) {
-      setError('Digite um número de telefone');
+      setError(t('property.checkoutAutoPhoneRequired') || 'Digite um número de telefone');
       return;
     }
 
     setSaving(true);
     setError('');
     try {
-      await onSave(phone, time);
+      await onSave(phone, time, dispatchWindow);
       onClose();
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar');
@@ -326,6 +340,39 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
           </div>
         </div>
 
+        {/* Dispatch Window */}
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+            Janela de disparo
+          </label>
+          <div className="relative">
+            <Bell className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+            <select
+              value={dispatchWindow}
+              onChange={(e) => setDispatchWindow(Number(e.target.value))}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none ${
+                isDark
+                  ? 'bg-white/5 border-white/10 text-white'
+                  : 'bg-white border-slate-200 text-slate-900'
+              }`}
+            >
+              {DISPATCH_WINDOWS.map((window) => (
+                <option key={window.id} value={window.id} className={isDark ? 'bg-[#1a1b26]' : ''}>
+                  {window.label}
+                </option>
+              ))}
+            </select>
+            <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          <p className={`text-xs mt-1.5 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+            As mensagens serão enviadas dentro desta janela de 10 minutos
+          </p>
+        </div>
+
         {/* Error */}
         {error && (
           <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
@@ -356,6 +403,7 @@ export const CheckoutAutoTab: React.FC = () => {
   const { t } = useTranslation();
   const { showError, showSuccess } = useToast();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [showHidden, setShowHidden] = useState(false);
@@ -371,15 +419,32 @@ export const CheckoutAutoTab: React.FC = () => {
     fetchProperties();
   }, []);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const data = await api.getProperties();
       setProperties(data);
+      if (isRefresh) {
+        showSuccess('Lista atualizada');
+      }
     } catch (err) {
       console.error('Erro ao carregar imóveis:', err);
+      if (isRefresh) {
+        showError('Erro ao atualizar lista');
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (!refreshing) {
+      fetchProperties(true);
     }
   };
 
@@ -406,13 +471,14 @@ export const CheckoutAutoTab: React.FC = () => {
   };
 
   // Save config from modal
-  const handleSaveConfig = async (phone: string, time: string) => {
+  const handleSaveConfig = async (phone: string, time: string, dispatchWindow: number) => {
     if (!configModal.property) return;
 
     const updated = await api.updatePropertyCheckoutAuto(configModal.property.id, {
       enabled: true,
       phone,
-      time
+      time,
+      dispatch_window: dispatchWindow
     });
 
     setProperties(prev => prev.map(p =>
@@ -496,8 +562,21 @@ export const CheckoutAutoTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats Badge + Hidden Toggle */}
+        {/* Refresh Button + Stats Badge + Hidden Toggle */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className={`p-2 rounded-lg transition-colors ${
+              isDark
+                ? 'text-slate-400 hover:text-white hover:bg-white/5 disabled:opacity-50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-50'
+            }`}
+            title="Atualizar lista"
+          >
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
             isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
           }`}>
