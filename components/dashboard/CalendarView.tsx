@@ -940,7 +940,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <span className="text-xs text-slate-400">Feriado</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>6</span>
+            <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-purple-400' : 'bg-purple-500'}`} />
             <span className="text-xs text-slate-400">Fim de semana</span>
           </div>
           {filterPropertyId && (
