@@ -21,6 +21,7 @@ root.render(
     <ClerkProvider
       publishableKey={CLERK_PUBLISHABLE_KEY}
       localization={ptBR}
+      afterSignOutUrl="/"
     >
       <App />
     </ClerkProvider>
