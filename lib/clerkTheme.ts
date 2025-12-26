@@ -2,292 +2,432 @@ import type { Appearance } from '@clerk/types';
 
 /**
  * Tema customizado do Clerk para combinar com a identidade visual do Mevo
+ *
+ * Cores principais:
+ * - Primary Blue: #2563EB (blue-600)
+ * - Cyan Accent: #22D3EE (cyan-400)
+ * - Dark Background: #050509, #0B0C15
+ * - Light Background: #F8FAFC, #FFFFFF
  */
 export const getClerkAppearance = (isDark: boolean): Appearance => ({
   variables: {
-    // Cores principais
-    colorPrimary: '#2563eb',           // blue-600
-    colorDanger: '#ef4444',            // red-500
-    colorSuccess: '#22c55e',           // green-500
-    colorWarning: '#f59e0b',           // amber-500
+    // Cores principais da marca Mevo
+    colorPrimary: '#2563EB',
+    colorDanger: '#EF4444',
+    colorSuccess: '#22C55E',
+    colorWarning: '#F59E0B',
 
     // Background
-    colorBackground: isDark ? '#0B0C15' : '#ffffff',
-    colorInputBackground: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+    colorBackground: isDark ? '#0B0C15' : '#FFFFFF',
+    colorInputBackground: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
 
-    // Text
-    colorText: isDark ? '#ffffff' : '#0f172a',
-    colorTextSecondary: isDark ? '#94a3b8' : '#64748b',
+    // Texto
+    colorText: isDark ? '#FFFFFF' : '#0F172A',
+    colorTextSecondary: isDark ? '#94A3B8' : '#64748B',
 
-    // Borders
-    colorInputBorder: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+    // Bordas
+    colorInputBorder: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
 
-    // Border radius
-    borderRadius: '0.75rem',
+    // Border radius igual ao Mevo
+    borderRadius: '0.5rem',
 
-    // Font
-    fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-    fontFamilyButtons: 'Inter, system-ui, -apple-system, sans-serif',
+    // Font family
+    fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontFamilyButtons: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
   },
 
   elements: {
-    // Root card
+    // ==========================================
+    // ROOT & CARD
+    // ==========================================
     rootBox: {
       width: '100%',
-      maxWidth: '24rem',
+      maxWidth: '24rem', // max-w-sm
     },
 
-    // Card container
     card: {
-      backgroundColor: isDark ? '#0B0C15' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       borderRadius: '1rem',
       padding: '2rem',
     },
 
-    // Header
+    // ==========================================
+    // HEADER
+    // ==========================================
     headerTitle: {
       fontSize: '1.25rem',
       fontWeight: '500',
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
     },
+
     headerSubtitle: {
-      color: isDark ? '#94a3b8' : '#64748b',
+      color: isDark ? '#94A3B8' : '#64748B',
       fontSize: '0.875rem',
     },
 
-    // Logo
-    logoBox: {
-      height: '2.5rem',
-    },
-    logoImage: {
-      height: '2.5rem',
-    },
-
-    // Form fields
+    // ==========================================
+    // FORM FIELDS
+    // ==========================================
     formFieldLabel: {
-      color: isDark ? '#e2e8f0' : '#374151',
-      fontSize: '0.875rem',
+      color: isDark ? '#94A3B8' : '#64748B',
+      fontSize: '0.75rem',
       fontWeight: '500',
-      marginBottom: '0.5rem',
+      marginBottom: '0.375rem',
     },
+
     formFieldInput: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
       borderRadius: '0.5rem',
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
       fontSize: '0.875rem',
-      padding: '0.625rem 0.875rem',
+      height: '2.5rem',
+      padding: '0 0.75rem',
+      transition: 'all 150ms ease',
       '&:focus': {
-        borderColor: '#2563eb',
+        borderColor: '#2563EB',
         boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.15)',
         outline: 'none',
       },
       '&::placeholder': {
-        color: isDark ? '#64748b' : '#94a3b8',
+        color: isDark ? '#64748B' : '#94A3B8',
       },
     },
+
     formFieldInputShowPasswordButton: {
-      color: isDark ? '#64748b' : '#94a3b8',
+      color: isDark ? '#64748B' : '#94A3B8',
+      '&:hover': {
+        color: isDark ? '#94A3B8' : '#64748B',
+      },
     },
 
-    // Primary button
+    formFieldErrorText: {
+      color: '#EF4444',
+      fontSize: '0.75rem',
+      marginTop: '0.25rem',
+    },
+
+    // ==========================================
+    // BUTTONS
+    // ==========================================
     formButtonPrimary: {
-      backgroundColor: '#2563eb',
-      color: '#ffffff',
+      backgroundColor: '#2563EB',
+      color: '#FFFFFF',
       fontSize: '0.875rem',
       fontWeight: '500',
-      padding: '0.625rem 1rem',
+      height: '2.5rem',
       borderRadius: '0.5rem',
-      textTransform: 'none',
+      border: 'none',
+      boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
+      transition: 'all 150ms ease',
+      textTransform: 'none' as const,
       '&:hover': {
-        backgroundColor: '#1d4ed8',
+        backgroundColor: '#1D4ED8',
       },
       '&:active': {
         transform: 'scale(0.98)',
       },
+      '&:focus': {
+        boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.3)',
+      },
       '&:disabled': {
         opacity: 0.5,
+        cursor: 'not-allowed',
       },
     },
 
-    // Social buttons
+    // ==========================================
+    // SOCIAL BUTTONS (Google, etc)
+    // ==========================================
     socialButtonsBlockButton: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
       borderRadius: '0.5rem',
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
       fontSize: '0.875rem',
       fontWeight: '500',
-      padding: '0.625rem 1rem',
+      height: '2.5rem',
+      transition: 'all 150ms ease',
       '&:hover': {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f8fafc',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#F8FAFC',
+        borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#CBD5E1',
       },
     },
+
     socialButtonsBlockButtonText: {
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
       fontWeight: '500',
     },
+
     socialButtonsProviderIcon: {
       width: '1.25rem',
       height: '1.25rem',
     },
 
-    // Divider
+    // ==========================================
+    // DIVIDER
+    // ==========================================
     dividerLine: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-    },
-    dividerText: {
-      color: isDark ? '#64748b' : '#94a3b8',
-      fontSize: '0.75rem',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
     },
 
-    // Footer links
+    dividerText: {
+      color: isDark ? '#64748B' : '#94A3B8',
+      fontSize: '0.75rem',
+      textTransform: 'lowercase' as const,
+    },
+
+    // ==========================================
+    // FOOTER
+    // ==========================================
     footerAction: {
       marginTop: '1.5rem',
     },
+
     footerActionText: {
-      color: isDark ? '#94a3b8' : '#64748b',
+      color: isDark ? '#94A3B8' : '#64748B',
       fontSize: '0.875rem',
     },
+
     footerActionLink: {
-      color: '#2563eb',
+      color: '#2563EB',
       fontWeight: '500',
+      transition: 'color 150ms ease',
       '&:hover': {
-        color: '#1d4ed8',
+        color: '#1D4ED8',
       },
     },
 
-    // Identity preview (após login)
+    // ==========================================
+    // IDENTITY PREVIEW (after entering email)
+    // ==========================================
     identityPreview: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
       borderRadius: '0.5rem',
     },
+
     identityPreviewText: {
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
     },
+
     identityPreviewEditButton: {
-      color: '#2563eb',
+      color: '#2563EB',
+      '&:hover': {
+        color: '#1D4ED8',
+      },
     },
 
-    // Form field errors
-    formFieldErrorText: {
-      color: '#ef4444',
-      fontSize: '0.75rem',
-    },
-
-    // Alert
+    // ==========================================
+    // ALERTS
+    // ==========================================
     alert: {
-      backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#fef2f2',
-      border: isDark ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid #fecaca',
+      backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2',
+      border: isDark ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid #FECACA',
       borderRadius: '0.5rem',
-      color: isDark ? '#fca5a5' : '#dc2626',
+      color: isDark ? '#FCA5A5' : '#DC2626',
     },
 
-    // OTP input
+    alertText: {
+      color: isDark ? '#FCA5A5' : '#DC2626',
+    },
+
+    // ==========================================
+    // OTP CODE INPUT
+    // ==========================================
     otpCodeFieldInput: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
       borderRadius: '0.5rem',
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
+      fontSize: '1.25rem',
+      fontWeight: '600',
       '&:focus': {
-        borderColor: '#2563eb',
+        borderColor: '#2563EB',
         boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.15)',
       },
     },
 
-    // User Button (avatar dropdown)
+    // ==========================================
+    // USER BUTTON (Avatar dropdown)
+    // ==========================================
     userButtonBox: {
       width: '2.5rem',
       height: '2.5rem',
     },
+
     userButtonTrigger: {
       borderRadius: '9999px',
+      '&:focus': {
+        boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.3)',
+      },
     },
+
     userButtonAvatarBox: {
       width: '2.5rem',
       height: '2.5rem',
       borderRadius: '9999px',
     },
+
     userButtonPopoverCard: {
-      backgroundColor: isDark ? '#0B0C15' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25)',
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+      boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.3)',
       borderRadius: '0.75rem',
+      overflow: 'hidden',
     },
+
     userButtonPopoverActionButton: {
-      color: isDark ? '#e2e8f0' : '#374151',
+      color: isDark ? '#E2E8F0' : '#374151',
+      transition: 'background-color 150ms ease',
       '&:hover': {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
       },
     },
+
     userButtonPopoverActionButtonText: {
-      color: isDark ? '#e2e8f0' : '#374151',
+      color: isDark ? '#E2E8F0' : '#374151',
     },
+
     userButtonPopoverActionButtonIcon: {
-      color: isDark ? '#94a3b8' : '#64748b',
+      color: isDark ? '#94A3B8' : '#64748B',
     },
+
     userButtonPopoverFooter: {
-      borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
     },
 
-    // User Profile
-    userProfileCard: {
-      backgroundColor: isDark ? '#0B0C15' : '#ffffff',
-      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+    // ==========================================
+    // USER PROFILE MODAL
+    // ==========================================
+    modalBackdrop: {
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      backdropFilter: 'blur(4px)',
     },
 
-    // Navbar (dentro do modal de perfil)
+    modalContent: {
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+      borderRadius: '1rem',
+    },
+
+    // Navbar inside profile modal
     navbar: {
-      backgroundColor: isDark ? '#050509' : '#f8fafc',
-      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      backgroundColor: isDark ? '#050509' : '#F8FAFC',
+      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
     },
+
     navbarButton: {
-      color: isDark ? '#e2e8f0' : '#374151',
+      color: isDark ? '#E2E8F0' : '#374151',
+      borderRadius: '0.5rem',
+      transition: 'all 150ms ease',
       '&:hover': {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      },
+      '&[data-active="true"]': {
+        backgroundColor: isDark ? 'rgba(37, 99, 235, 0.1)' : 'rgba(37, 99, 235, 0.1)',
+        color: '#2563EB',
       },
     },
 
-    // Page (dentro do modal de perfil)
+    // Page content inside profile
     pageScrollBox: {
-      backgroundColor: isDark ? '#0B0C15' : '#ffffff',
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
     },
 
-    // Profile section
+    page: {
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+    },
+
+    // Profile sections
     profileSectionTitle: {
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
+      borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
     },
+
     profileSectionTitleText: {
-      color: isDark ? '#ffffff' : '#0f172a',
+      color: isDark ? '#FFFFFF' : '#0F172A',
+      fontWeight: '600',
     },
+
     profileSectionContent: {
-      borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+      borderTop: 'none',
+    },
+
+    profileSectionPrimaryButton: {
+      backgroundColor: '#2563EB',
+      color: '#FFFFFF',
+      '&:hover': {
+        backgroundColor: '#1D4ED8',
+      },
+    },
+
+    // Form inside profile
+    formFieldRow: {
+      borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid #F1F5F9',
     },
 
     // Accordion
     accordionTriggerButton: {
-      color: isDark ? '#e2e8f0' : '#374151',
+      color: isDark ? '#E2E8F0' : '#374151',
       '&:hover': {
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
       },
     },
+
     accordionContent: {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc',
+      backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC',
     },
 
     // Badge
     badge: {
-      backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#dbeafe',
-      color: isDark ? '#60a5fa' : '#2563eb',
+      backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#DBEAFE',
+      color: isDark ? '#60A5FA' : '#2563EB',
+      fontWeight: '500',
+      fontSize: '0.75rem',
     },
 
-    // Modal backdrop
-    modalBackdrop: {
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      backdropFilter: 'blur(4px)',
+    // Avatar uploader
+    avatarImageActionsUpload: {
+      backgroundColor: '#2563EB',
+      color: '#FFFFFF',
+      '&:hover': {
+        backgroundColor: '#1D4ED8',
+      },
+    },
+
+    // Phone input
+    phoneInputBox: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+      borderRadius: '0.5rem',
+    },
+
+    // Select
+    selectButton: {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+      borderRadius: '0.5rem',
+      color: isDark ? '#FFFFFF' : '#0F172A',
+    },
+
+    selectOptionsContainer: {
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+      borderRadius: '0.5rem',
+    },
+
+    selectOption: {
+      color: isDark ? '#E2E8F0' : '#374151',
+      '&:hover': {
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+      },
+      '&[data-selected="true"]': {
+        backgroundColor: isDark ? 'rgba(37, 99, 235, 0.1)' : 'rgba(37, 99, 235, 0.1)',
+        color: '#2563EB',
+      },
     },
   },
 });
