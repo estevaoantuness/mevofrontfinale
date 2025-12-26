@@ -155,8 +155,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     isOpen: boolean;
     title: string;
     message: string;
-    variant: 'danger' | 'warning';
+    variant: 'danger' | 'warning' | 'info';
     onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
     loading?: boolean;
   }>({ isOpen: false, title: '', message: '', variant: 'danger', onConfirm: () => {} });
 
@@ -312,15 +314,46 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const phoneToSave = newProp.employee_phone || undefined;
       const property = await api.createProperty({
         name: newProp.name,
         ical_airbnb: newProp.ical_airbnb,
         ical_booking: newProp.ical_booking,
-        employee_phone: newProp.employee_phone || undefined
+        employee_phone: phoneToSave
       });
       setProperties([property, ...properties]);
       setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '' });
       setIsModalOpen(false);
+
+      // Perguntar se deseja tornar o telefone padrão
+      if (phoneToSave) {
+        try {
+          const currentSettings = await api.getSettings();
+          // Só pergunta se for diferente do atual ou se não existir
+          if (!currentSettings.default_employee_phone || currentSettings.default_employee_phone !== phoneToSave) {
+            setConfirmModal({
+              isOpen: true,
+              title: 'Telefone Padrão',
+              message: `Deseja usar "${phoneToSave}" como telefone padrão para novos imóveis?`,
+              variant: 'info',
+              confirmText: 'Sim, usar como padrão',
+              cancelText: 'Não',
+              onConfirm: async () => {
+                try {
+                  await api.updateSettings({ default_employee_phone: phoneToSave });
+                  setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                  showSuccess('Telefone padrão atualizado!');
+                } catch {
+                  showError('Erro ao salvar telefone padrão');
+                  setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Erro ao verificar telefone padrão:', err);
+        }
+      }
     } catch (err: any) {
       // Verificar se é erro de assinatura/limite
       const errorCode = err.code || err.response?.data?.code;
@@ -644,8 +677,18 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                   <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
-                <Button onClick={() => {
-                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: '' });
+                <Button onClick={async () => {
+                  // Carregar telefone padrão das configurações
+                  let defaultPhone = '';
+                  try {
+                    const settings = await api.getSettings();
+                    if (settings.default_employee_phone) {
+                      defaultPhone = settings.default_employee_phone;
+                    }
+                  } catch (err) {
+                    console.error('Erro ao carregar telefone padrão:', err);
+                  }
+                  setNewProp({ name: '', ical_airbnb: '', ical_booking: '', employee_phone: defaultPhone });
                   setIsModalOpen(true);
                 }}>
                   <Plus size={16} className="mr-2" /> Adicionar Imóvel
@@ -1162,6 +1205,8 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         title={confirmModal.title}
         message={confirmModal.message}
         variant={confirmModal.variant}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
         loading={confirmModal.loading}
       />
 

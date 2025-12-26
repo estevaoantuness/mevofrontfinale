@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, AlertTriangle, Trash2 } from 'lucide-react';
+import { X, AlertTriangle, Trash2, Info } from 'lucide-react';
 import { useTheme } from '../../lib/ThemeContext';
 import { Button } from './Button';
 
@@ -11,7 +11,7 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning';
+  variant?: 'danger' | 'warning' | 'info';
   loading?: boolean;
 }
 
@@ -30,12 +30,16 @@ export const ConfirmModal = ({
 
   if (!isOpen) return null;
 
-  const Icon = variant === 'danger' ? Trash2 : AlertTriangle;
+  const Icon = variant === 'danger' ? Trash2 : variant === 'info' ? Info : AlertTriangle;
   const iconBg = variant === 'danger'
     ? 'bg-red-500/10 text-red-500'
+    : variant === 'info'
+    ? 'bg-blue-500/10 text-blue-500'
     : 'bg-yellow-500/10 text-yellow-500';
   const confirmBtnClass = variant === 'danger'
     ? 'bg-red-600 hover:bg-red-700 text-white'
+    : variant === 'info'
+    ? 'bg-blue-600 hover:bg-blue-700 text-white'
     : 'bg-yellow-600 hover:bg-yellow-700 text-white';
 
   return (
