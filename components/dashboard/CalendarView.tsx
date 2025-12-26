@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,6 +17,7 @@ import {
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
+import { useToast } from '../ui/ToastContext';
 import * as api from '../../lib/api';
 import type { Reservation, Property, DashboardStats, TodayReservations, Subscription, Holiday, CalendarDay as CalendarPriceDay } from '../../lib/api';
 
@@ -152,6 +154,8 @@ const EventIndicator: React.FC<EventIndicatorProps> = ({ items, type, isDark }) 
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, subscription, onActivateTrial, onSelectPlan }) => {
   const { isDark } = useTheme();
+  const { t } = useTranslation();
+  const { showSuccess, showError } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
@@ -371,12 +375,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
 
       // Mostrar resultado
       if (result.created > 0 || result.updated > 0) {
-        alert(`✅ Sincronizado!\n${result.created} nova(s) reserva(s)\n${result.updated} atualizada(s)`);
+        showSuccess(`${t('notifications.success.calendarSynced')} ${result.created} nova(s), ${result.updated} atualizada(s)`);
       } else {
-        alert('✅ Calendários sincronizados!\nNenhuma alteração encontrada.');
+        showSuccess(t('notifications.success.calendarNoChanges'));
       }
     } catch (err: any) {
-      alert(`❌ Erro ao sincronizar: ${err.message}`);
+      showError(t('notifications.error.calendarSync'));
     } finally {
       setSyncing(false);
     }

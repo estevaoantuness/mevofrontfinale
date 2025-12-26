@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   Phone,
@@ -16,6 +17,7 @@ import {
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
+import { useToast } from '../ui/ToastContext';
 import * as api from '../../lib/api';
 import type { Property } from '../../lib/api';
 
@@ -329,6 +331,8 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
 
 export const CheckoutAutoTab: React.FC = () => {
   const { isDark } = useTheme();
+  const { t } = useTranslation();
+  const { showError } = useToast();
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
   const [savingId, setSavingId] = useState<number | null>(null);
@@ -372,7 +376,7 @@ export const CheckoutAutoTab: React.FC = () => {
       ));
     } catch (err: any) {
       console.error('Erro ao atualizar:', err);
-      alert(err.message || 'Erro ao atualizar configuração');
+      showError(t('notifications.error.settingsSave'));
     } finally {
       setSavingId(null);
     }

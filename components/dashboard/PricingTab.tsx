@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calculator, CheckCircle, Loader2, DollarSign, Calendar, TrendingUp, Settings2, Lock, Sparkles, Zap, Brain, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { useTheme } from '../../lib/ThemeContext';
+import { useToast } from '../ui/ToastContext';
 import type { Property, Subscription } from '../../lib/api';
 import { getPropertyPricingConfig, updatePropertyPricingConfig, createCheckout } from '../../lib/api';
 import type { PropertyPricingConfigInput } from '../../lib/pricing';
@@ -29,6 +31,8 @@ type PricingTabProps = {
 
 // Paywall overlay component - mostra blur sobre o conteúdo
 const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+  const { t } = useTranslation();
+  const { showError } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleUpgrade = async (plan: 'pro' | 'agency') => {
@@ -38,7 +42,7 @@ const PricingPaywall: React.FC<{ isDark: boolean }> = ({ isDark }) => {
       window.location.href = checkoutUrl;
     } catch (err) {
       setLoading(false);
-      alert('Erro ao iniciar checkout. Tente novamente.');
+      showError(t('notifications.error.checkoutStart'));
     }
   };
 

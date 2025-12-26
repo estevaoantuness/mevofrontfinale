@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutGrid,
   Home,
@@ -23,7 +24,8 @@ import {
   Calculator,
   HelpCircle,
   Phone,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -45,6 +47,7 @@ import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
+import { useToast } from '../components/ui/ToastContext';
 import * as api from '../lib/api';
 import type { Property, DashboardStats, WhatsAppStatus, WhatsAppQRResponse, Subscription } from '../lib/api';
 
@@ -56,8 +59,10 @@ interface DashboardProps {
 export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, setInitialized, authTransition } = useAuth();
   const { isDark } = useTheme();
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const allowedTabs = useMemo(
     () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings', 'admin']),
     []
@@ -258,7 +263,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         throw new Error('Não foi possível gerar o QR Code. Tente novamente.');
       }
     } catch (err: any) {
-      alert('Erro ao gerar QR Code: ' + err.message);
+      showError(t('notifications.error.whatsappQr'));
       setQrCode(null); // Reset do estado para voltar à tela inicial
     } finally {
       setQrLoading(false);
@@ -267,7 +272,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   const handleGetPairingCode = async () => {
     if (!pairingPhoneNumber) {
-      alert('Digite o número do WhatsApp que será conectado');
+      showWarning(t('notifications.warning.whatsappPhoneRequired'));
       return;
     }
     setPairingCodeLoading(true);
@@ -280,7 +285,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         setPairingCode(result.pairingCode || null);
       }
     } catch (err: any) {
-      alert('Erro ao gerar código de pareamento: ' + err.message);
+      showError(t('notifications.error.whatsappPairing'));
     } finally {
       setPairingCodeLoading(false);
     }
@@ -302,7 +307,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           setConfirmModal(prev => ({ ...prev, isOpen: false, loading: false }));
         } catch (err: any) {
           setConfirmModal(prev => ({ ...prev, loading: false }));
-          alert('Erro ao desconectar: ' + err.message);
+          showError(t('notifications.error.whatsappDisconnect'));
         }
       }
     });
@@ -344,7 +349,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         });
       } else {
         // Outro erro - mostrar mensagem
-        alert(err.message || 'Erro ao criar imóvel');
+        showError(t('notifications.error.propertyCreate'));
       }
     }
   };
@@ -365,7 +370,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           setConfirmModal(prev => ({ ...prev, isOpen: false, loading: false }));
         } catch (err: any) {
           setConfirmModal(prev => ({ ...prev, loading: false }));
-          alert(err.message);
+          showError(t('notifications.error.propertyDelete'));
         }
       }
     });
@@ -390,7 +395,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       setIsEditModalOpen(false);
       setEditProp(null);
     } catch (err: any) {
-      alert(err.message);
+      showError(t('notifications.error.propertyUpdate'));
     }
   };
 
@@ -412,13 +417,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     setTestLoading(true);
     try {
       const result = await api.testWhatsApp(testPhone, testMessage);
-      alert(result.message);
       if (result.success) {
+        showSuccess(t('notifications.success.messageSent'));
         setIsTestModalOpen(false);
         setTestPhone('');
+      } else {
+        showError(result.message || t('notifications.error.whatsappSend'));
       }
     } catch (err: any) {
-      alert(err.message);
+      showError(t('notifications.error.whatsappSend'));
     } finally {
       setTestLoading(false);
     }
@@ -435,21 +442,17 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       // Mostra resultado
       if (result.success) {
         const details = result.details;
-        let message = result.message;
+        let message = t('notifications.success.workerExecuted');
         if (details) {
-          message = `✅ ${details.propertiesChecked} imóvel(is) verificado(s)\n`;
-          message += `📅 ${details.checkoutsFound} checkout(s) para hoje\n`;
+          message = `${details.propertiesChecked} imóvel(is) verificado(s), ${details.checkoutsFound} checkout(s)`;
           if (details.messagesSent > 0) {
-            message += `📨 ${details.messagesSent} mensagem(ns) enviada(s)`;
-          }
-          if (details.messagesFailed > 0) {
-            message += `\n❌ ${details.messagesFailed} falha(s)`;
+            message += `, ${details.messagesSent} mensagem(ns) enviada(s)`;
           }
         }
-        alert(message);
+        showSuccess(message);
       }
     } catch (err: any) {
-      alert(`❌ Erro: ${err.message}`);
+      showError(t('notifications.error.workerExecute'));
     } finally {
       setWorkerLoading(false);
     }

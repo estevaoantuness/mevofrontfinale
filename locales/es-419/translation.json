@@ -601,5 +601,51 @@
     "minutes": "minutos",
     "ago": "hace",
     "in": "en"
+  },
+  "notifications": {
+    "success": {
+      "propertyCreated": "Propiedad creada exitosamente!",
+      "propertyUpdated": "Propiedad actualizada!",
+      "propertyDeleted": "Propiedad eliminada",
+      "calendarSynced": "Calendario sincronizado!",
+      "calendarNoChanges": "Calendario sincronizado. Sin cambios.",
+      "notificationSent": "Notificacion enviada!",
+      "planChanged": "Plan cambiado exitosamente!",
+      "adminPromoted": "Usuario promovido a admin!",
+      "adminDemoted": "Privilegios de admin removidos",
+      "whatsappConnected": "WhatsApp conectado!",
+      "whatsappDisconnected": "WhatsApp desconectado",
+      "settingsSaved": "Configuracion guardada!",
+      "workerExecuted": "Worker ejecutado exitosamente!",
+      "messageSent": "Mensaje enviado exitosamente!"
+    },
+    "error": {
+      "generic": "Ocurrio un error. Intenta de nuevo.",
+      "propertyCreate": "Error al crear propiedad",
+      "propertyUpdate": "Error al actualizar propiedad",
+      "propertyDelete": "Error al eliminar propiedad",
+      "calendarSync": "Error al sincronizar calendario",
+      "notificationSend": "Error al enviar notificacion",
+      "checkoutStart": "Error al iniciar pago",
+      "whatsappQr": "Error al generar QR Code",
+      "whatsappPairing": "Error al generar codigo de emparejamiento",
+      "whatsappDisconnect": "Error al desconectar WhatsApp",
+      "whatsappSend": "Error al enviar mensaje",
+      "planChange": "Error al cambiar plan",
+      "adminPromote": "Error al promover admin",
+      "adminDemote": "Error al remover admin",
+      "statusChange": "Error al cambiar estado",
+      "workerExecute": "Error al ejecutar worker",
+      "settingsSave": "Error al guardar configuracion"
+    },
+    "warning": {
+      "requiredFields": "Completa todos los campos obligatorios",
+      "whatsappPhoneRequired": "Ingresa el numero de WhatsApp",
+      "noChanges": "Sin cambios para guardar"
+    },
+    "info": {
+      "workerResult": "Resultado del worker",
+      "testMessageSent": "Mensaje de prueba enviado"
+    }
   }
 }

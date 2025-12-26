@@ -601,5 +601,51 @@
     "minutes": "minutes",
     "ago": "ago",
     "in": "in"
+  },
+  "notifications": {
+    "success": {
+      "propertyCreated": "Property created successfully!",
+      "propertyUpdated": "Property updated!",
+      "propertyDeleted": "Property removed",
+      "calendarSynced": "Calendar synced!",
+      "calendarNoChanges": "Calendar synced. No changes.",
+      "notificationSent": "Notification sent!",
+      "planChanged": "Plan changed successfully!",
+      "adminPromoted": "User promoted to admin!",
+      "adminDemoted": "Admin privileges removed",
+      "whatsappConnected": "WhatsApp connected!",
+      "whatsappDisconnected": "WhatsApp disconnected",
+      "settingsSaved": "Settings saved!",
+      "workerExecuted": "Worker executed successfully!",
+      "messageSent": "Message sent successfully!"
+    },
+    "error": {
+      "generic": "An error occurred. Please try again.",
+      "propertyCreate": "Failed to create property",
+      "propertyUpdate": "Failed to update property",
+      "propertyDelete": "Failed to remove property",
+      "calendarSync": "Failed to sync calendar",
+      "notificationSend": "Failed to send notification",
+      "checkoutStart": "Failed to start payment",
+      "whatsappQr": "Failed to generate QR Code",
+      "whatsappPairing": "Failed to generate pairing code",
+      "whatsappDisconnect": "Failed to disconnect WhatsApp",
+      "whatsappSend": "Failed to send message",
+      "planChange": "Failed to change plan",
+      "adminPromote": "Failed to promote admin",
+      "adminDemote": "Failed to remove admin",
+      "statusChange": "Failed to change status",
+      "workerExecute": "Failed to execute worker",
+      "settingsSave": "Failed to save settings"
+    },
+    "warning": {
+      "requiredFields": "Please fill in all required fields",
+      "whatsappPhoneRequired": "Enter WhatsApp number",
+      "noChanges": "No changes to save"
+    },
+    "info": {
+      "workerResult": "Worker result",
+      "testMessageSent": "Test message sent"
+    }
   }
 }

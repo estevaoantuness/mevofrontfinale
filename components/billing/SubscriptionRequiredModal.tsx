@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Check, Crown, ArrowRight, CreditCard } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useToast } from '../ui/ToastContext';
 import { createCheckout } from '../../lib/api';
 
 interface SubscriptionRequiredModalProps {
@@ -23,6 +25,8 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
   propertyCount,
   onSuccess
 }) => {
+  const { t } = useTranslation();
+  const { showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
@@ -38,7 +42,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
       }, 800);
     } catch (err) {
       setLoading(false);
-      alert('Erro ao iniciar checkout. Tente novamente.');
+      showError(t('notifications.error.checkoutStart'));
     }
   };
 
@@ -54,7 +58,7 @@ export const SubscriptionRequiredModal: React.FC<SubscriptionRequiredModalProps>
       }, 800);
     } catch (err) {
       setLoading(false);
-      alert('Erro ao iniciar checkout. Tente novamente.');
+      showError(t('notifications.error.checkoutStart'));
     }
   };
 

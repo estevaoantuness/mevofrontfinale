@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Users,
   Building,
@@ -22,6 +23,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../lib/ThemeContext';
 import { useAuth } from '../../lib/AuthContext';
+import { useToast } from '../ui/ToastContext';
 import * as api from '../../lib/api';
 import type { AdminMetrics, AdminUser, AdminListItem } from '../../lib/api';
 
@@ -37,6 +39,8 @@ const TEST_PLANS = [
 export const AdminTab: React.FC = () => {
   const { isDark } = useTheme();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { showSuccess, showError } = useToast();
 
   // State
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
@@ -113,10 +117,11 @@ export const AdminTab: React.FC = () => {
     try {
       await api.testAdminPlan(planId, status);
       setCurrentTestPlan(planId);
+      showSuccess(t('notifications.success.planChanged'));
       // Refresh to see changes
       window.location.reload();
     } catch (error: any) {
-      alert(error.message || 'Erro ao mudar plano');
+      showError(t('notifications.error.planChange'));
     } finally {
       setChangingPlan(false);
     }
@@ -126,9 +131,10 @@ export const AdminTab: React.FC = () => {
   const handleChangeUserPlan = async (userId: number, planId: string | null, status: string = 'active') => {
     try {
       await api.changeUserPlan(userId, planId, status);
+      showSuccess(t('notifications.success.planChanged'));
       fetchData();
     } catch (error: any) {
-      alert(error.message || 'Erro ao mudar plano');
+      showError(t('notifications.error.planChange'));
     }
   };
 
@@ -138,7 +144,7 @@ export const AdminTab: React.FC = () => {
       await api.toggleUserStatus(userId);
       fetchData();
     } catch (error: any) {
-      alert(error.message || 'Erro ao alterar status');
+      showError(t('notifications.error.statusChange'));
     }
   };
 
@@ -149,9 +155,10 @@ export const AdminTab: React.FC = () => {
     try {
       await api.promoteToAdmin(newAdminEmail.trim());
       setNewAdminEmail('');
+      showSuccess(t('notifications.success.adminPromoted'));
       fetchData();
     } catch (error: any) {
-      alert(error.message || 'Erro ao promover admin');
+      showError(t('notifications.error.adminPromote'));
     } finally {
       setAddingAdmin(false);
     }
@@ -162,9 +169,10 @@ export const AdminTab: React.FC = () => {
     if (!confirm('Remover privilégios de admin deste usuário?')) return;
     try {
       await api.demoteAdmin(userId);
+      showSuccess(t('notifications.success.adminDemoted'));
       fetchData();
     } catch (error: any) {
-      alert(error.message || 'Erro ao remover admin');
+      showError(t('notifications.error.adminDemote'));
     }
   };
 

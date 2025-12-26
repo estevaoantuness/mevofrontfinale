@@ -601,5 +601,51 @@
     "minutes": "minutos",
     "ago": "atrás",
     "in": "em"
+  },
+  "notifications": {
+    "success": {
+      "propertyCreated": "Imóvel criado com sucesso!",
+      "propertyUpdated": "Imóvel atualizado!",
+      "propertyDeleted": "Imóvel removido",
+      "calendarSynced": "Calendário sincronizado!",
+      "calendarNoChanges": "Calendário sincronizado. Nenhuma alteração.",
+      "notificationSent": "Notificação enviada!",
+      "planChanged": "Plano alterado com sucesso!",
+      "adminPromoted": "Usuário promovido a admin!",
+      "adminDemoted": "Privilégios de admin removidos",
+      "whatsappConnected": "WhatsApp conectado!",
+      "whatsappDisconnected": "WhatsApp desconectado",
+      "settingsSaved": "Configurações salvas!",
+      "workerExecuted": "Worker executado com sucesso!",
+      "messageSent": "Mensagem enviada com sucesso!"
+    },
+    "error": {
+      "generic": "Ocorreu um erro. Tente novamente.",
+      "propertyCreate": "Erro ao criar imóvel",
+      "propertyUpdate": "Erro ao atualizar imóvel",
+      "propertyDelete": "Erro ao remover imóvel",
+      "calendarSync": "Erro ao sincronizar calendário",
+      "notificationSend": "Erro ao enviar notificação",
+      "checkoutStart": "Erro ao iniciar pagamento",
+      "whatsappQr": "Erro ao gerar QR Code",
+      "whatsappPairing": "Erro ao gerar código de pareamento",
+      "whatsappDisconnect": "Erro ao desconectar WhatsApp",
+      "whatsappSend": "Erro ao enviar mensagem",
+      "planChange": "Erro ao mudar plano",
+      "adminPromote": "Erro ao promover admin",
+      "adminDemote": "Erro ao remover admin",
+      "statusChange": "Erro ao alterar status",
+      "workerExecute": "Erro ao executar worker",
+      "settingsSave": "Erro ao salvar configurações"
+    },
+    "warning": {
+      "requiredFields": "Preencha todos os campos obrigatórios",
+      "whatsappPhoneRequired": "Digite o número do WhatsApp",
+      "noChanges": "Nenhuma alteração para salvar"
+    },
+    "info": {
+      "workerResult": "Resultado do worker",
+      "testMessageSent": "Mensagem de teste enviada"
+    }
   }
 }

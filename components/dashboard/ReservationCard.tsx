@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Home,
   User,
@@ -11,6 +12,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useToast } from '../ui/ToastContext';
 import type { Property, Reservation } from '../../lib/api';
 
 interface ReservationCardProps {
@@ -20,6 +22,8 @@ interface ReservationCardProps {
 }
 
 export const ReservationCard = ({ reservation, type, properties }: ReservationCardProps) => {
+  const { t } = useTranslation();
+  const { showSuccess, showError } = useToast();
   const [expanded, setExpanded] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -44,9 +48,9 @@ export const ReservationCard = ({ reservation, type, properties }: ReservationCa
     try {
       // TODO: Call API to send notification
       await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Notificacao enviada!');
+      showSuccess(t('notifications.success.notificationSent'));
     } catch (err) {
-      alert('Erro ao enviar notificacao');
+      showError(t('notifications.error.notificationSend'));
     } finally {
       setSending(false);
     }
