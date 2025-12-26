@@ -51,6 +51,50 @@ export const getClerkAppearance = (isDark: boolean): Appearance => ({
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       borderRadius: '1rem',
       padding: '2rem',
+      backgroundImage: 'none',
+    },
+
+    // Remove Clerk branding gradient
+    footer: {
+      background: 'transparent',
+      backgroundImage: 'none',
+      '& + div': {
+        background: 'transparent',
+      },
+    },
+
+    footerPagesLink: {
+      display: 'none',
+    },
+
+    // Internal card styling
+    main: {
+      backgroundColor: isDark ? '#0B0C15' : '#FFFFFF',
+      backgroundImage: 'none',
+    },
+
+    // Remove/style the "Secured by Clerk" badge
+    badge: {
+      backgroundColor: 'transparent',
+      backgroundImage: 'none',
+    },
+
+    // Card footer area (where gradient appears)
+    cardFooter: {
+      background: isDark ? '#0B0C15' : '#FFFFFF',
+      backgroundImage: 'none',
+      borderTop: 'none',
+    },
+
+    // Power by badge styling
+    poweredBy: {
+      background: isDark ? '#0B0C15' : '#FFFFFF',
+      backgroundImage: 'none',
+    },
+
+    // Internal styling
+    internal: {
+      backgroundImage: 'none',
     },
 
     // ==========================================
