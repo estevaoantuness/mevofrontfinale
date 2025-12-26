@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { SignedIn, SignedOut, RedirectToSignIn, useClerk } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn, useUser } from '@clerk/clerk-react';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import { ThemeProvider } from './lib/ThemeContext';
 import './lib/i18n'; // Initialize i18n
@@ -10,9 +10,36 @@ import { RegisterPage } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
 import { ToastProvider } from './components/ui/ToastContext';
+import { AuthTransition } from './components/AuthTransition';
 
-// Protected Route Component - uses Clerk
+// Protected Route Component - uses Clerk with transition
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isSignedIn, isLoaded } = useUser();
+  const [showTransition, setShowTransition] = useState(false);
+  const [transitionComplete, setTransitionComplete] = useState(false);
+
+  useEffect(() => {
+    // Show transition only once per session when user first accesses protected route
+    if (isLoaded && isSignedIn && !transitionComplete) {
+      const hasSeenTransition = sessionStorage.getItem('mevo_auth_transition_shown');
+      if (!hasSeenTransition) {
+        setShowTransition(true);
+        sessionStorage.setItem('mevo_auth_transition_shown', 'true');
+      } else {
+        setTransitionComplete(true);
+      }
+    }
+  }, [isLoaded, isSignedIn, transitionComplete]);
+
+  const handleTransitionComplete = useCallback(() => {
+    setShowTransition(false);
+    setTransitionComplete(true);
+  }, []);
+
+  if (showTransition) {
+    return <AuthTransition onComplete={handleTransitionComplete} />;
+  }
+
   return (
     <>
       <SignedIn>{children}</SignedIn>
@@ -40,6 +67,7 @@ function AppRoutes() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('mevo_auth_transition_shown');
     await logout();
     navigate('/');
   };
