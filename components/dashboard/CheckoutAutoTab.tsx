@@ -12,7 +12,10 @@ import {
   Pencil,
   Info,
   Calendar,
-  Loader2
+  Loader2,
+  Trash2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -72,10 +75,12 @@ interface PropertyCardProps {
   };
   onToggle: (enabled: boolean) => void;
   onEdit: () => void;
+  onHide: () => void;
+  isHidden?: boolean;
   loading?: boolean;
 }
 
-const PropertyCard = ({ property, onToggle, onEdit, loading }: PropertyCardProps) => {
+const PropertyCard = ({ property, onToggle, onEdit, onHide, isHidden, loading }: PropertyCardProps) => {
   const { isDark } = useTheme();
 
   const statusConfig = {
@@ -132,13 +137,30 @@ const PropertyCard = ({ property, onToggle, onEdit, loading }: PropertyCardProps
           </div>
         </div>
 
-        {/* Toggle */}
-        <Toggle
-          enabled={property.checkout_auto_enabled}
-          onChange={onToggle}
-          disabled={!canToggle}
-          loading={loading}
-        />
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onHide}
+            className={`p-1.5 rounded-lg transition-colors ${
+              isHidden
+                ? isDark
+                  ? 'text-slate-500 hover:text-green-400 hover:bg-green-500/10'
+                  : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                : isDark
+                  ? 'text-slate-500 hover:text-red-400 hover:bg-red-500/10'
+                  : 'text-slate-400 hover:text-red-500 hover:bg-red-50'
+            }`}
+            title={isHidden ? 'Restaurar na lista' : 'Remover da lista'}
+          >
+            {isHidden ? <Eye className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
+          </button>
+          <Toggle
+            enabled={property.checkout_auto_enabled}
+            onChange={onToggle}
+            disabled={!canToggle}
+            loading={loading}
+          />
+        </div>
       </div>
 
       {/* Content based on status */}
@@ -332,10 +354,11 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
 export const CheckoutAutoTab: React.FC = () => {
   const { isDark } = useTheme();
   const { t } = useTranslation();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [showHidden, setShowHidden] = useState(false);
 
   // Config Modal State
   const [configModal, setConfigModal] = useState<{
@@ -402,6 +425,40 @@ export const CheckoutAutoTab: React.FC = () => {
     setConfigModal({ isOpen: true, property });
   };
 
+  // Hide property from checkout auto
+  const handleHide = async (property: Property) => {
+    setSavingId(property.id);
+    try {
+      await api.hidePropertyFromCheckoutAuto(property.id, true);
+      setProperties(prev => prev.map(p =>
+        p.id === property.id ? { ...p, checkout_auto_hidden: true } : p
+      ));
+      showSuccess('Imóvel removido da lista');
+    } catch (err: any) {
+      console.error('Erro ao esconder imóvel:', err);
+      showError('Erro ao remover imóvel da lista');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // Unhide property
+  const handleUnhide = async (property: Property) => {
+    setSavingId(property.id);
+    try {
+      await api.hidePropertyFromCheckoutAuto(property.id, false);
+      setProperties(prev => prev.map(p =>
+        p.id === property.id ? { ...p, checkout_auto_hidden: false } : p
+      ));
+      showSuccess('Imóvel restaurado');
+    } catch (err: any) {
+      console.error('Erro ao restaurar imóvel:', err);
+      showError('Erro ao restaurar imóvel');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   // Transform properties with status
   const propertiesWithStatus = properties.map(p => ({
     ...p,
@@ -409,9 +466,14 @@ export const CheckoutAutoTab: React.FC = () => {
     status: getPropertyStatus(p)
   }));
 
+  // Filter visible/hidden properties
+  const visibleProperties = propertiesWithStatus.filter(p => !p.checkout_auto_hidden);
+  const hiddenProperties = propertiesWithStatus.filter(p => p.checkout_auto_hidden);
+  const displayedProperties = showHidden ? hiddenProperties : visibleProperties;
+
   // Stats
-  const activeCount = propertiesWithStatus.filter(p => p.status === 'active').length;
-  const totalConfigurable = propertiesWithStatus.filter(p => p.hasIcal).length;
+  const activeCount = visibleProperties.filter(p => p.status === 'active').length;
+  const totalConfigurable = visibleProperties.filter(p => p.hasIcal).length;
 
   if (loading) {
     return (
@@ -434,12 +496,32 @@ export const CheckoutAutoTab: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats Badge */}
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-          isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
-        }`}>
-          <CheckCircle className="w-4 h-4" />
-          {activeCount} de {totalConfigurable} ativos
+        {/* Stats Badge + Hidden Toggle */}
+        <div className="flex items-center gap-3">
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+            isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'
+          }`}>
+            <CheckCircle className="w-4 h-4" />
+            {activeCount} de {totalConfigurable} ativos
+          </div>
+
+          {hiddenProperties.length > 0 && (
+            <button
+              onClick={() => setShowHidden(!showHidden)}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
+                showHidden
+                  ? isDark
+                    ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                  : isDark
+                    ? 'bg-white/5 text-slate-400 hover:bg-white/10'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {showHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {hiddenProperties.length} oculto{hiddenProperties.length > 1 ? 's' : ''}
+            </button>
+          )}
         </div>
       </div>
 
@@ -456,14 +538,42 @@ export const CheckoutAutoTab: React.FC = () => {
             Cadastre imóveis na aba "Meus Imóveis" para configurar o checkout automático.
           </p>
         </div>
+      ) : displayedProperties.length === 0 ? (
+        <div className={`text-center py-12 rounded-xl ${
+          isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200'
+        }`}>
+          {showHidden ? (
+            <>
+              <EyeOff className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Nenhum imóvel oculto
+              </p>
+              <p className={`text-sm mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                Imóveis removidos da lista aparecerão aqui.
+              </p>
+            </>
+          ) : (
+            <>
+              <Home className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Todos os imóveis estão ocultos
+              </p>
+              <p className={`text-sm mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                Clique em "{hiddenProperties.length} oculto{hiddenProperties.length > 1 ? 's' : ''}" para ver.
+              </p>
+            </>
+          )}
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {propertiesWithStatus.map(property => (
+          {displayedProperties.map(property => (
             <PropertyCard
               key={property.id}
               property={property}
               onToggle={(enabled) => handleToggle(property, enabled)}
               onEdit={() => handleEdit(property)}
+              onHide={() => showHidden ? handleUnhide(property) : handleHide(property)}
+              isHidden={showHidden}
               loading={savingId === property.id}
             />
           ))}

@@ -27,6 +27,7 @@ export interface Property {
   checkout_auto_enabled: boolean;
   checkout_notify_phone?: string;
   checkout_notify_time?: string;
+  checkout_auto_hidden?: boolean;
   created_at: string;
 }
 
@@ -282,6 +283,16 @@ export async function updatePropertyCheckoutAuto(
   return apiFetch<Property>(`/properties/${id}/checkout-auto`, {
     method: 'PATCH',
     body: JSON.stringify(config),
+  });
+}
+
+export async function hidePropertyFromCheckoutAuto(
+  id: number,
+  hidden: boolean
+): Promise<{ id: number; checkout_auto_hidden: boolean }> {
+  return apiFetch(`/properties/${id}/checkout-auto-hidden`, {
+    method: 'PATCH',
+    body: JSON.stringify({ hidden }),
   });
 }
 
