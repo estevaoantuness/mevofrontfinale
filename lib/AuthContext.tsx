@@ -37,6 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!clerkLoaded) return;
 
             if (clerkUser) {
+                // Email verification status from Clerk (source of truth)
+                const clerkEmailVerified = clerkUser.primaryEmailAddress?.verification?.status === 'verified';
+
                 try {
                     // Get Clerk session token
                     const token = await getToken();
@@ -45,10 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     }
 
                     // Try to get user from backend
-                    // Note: This will work after webhook creates the user
                     try {
                         const userData = await api.getMe();
-                        setUser(userData);
+                        // Always use Clerk's email verification status
+                        setUser({
+                            ...userData,
+                            emailVerified: clerkEmailVerified,
+                        });
                     } catch (error) {
                         // User might not exist in backend yet (webhook delay)
                         // Create a temporary user object from Clerk data
@@ -58,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             email: clerkUser.primaryEmailAddress?.emailAddress || '',
                             name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
                             role: 'user',
-                            email_verified: clerkUser.primaryEmailAddress?.verification?.status === 'verified',
+                            emailVerified: clerkEmailVerified,
                         } as User);
                     }
                 } catch (error) {

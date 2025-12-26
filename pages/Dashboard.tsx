@@ -41,7 +41,6 @@ import { AdminTab } from '../components/dashboard/AdminTab';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { MobileHeader } from '../components/dashboard/MobileHeader';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
-import { EmailVerificationModal } from '../components/billing/EmailVerificationModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
@@ -150,9 +149,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
   // Worker Loading State
   const [workerLoading, setWorkerLoading] = useState(false);
-
-  // Email Verification Modal State
-  const [emailVerificationModalOpen, setEmailVerificationModalOpen] = useState(false);
 
   // Confirm Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -531,33 +527,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         </nav>
 
         <div className={`p-4 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
-          {/* Email Verification Warning */}
-          {user && !user.emailVerified && (
-            <button
-              onClick={() => setEmailVerificationModalOpen(true)}
-              className="w-full mb-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/15 transition-colors text-left"
-            >
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-yellow-400 font-medium">Email não verificado</p>
-                  <p className="text-[10px] text-yellow-400/70 truncate">Clique para confirmar</p>
-                </div>
-              </div>
-            </button>
-          )}
-
           <div className="flex items-center mb-4 px-2">
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-              {/* Email verification badge on avatar */}
-              {user && !user.emailVerified && (
-                <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-yellow-500 border-2 ${isDark ? 'border-[#080911]' : 'border-white'} flex items-center justify-center`}>
-                  <span className="sr-only">Email não verificado</span>
-                </div>
-              )}
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="ml-3 overflow-hidden">
               <p className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{user?.name || 'Usuário'}</p>
@@ -1156,16 +1128,6 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         isVisible={workerLoading}
         title="Executando Worker"
         subtitle="Processando checkouts e enviando mensagens..."
-      />
-
-      {/* Email Verification Modal */}
-      <EmailVerificationModal
-        isOpen={emailVerificationModalOpen}
-        onClose={() => setEmailVerificationModalOpen(false)}
-        userEmail={user?.email || ''}
-        onEmailSent={() => {
-          // Optionally refresh user data after email is sent
-        }}
       />
 
       {/* Confirm Modal */}
