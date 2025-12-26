@@ -143,8 +143,8 @@ export interface ApiHealth {
 
 // Token management
 const getToken = () => localStorage.getItem('mevo_token');
-const setToken = (token: string) => localStorage.setItem('mevo_token', token);
-const removeToken = () => localStorage.removeItem('mevo_token');
+export const setToken = (token: string) => localStorage.setItem('mevo_token', token);
+export const removeToken = () => localStorage.removeItem('mevo_token');
 
 // Normalize reservation payloads to keep backward compatibility in UI
 const normalizeReservation = (reservation: Reservation): Reservation => ({

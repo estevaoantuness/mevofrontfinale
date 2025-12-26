@@ -1,76 +1,85 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useUser, useClerk, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import * as api from './api';
 import type { User } from './api';
 
 interface AuthContextType {
     user: User | null;
+    clerkUser: ReturnType<typeof useUser>['user'];
     isLoading: boolean;
     isAuthenticated: boolean;
     authTransition: boolean;
     isInitializing: boolean;
     setInitialized: () => void;
-    login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     updateUser: (data: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+    const { signOut } = useClerk();
+    const { getToken } = useClerkAuth();
+
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [authTransition, setAuthTransition] = useState(false);
-    // Track if the app is still initializing (auth check + initial data load)
     const [isInitializing, setIsInitializing] = useState(true);
 
-    // Called by Dashboard when initial data is loaded
     const setInitialized = useCallback(() => {
         setIsInitializing(false);
     }, []);
 
-    // Check if user is already logged in on mount
+    // Sync with backend when Clerk user changes
     useEffect(() => {
-        const checkAuth = async () => {
-            if (api.isAuthenticated()) {
+        const syncUser = async () => {
+            if (!clerkLoaded) return;
+
+            if (clerkUser) {
                 try {
-                    const userData = await api.getMe();
-                    setUser(userData);
+                    // Get Clerk session token
+                    const token = await getToken();
+                    if (token) {
+                        api.setToken(token);
+                    }
+
+                    // Try to get user from backend
+                    // Note: This will work after webhook creates the user
+                    try {
+                        const userData = await api.getMe();
+                        setUser(userData);
+                    } catch (error) {
+                        // User might not exist in backend yet (webhook delay)
+                        // Create a temporary user object from Clerk data
+                        console.log('User not in backend yet, using Clerk data');
+                        setUser({
+                            id: 0,
+                            email: clerkUser.primaryEmailAddress?.emailAddress || '',
+                            name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+                            role: 'user',
+                            email_verified: clerkUser.primaryEmailAddress?.verification?.status === 'verified',
+                        } as User);
+                    }
                 } catch (error) {
-                    // Token expired or invalid
-                    api.logout();
-                    setIsInitializing(false);
+                    console.error('Error syncing user:', error);
                 }
             } else {
-                // Not authenticated, no need to wait for dashboard
+                setUser(null);
+                api.removeToken();
                 setIsInitializing(false);
             }
             setIsLoading(false);
         };
 
-        checkAuth();
-    }, []);
+        syncUser();
+    }, [clerkUser, clerkLoaded, getToken]);
 
-    const login = async (email: string, password: string) => {
-        const { user: userData } = await api.login(email, password);
-        setUser(userData);
-        setIsInitializing(true); // Reset so dashboard loading shows
-        setAuthTransition(true);
-        setTimeout(() => setAuthTransition(false), 2000);
-    };
-
-    const register = async (name: string, email: string, password: string) => {
-        const { user: userData } = await api.register(name, email, password);
-        setUser(userData);
-        setIsInitializing(true); // Reset so dashboard loading shows
-        setAuthTransition(true);
-        setTimeout(() => setAuthTransition(false), 2000);
-    };
-
-    const logout = () => {
-        api.logout();
+    const logout = async () => {
+        await signOut();
         setUser(null);
-        setIsInitializing(true); // Reset for next login
+        api.removeToken();
+        setIsInitializing(true);
     };
 
     const updateUser = async (data: Partial<User>) => {
@@ -82,19 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         <AuthContext.Provider
             value={{
                 user,
-                isLoading,
-                isAuthenticated: !!user,
+                clerkUser,
+                isLoading: !clerkLoaded || isLoading,
+                isAuthenticated: !!clerkUser,
                 authTransition,
                 isInitializing,
                 setInitialized,
-                login,
-                register,
                 logout,
                 updateUser
             }}
         >
             {children}
-            {/* LoadingOverlay removido daqui - centralizado no Dashboard */}
         </AuthContext.Provider>
     );
 }

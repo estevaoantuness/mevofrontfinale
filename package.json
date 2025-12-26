@@ -17,6 +17,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.59.2",
+    "@clerk/localizations": "^3.32.1",
     "clsx": "2.1.1",
     "framer-motion": "^12.23.26",
     "i18next": "^24.2.2",

@@ -1,65 +1,48 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { SignedIn, SignedOut, RedirectToSignIn, useClerk } from '@clerk/clerk-react';
 import { AuthProvider, useAuth } from './lib/AuthContext';
-import { ThemeProvider, useTheme } from './lib/ThemeContext';
+import { ThemeProvider } from './lib/ThemeContext';
 import './lib/i18n'; // Initialize i18n
 import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
-import { VerifyEmailPage } from './pages/VerifyEmail';
-import { ForgotPasswordPage } from './pages/ForgotPassword';
-import { ResetPasswordPage } from './pages/ResetPassword';
-import { LoadingOverlay } from './components/ui/LoadingOverlay';
 import { ToastProvider } from './components/ui/ToastContext';
 
-// Protected Route Component
+// Protected Route Component - uses Clerk
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Show loading only while checking auth
-  if (isLoading) {
-    return (
-      <LoadingOverlay
-        isVisible={true}
-        title="Verificando sessão"
-        subtitle="Aguarde um momento..."
-      />
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      <SignedIn>{children}</SignedIn>
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
+    </>
+  );
 }
 
 // Public Route (redirects if logged in)
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <LoadingOverlay
-        isVisible={true}
-        title="Carregando"
-        subtitle="Aguarde um momento..."
-      />
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      <SignedIn>
+        <Navigate to="/dashboard" replace />
+      </SignedIn>
+      <SignedOut>{children}</SignedOut>
+    </>
+  );
 }
 
 function AppRoutes() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <Routes>
@@ -75,52 +58,22 @@ function AppRoutes() {
         }
       />
 
+      {/* Clerk handles login at /login */}
       <Route
-        path="/login"
+        path="/login/*"
         element={
           <PublicRoute>
-            <LoginPage
-              onLoginSuccess={() => navigate('/dashboard')}
-              onBack={() => navigate('/')}
-              onGoToRegister={() => navigate('/register')}
-              onGoToForgotPassword={() => navigate('/forgot-password')}
-            />
+            <LoginPage onBack={() => navigate('/')} />
           </PublicRoute>
         }
       />
 
+      {/* Clerk handles register at /register */}
       <Route
-        path="/forgot-password"
+        path="/register/*"
         element={
           <PublicRoute>
-            <ForgotPasswordPage
-              onBack={() => navigate('/')}
-              onGoToLogin={() => navigate('/login')}
-            />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/reset-password"
-        element={
-          <PublicRoute>
-            <ResetPasswordPage
-              onGoToLogin={() => navigate('/login')}
-              onBack={() => navigate('/')}
-            />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage
-              onRegisterSuccess={() => navigate('/dashboard')}
-              onGoToLogin={() => navigate('/login')}
-            />
+            <RegisterPage />
           </PublicRoute>
         }
       />
@@ -129,7 +82,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard onLogout={logout} onGoToLanding={() => navigate('/')} />
+            <Dashboard onLogout={handleLogout} onGoToLanding={() => navigate('/')} />
           </ProtectedRoute>
         }
       />
@@ -145,17 +98,6 @@ function AppRoutes() {
 
       {/* Checkout cancel - redirect to dashboard */}
       <Route path="/checkout/cancel" element={<Navigate to="/dashboard" replace />} />
-
-      {/* Email Verification - accessible without auth */}
-      <Route
-        path="/verify-email"
-        element={
-          <VerifyEmailPage
-            onGoToDashboard={() => navigate('/dashboard')}
-            onGoToLogin={() => navigate('/login')}
-          />
-        }
-      />
 
       {/* 404 - Redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
