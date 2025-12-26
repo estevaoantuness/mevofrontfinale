@@ -52,7 +52,28 @@ interface DayReservation {
   type: 'checkin' | 'checkout' | 'stay';
   color: typeof PROPERTY_COLORS[0];
   propertyName: string;
+  source: 'airbnb' | 'booking' | 'other';
 }
+
+// Source colors and icons
+const SOURCE_STYLES = {
+  airbnb: { bg: 'bg-rose-500/20', border: 'border-rose-500/40', text: 'text-rose-400', label: 'Airbnb' },
+  booking: { bg: 'bg-blue-500/20', border: 'border-blue-500/40', text: 'text-blue-400', label: 'Booking' },
+  other: { bg: 'bg-slate-500/20', border: 'border-slate-500/40', text: 'text-slate-400', label: 'Manual' }
+};
+
+// Helper to detect source from reservation
+const getReservationSource = (reservation: Reservation): 'airbnb' | 'booking' | 'other' => {
+  const source = (reservation.source || '').toLowerCase();
+  if (source.includes('airbnb')) return 'airbnb';
+  if (source.includes('booking')) return 'booking';
+  return 'other';
+};
+
+// Generate unique key for deduplication
+const getReservationKey = (reservation: Reservation): string => {
+  return `${reservation.propertyId}-${reservation.checkinDate}-${reservation.checkoutDate}`;
+};
 
 interface GroupedDayEvents {
   checkins: DayReservation[];
@@ -75,20 +96,28 @@ const EventTooltip: React.FC<TooltipProps> = ({ items, type, isDark }) => {
   };
 
   return (
-    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 min-w-[140px] max-w-[200px] p-2 rounded-lg shadow-xl text-xs ${
+    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 min-w-[180px] max-w-[240px] p-2.5 rounded-lg shadow-xl text-xs ${
       isDark ? 'bg-[#1a1b26] border border-white/10' : 'bg-white border border-slate-200 shadow-lg'
     }`}>
-      <div className={`font-semibold mb-1.5 ${
+      <div className={`font-semibold mb-2 ${
         type === 'checkin' ? 'text-emerald-400' : type === 'checkout' ? 'text-red-400' : 'text-blue-400'
       }`}>
         {typeLabels[type]} ({items.length})
       </div>
-      <div className="space-y-1">
-        {items.map((item, idx) => (
-          <div key={idx} className={`truncate ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-            • {item.propertyName}
-          </div>
-        ))}
+      <div className="space-y-1.5">
+        {items.map((item, idx) => {
+          const sourceStyle = SOURCE_STYLES[item.source];
+          return (
+            <div key={idx} className="flex items-center gap-2">
+              <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium ${sourceStyle.bg} ${sourceStyle.text}`}>
+                {sourceStyle.label}
+              </span>
+              <span className={`truncate ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                {item.propertyName}
+              </span>
+            </div>
+          );
+        })}
       </div>
       {/* Arrow */}
       <div className={`absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
@@ -276,16 +305,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     return days;
   }, [currentDate]);
 
-  // Mapear reservas por dia
+  // Mapear reservas por dia (com deduplicação)
   const reservationsByDay = useMemo(() => {
     const map: Record<string, DayReservation[]> = {};
 
+    // Primeiro, deduplica reservas pelo mesmo imóvel + mesmas datas
+    const seenKeys = new Set<string>();
+    const uniqueReservations: Reservation[] = [];
+
     reservations.forEach(reservation => {
+      const key = getReservationKey(reservation);
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        uniqueReservations.push(reservation);
+      }
+    });
+
+    uniqueReservations.forEach(reservation => {
       const checkin = new Date(reservation.checkinDate);
       const checkout = new Date(reservation.checkoutDate);
       const propertyName = reservation.property?.name || `Imóvel ${reservation.propertyId}`;
       const colorIndex = (reservation.propertyId - 1) % PROPERTY_COLORS.length;
       const color = PROPERTY_COLORS[colorIndex];
+      const source = getReservationSource(reservation);
 
       // Adicionar check-in
       const checkinKey = checkin.toISOString().split('T')[0];
@@ -294,7 +336,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         reservation,
         type: 'checkin',
         color,
-        propertyName
+        propertyName,
+        source
       });
 
       // Adicionar checkout
@@ -304,7 +347,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
         reservation,
         type: 'checkout',
         color,
-        propertyName
+        propertyName,
+        source
       });
 
       // Adicionar dias de estadia
@@ -317,7 +361,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           reservation,
           type: 'stay',
           color,
-          propertyName
+          propertyName,
+          source
         });
         current.setDate(current.getDate() + 1);
       }
@@ -758,48 +803,61 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                             </div>
                           )}
 
-                          {/* Modo Stacked: pills empilhadas com cores vivas */}
+                          {/* Modo Stacked: pills empilhadas com source badge */}
                           {viewMode === 'stacked' && (
                             <div className="space-y-0.5 mt-0.5">
-                              {allEvents.slice(0, 3).map((e, i) => (
-                                <div
-                                  key={i}
-                                  className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center truncate font-semibold ${
-                                    e.type === 'checkin'
-                                      ? 'text-emerald-500 bg-emerald-500/10'
-                                      : e.type === 'checkout'
-                                      ? 'text-red-500 bg-red-500/10'
-                                      : `${e.color.text} ${e.color.bg}`
-                                  }`}
-                                >
-                                  <span className="flex-shrink-0 text-[9px] md:text-[10px]">
-                                    {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
-                                  </span>
-                                  <span className="ml-0.5 truncate hidden sm:inline font-medium">{e.propertyName}</span>
-                                </div>
-                              ))}
+                              {allEvents.slice(0, 3).map((e, i) => {
+                                const sourceStyle = SOURCE_STYLES[e.source];
+                                return (
+                                  <div
+                                    key={i}
+                                    className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center gap-0.5 truncate font-semibold ${
+                                      e.type === 'checkin'
+                                        ? 'text-emerald-500 bg-emerald-500/10'
+                                        : e.type === 'checkout'
+                                        ? 'text-red-500 bg-red-500/10'
+                                        : `${e.color.text} ${e.color.bg}`
+                                    }`}
+                                  >
+                                    <span className="flex-shrink-0 text-[9px] md:text-[10px]">
+                                      {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                    </span>
+                                    <span className={`hidden lg:inline flex-shrink-0 px-1 rounded text-[6px] ${sourceStyle.bg} ${sourceStyle.text}`}>
+                                      {e.source === 'airbnb' ? 'A' : e.source === 'booking' ? 'B' : 'M'}
+                                    </span>
+                                    <span className="truncate hidden sm:inline font-medium">{e.propertyName}</span>
+                                  </div>
+                                );
+                              })}
                               {allEvents.length > 3 && (
                                 <div className="text-[7px] md:text-[8px] text-slate-500 pl-1">+{allEvents.length - 3}</div>
                               )}
                             </div>
                           )}
 
-                          {/* Modo Details: títulos visíveis com cores vivas */}
+                          {/* Modo Details: títulos visíveis com source badge */}
                           {viewMode === 'details' && (
-                            <div className="space-y-px mt-0.5 text-[6px] md:text-[8px] font-medium">
-                              {allEvents.slice(0, 4).map((e, i) => (
-                                <div key={i} className={`truncate ${
-                                  e.type === 'checkin'
-                                    ? 'text-emerald-500'
-                                    : e.type === 'checkout'
-                                    ? 'text-red-500'
-                                    : e.color.text
-                                }`}>
-                                  <span className="text-[8px] md:text-[10px]">
-                                    {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
-                                  </span> {e.propertyName}
-                                </div>
-                              ))}
+                            <div className="space-y-0.5 mt-0.5 text-[6px] md:text-[8px] font-medium">
+                              {allEvents.slice(0, 4).map((e, i) => {
+                                const sourceStyle = SOURCE_STYLES[e.source];
+                                return (
+                                  <div key={i} className={`flex items-center gap-0.5 truncate ${
+                                    e.type === 'checkin'
+                                      ? 'text-emerald-500'
+                                      : e.type === 'checkout'
+                                      ? 'text-red-500'
+                                      : e.color.text
+                                  }`}>
+                                    <span className="text-[8px] md:text-[10px]">
+                                      {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                    </span>
+                                    <span className={`flex-shrink-0 px-0.5 rounded text-[5px] md:text-[6px] ${sourceStyle.bg} ${sourceStyle.text}`}>
+                                      {e.source === 'airbnb' ? 'Air' : e.source === 'booking' ? 'Bkg' : 'Man'}
+                                    </span>
+                                    <span className="truncate">{e.propertyName}</span>
+                                  </div>
+                                );
+                              })}
                               {allEvents.length > 4 && (
                                 <div className="text-slate-500">+{allEvents.length - 4}</div>
                               )}
@@ -834,6 +892,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
               <span className="text-[10px] text-slate-400">Ocupado</span>
             </div>
             <div className="flex items-center gap-1">
+              <span className="text-[8px] px-1 rounded font-medium bg-rose-500/20 text-rose-400">A</span>
+              <span className="text-[10px] text-slate-400">Airbnb</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-[8px] px-1 rounded font-medium bg-blue-500/20 text-blue-400">B</span>
+              <span className="text-[10px] text-slate-400">Booking</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               <span className="text-[10px] text-slate-400">Feriado</span>
             </div>
@@ -861,6 +927,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <div className="w-2 h-2 rounded-full bg-blue-500" />
             <span className="text-xs text-slate-400">Ocupado</span>
           </div>
+          <div className={`h-4 w-px ${isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-rose-500/20 text-rose-400">Airbnb</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-blue-500/20 text-blue-400">Booking</span>
+          </div>
+          <div className={`h-4 w-px ${isDark ? 'bg-white/10' : 'bg-slate-200'}`} />
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-amber-500" />
             <span className="text-xs text-slate-400">Feriado</span>
@@ -949,33 +1023,41 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
       >
         {selectedDay && (
           <div className="space-y-3">
-            {getDayReservations(selectedDay).map((dayRes, idx) => (
-              <div
-                key={`${dayRes.reservation.id}-${idx}`}
-                className={`p-4 rounded-lg ${dayRes.color.bg} border ${dayRes.color.border}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`font-medium ${dayRes.color.text}`}>
-                    {dayRes.propertyName}
-                  </span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    dayRes.type === 'checkin' ? 'bg-emerald-500/20 text-emerald-400' :
-                    dayRes.type === 'checkout' ? 'bg-red-500/20 text-red-400' :
-                    'bg-blue-500/20 text-blue-400'
-                  }`}>
-                    {dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}
-                  </span>
-                </div>
-                {dayRes.reservation.guestName && (
-                  <p className="text-sm text-slate-400">
-                    Funcionário: {dayRes.reservation.guestName}
+            {getDayReservations(selectedDay).map((dayRes, idx) => {
+              const sourceStyle = SOURCE_STYLES[dayRes.source];
+              return (
+                <div
+                  key={`${dayRes.reservation.id}-${idx}`}
+                  className={`p-4 rounded-lg ${dayRes.color.bg} border ${dayRes.color.border}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`font-medium ${dayRes.color.text}`}>
+                        {dayRes.propertyName}
+                      </span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${sourceStyle.bg} ${sourceStyle.text}`}>
+                        {sourceStyle.label}
+                      </span>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      dayRes.type === 'checkin' ? 'bg-emerald-500/20 text-emerald-400' :
+                      dayRes.type === 'checkout' ? 'bg-red-500/20 text-red-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {dayRes.type === 'checkin' ? 'Check-in' : dayRes.type === 'checkout' ? 'Check-out' : 'Ocupado'}
+                    </span>
+                  </div>
+                  {dayRes.reservation.guestName && (
+                    <p className="text-sm text-slate-400">
+                      Hóspede: {dayRes.reservation.guestName}
+                    </p>
+                  )}
+                  <p className="text-xs text-slate-500 mt-1">
+                    {new Date(dayRes.reservation.checkinDate).toLocaleDateString('pt-BR')} → {new Date(dayRes.reservation.checkoutDate).toLocaleDateString('pt-BR')}
                   </p>
-                )}
-                <p className="text-xs text-slate-500 mt-1">
-                  {new Date(dayRes.reservation.checkinDate).toLocaleDateString('pt-BR')} - {new Date(dayRes.reservation.checkoutDate).toLocaleDateString('pt-BR')}
-                </p>
-              </div>
-            ))}
+                </div>
+              );
+            })}
             {getDayReservations(selectedDay).length === 0 && (
               <p className="text-center text-slate-500 py-8">Nenhuma reserva neste dia</p>
             )}
