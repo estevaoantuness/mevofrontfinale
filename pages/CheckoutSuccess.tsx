@@ -104,7 +104,7 @@ export const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({ onGoToDashboar
 
         {/* Help Text */}
         <p className="mt-6 text-sm text-slate-500">
-          Dúvidas? Entre em contato pelo email suporte@mevo.ai
+          Dúvidas? Entre em contato pelo email suporte@mevoia.com
         </p>
       </div>
     </div>
