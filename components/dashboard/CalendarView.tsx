@@ -812,11 +812,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                                   <div
                                     key={i}
                                     className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center gap-0.5 truncate font-semibold ${
-                                      e.type === 'checkin'
-                                        ? 'text-emerald-500 bg-emerald-500/10'
-                                        : e.type === 'checkout'
+                                      e.type === 'checkout'
                                         ? 'text-red-500 bg-red-500/10'
-                                        : `${e.color.text} ${e.color.bg}`
+                                        : 'text-emerald-500 bg-emerald-500/10'
                                     }`}
                                   >
                                     <span className="flex-shrink-0 text-[9px] md:text-[10px]">
@@ -842,11 +840,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                                 const sourceStyle = SOURCE_STYLES[e.source];
                                 return (
                                   <div key={i} className={`flex items-center gap-0.5 truncate ${
-                                    e.type === 'checkin'
-                                      ? 'text-emerald-500'
-                                      : e.type === 'checkout'
+                                    e.type === 'checkout'
                                       ? 'text-red-500'
-                                      : e.color.text
+                                      : 'text-emerald-500'
                                   }`}>
                                     <span className="text-[8px] md:text-[10px]">
                                       {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
