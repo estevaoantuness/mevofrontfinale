@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bell,
@@ -24,6 +24,12 @@ import { useTheme } from '../../lib/ThemeContext';
 import { useToast } from '../ui/ToastContext';
 import * as api from '../../lib/api';
 import type { Property } from '../../lib/api';
+
+// Props interface for CheckoutAutoTab
+interface CheckoutAutoTabProps {
+  // Callback to notify parent (Dashboard) when a property is updated
+  onPropertyUpdate?: (updatedProperty: Property) => void;
+}
 
 // ============================================
 // TOGGLE COMPONENT
@@ -377,7 +383,7 @@ const ConfigModal = ({ isOpen, onClose, property, onSave }: ConfigModalProps) =>
 // MAIN COMPONENT
 // ============================================
 
-export const CheckoutAutoTab: React.FC = () => {
+export const CheckoutAutoTab: React.FC<CheckoutAutoTabProps> = ({ onPropertyUpdate }) => {
   const { isDark } = useTheme();
   const { t } = useTranslation();
   const { showError, showSuccess } = useToast();
@@ -438,9 +444,12 @@ export const CheckoutAutoTab: React.FC = () => {
     setSavingId(property.id);
     try {
       const updated = await api.updatePropertyCheckoutAuto(property.id, { enabled });
+      const fullUpdatedProperty = { ...property, checkout_auto_enabled: enabled, ...updated };
       setProperties(prev => prev.map(p =>
-        p.id === property.id ? { ...p, checkout_auto_enabled: enabled, ...updated } : p
+        p.id === property.id ? fullUpdatedProperty : p
       ));
+      // Notify parent (Dashboard) about the update
+      onPropertyUpdate?.(fullUpdatedProperty);
     } catch (err: any) {
       console.error('Erro ao atualizar:', err);
       showError(t('notifications.error.settingsSave'));
@@ -459,9 +468,12 @@ export const CheckoutAutoTab: React.FC = () => {
       dispatch_window: dispatchWindow
     });
 
+    const fullUpdatedProperty = { ...configModal.property, ...updated };
     setProperties(prev => prev.map(p =>
-      p.id === configModal.property!.id ? { ...p, ...updated } : p
+      p.id === configModal.property!.id ? fullUpdatedProperty : p
     ));
+    // Notify parent (Dashboard) about the update
+    onPropertyUpdate?.(fullUpdatedProperty);
   };
 
   // Open edit modal
@@ -474,9 +486,12 @@ export const CheckoutAutoTab: React.FC = () => {
     setSavingId(property.id);
     try {
       await api.hidePropertyFromCheckoutAuto(property.id, true);
+      const fullUpdatedProperty = { ...property, checkout_auto_hidden: true };
       setProperties(prev => prev.map(p =>
-        p.id === property.id ? { ...p, checkout_auto_hidden: true } : p
+        p.id === property.id ? fullUpdatedProperty : p
       ));
+      // Notify parent (Dashboard) about the update
+      onPropertyUpdate?.(fullUpdatedProperty);
       showSuccess('Imóvel removido da lista');
     } catch (err: any) {
       console.error('Erro ao esconder imóvel:', err);
@@ -491,9 +506,12 @@ export const CheckoutAutoTab: React.FC = () => {
     setSavingId(property.id);
     try {
       await api.hidePropertyFromCheckoutAuto(property.id, false);
+      const fullUpdatedProperty = { ...property, checkout_auto_hidden: false };
       setProperties(prev => prev.map(p =>
-        p.id === property.id ? { ...p, checkout_auto_hidden: false } : p
+        p.id === property.id ? fullUpdatedProperty : p
       ));
+      // Notify parent (Dashboard) about the update
+      onPropertyUpdate?.(fullUpdatedProperty);
       showSuccess('Imóvel restaurado');
     } catch (err: any) {
       console.error('Erro ao restaurar imóvel:', err);

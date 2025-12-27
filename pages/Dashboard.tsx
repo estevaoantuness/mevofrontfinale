@@ -921,7 +921,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: CHECKOUT AUTO */}
           {activeTab === 'checkout' && (
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <CheckoutAutoTab />
+              <CheckoutAutoTab
+                onPropertyUpdate={(updatedProperty) => {
+                  // Sync the updated property to Dashboard's state
+                  // This ensures CalendarView and other components see the changes
+                  setProperties(prev => prev.map(p =>
+                    p.id === updatedProperty.id ? updatedProperty : p
+                  ));
+                }}
+              />
 
               {/* Teste Manual do Worker */}
               <div className={`mt-6 rounded-xl p-6 ${isDark ? 'bg-[#0B0C15] border border-white/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
