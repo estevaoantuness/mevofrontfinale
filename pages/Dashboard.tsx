@@ -25,7 +25,9 @@ import {
   HelpCircle,
   Phone,
   X,
-  MessageCircle
+  MessageCircle,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -136,6 +138,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [pairingPhoneNumber, setPairingPhoneNumber] = useState('');
   const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [pairingCodeLoading, setPairingCodeLoading] = useState(false);
+  const [pairingCodeCopied, setPairingCodeCopied] = useState(false);
 
 
   // Subscription Required Modal State
@@ -848,7 +851,34 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
                       <div className="text-4xl font-mono font-bold tracking-[0.3em] text-blue-500 text-center py-4">
                         {pairingCode}
                       </div>
-                      <p className={`text-xs text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(pairingCode.replace('-', ''));
+                          setPairingCodeCopied(true);
+                          setTimeout(() => setPairingCodeCopied(false), 2000);
+                          showToast('Código copiado!', 'success');
+                        }}
+                        className={`flex items-center justify-center gap-2 w-full py-2 rounded-lg transition-colors ${
+                          pairingCodeCopied
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : isDark
+                              ? 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        {pairingCodeCopied ? (
+                          <>
+                            <Check size={16} />
+                            <span className="text-sm font-medium">Copiado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={16} />
+                            <span className="text-sm font-medium">Copiar código</span>
+                          </>
+                        )}
+                      </button>
+                      <p className={`text-xs text-center mt-3 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
                         Digite este código no seu WhatsApp
                       </p>
                     </div>
