@@ -31,6 +31,10 @@ type EventHandler = (event: AdminEventType, data: AdminEventData) => void;
  * Hook para conectar ao stream de eventos SSE do admin
  * Permite receber atualizações em tempo real quando dados são modificados
  *
+ * Fluxo de autenticação seguro:
+ * 1. POST /admin/events/auth com Bearer token → recebe cookie HttpOnly
+ * 2. GET /admin/events/stream com cookie → conexão SSE autenticada
+ *
  * @param onEvent - Callback chamado quando um evento é recebido
  * @param enabled - Se deve conectar ao stream (default: true)
  */
@@ -38,6 +42,50 @@ export function useAdminEvents(onEvent: EventHandler, enabled: boolean = true) {
   const { getToken } = useAuth();
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cookieExpiresRef = useRef<number>(0);
+
+  const getApiBaseUrl = () => {
+    const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    return rawBaseUrl.endsWith('/api')
+      ? rawBaseUrl
+      : `${rawBaseUrl.replace(/\/$/, '')}/api`;
+  };
+
+  /**
+   * Solicita cookie de autenticação SSE
+   * O cookie é HttpOnly e será enviado automaticamente nas requisições
+   */
+  const requestSseCookie = async (token: string): Promise<boolean> => {
+    const apiBaseUrl = getApiBaseUrl();
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/admin/events/auth`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // Importante: aceitar cookies
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Armazenar quando o cookie expira para renovar antes
+      if (data.expiresIn) {
+        cookieExpiresRef.current = Date.now() + (data.expiresIn * 1000) - 60000; // 1 min antes
+      }
+
+      console.log('[AdminSSE] Cookie de autenticação obtido');
+      return true;
+    } catch (error) {
+      console.error('[AdminSSE] Erro ao obter cookie SSE:', error);
+      return false;
+    }
+  };
 
   const connect = useCallback(async () => {
     if (!enabled) return;
@@ -54,23 +102,36 @@ export function useAdminEvents(onEvent: EventHandler, enabled: boolean = true) {
         eventSourceRef.current.close();
       }
 
-      // Criar nova conexão SSE com token no header via fetch API não é possível
-      // SSE não suporta headers customizados, então usamos query param
-      const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      const apiBaseUrl = rawBaseUrl.endsWith('/api')
-        ? rawBaseUrl
-        : `${rawBaseUrl.replace(/\/$/, '')}/api`;
-      const url = `${apiBaseUrl}/admin/events/stream?token=${encodeURIComponent(token)}`;
+      // 1. Solicitar cookie de autenticação SSE (se não tiver ou expirou)
+      if (Date.now() >= cookieExpiresRef.current) {
+        const cookieObtained = await requestSseCookie(token);
+        if (!cookieObtained) {
+          // Tentar novamente em 5 segundos
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('[AdminSSE] Tentando obter cookie novamente...');
+            connect();
+          }, 5000);
+          return;
+        }
+      }
 
-      const eventSource = new EventSource(url);
+      // 2. Conectar ao SSE (cookie será enviado automaticamente)
+      const apiBaseUrl = getApiBaseUrl();
+      const url = `${apiBaseUrl}/admin/events/stream`;
+
+      // EventSource com credentials para enviar cookies
+      const eventSource = new EventSource(url, { withCredentials: true });
 
       eventSource.onopen = () => {
-        console.log('[AdminSSE] Conectado ao stream de eventos');
+        console.log('[AdminSSE] Conectado ao stream de eventos (via cookie)');
       };
 
       eventSource.onerror = (error) => {
         console.error('[AdminSSE] Erro na conexão:', error);
         eventSource.close();
+
+        // Limpar cookie expirado
+        cookieExpiresRef.current = 0;
 
         // Tentar reconectar após 5 segundos
         reconnectTimeoutRef.current = setTimeout(() => {
