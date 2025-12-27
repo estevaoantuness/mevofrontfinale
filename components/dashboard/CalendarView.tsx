@@ -811,12 +811,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                                 return (
                                   <div
                                     key={i}
-                                    className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center gap-0.5 truncate font-semibold ${e.color.text} ${e.color.bg}`}
+                                    className={`h-3.5 md:h-4 rounded text-[7px] md:text-[8px] px-1 flex items-center gap-0.5 truncate font-semibold ${
+                                      e.type === 'checkin'
+                                        ? 'text-emerald-500 bg-emerald-500/10'
+                                        : e.type === 'checkout'
+                                        ? 'text-red-500 bg-red-500/10'
+                                        : `${e.color.text} ${e.color.bg}`
+                                    }`}
                                   >
+                                    <span className="flex-shrink-0 text-[9px] md:text-[10px]">
+                                      {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                    </span>
                                     <span className={`hidden lg:inline flex-shrink-0 px-1 rounded text-[6px] ${sourceStyle.bg} ${sourceStyle.text}`}>
                                       {e.source === 'airbnb' ? 'A' : e.source === 'booking' ? 'B' : 'M'}
                                     </span>
-                                    <span className="truncate font-medium">{e.propertyName}</span>
+                                    <span className="truncate hidden sm:inline font-medium">{e.propertyName}</span>
                                   </div>
                                 );
                               })}
@@ -832,7 +841,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                               {allEvents.slice(0, 4).map((e, i) => {
                                 const sourceStyle = SOURCE_STYLES[e.source];
                                 return (
-                                  <div key={i} className={`flex items-center gap-0.5 truncate ${e.color.text}`}>
+                                  <div key={i} className={`flex items-center gap-0.5 truncate ${
+                                    e.type === 'checkin'
+                                      ? 'text-emerald-500'
+                                      : e.type === 'checkout'
+                                      ? 'text-red-500'
+                                      : e.color.text
+                                  }`}>
+                                    <span className="text-[8px] md:text-[10px]">
+                                      {e.type === 'checkin' ? '→' : e.type === 'checkout' ? '←' : '•'}
+                                    </span>
                                     <span className={`flex-shrink-0 px-0.5 rounded text-[5px] md:text-[6px] ${sourceStyle.bg} ${sourceStyle.text}`}>
                                       {e.source === 'airbnb' ? 'Air' : e.source === 'booking' ? 'Bkg' : 'Man'}
                                     </span>
