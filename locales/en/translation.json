@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "mevo.ai",
+    "name": "mevo.ia",
     "tagline": "Automation for demanding hosts"
   },
   "nav": {
@@ -124,7 +124,7 @@
       "loggedInSubtitle": "Your dashboard is ready. Access now and track your reservations and automations."
     },
     "footer": {
-      "copyright": "mevo.ai - Automation for demanding hosts."
+      "copyright": "mevo.ia - Automation for demanding hosts."
     }
   },
   "auth": {
@@ -563,6 +563,34 @@
     "whatsapp": {
       "notConnected": "WhatsApp not connected",
       "sendFailed": "Failed to send message"
+    },
+    "checkoutAuto": {
+      "dispatchWindow": "Dispatch window",
+      "dispatchWindowHelp": "Messages will be sent within this 10-minute window",
+      "phoneLabel": "Phone for notifications",
+      "phoneHelp": "This number will receive daily checkout alerts",
+      "timeLabel": "Send time",
+      "title": "Auto Checkout",
+      "subtitle": "Configure automatic checkout notifications per property",
+      "activeCount": "{{count}} of {{total}} active",
+      "hidden": "hidden",
+      "hiddenPlural": "hidden",
+      "howItWorks": "How it works?",
+      "howItWorksItems": [
+        "The system checks your iCal calendars every day",
+        "When it detects a checkout, it sends a message at the configured time",
+        "Each property can have its own phone and time"
+      ],
+      "configurePhone": "Configure phone",
+      "noProperties": "No properties registered",
+      "noPropertiesDesc": "Register properties in the \"My Properties\" tab to configure auto checkout.",
+      "allHidden": "All properties are hidden",
+      "noHidden": "No hidden properties",
+      "hiddenAppearHere": "Properties removed from the list will appear here.",
+      "removeFromList": "Remove from list",
+      "restoreToList": "Restore to list",
+      "removedSuccess": "Property removed from list",
+      "restoredSuccess": "Property restored"
     }
   },
   "common": {

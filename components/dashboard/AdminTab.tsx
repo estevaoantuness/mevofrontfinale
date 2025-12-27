@@ -17,13 +17,15 @@ import {
   UserPlus,
   UserMinus,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Radio
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../lib/ThemeContext';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../ui/ToastContext';
+import { useAdminRealtime } from '../../hooks/useAdminEvents';
 import * as api from '../../lib/api';
 import type { AdminMetrics, AdminUser, AdminListItem } from '../../lib/api';
 
@@ -65,6 +67,9 @@ export const AdminTab: React.FC = () => {
   const [currentTestPlan, setCurrentTestPlan] = useState<string | null>(null);
   const [changingPlan, setChangingPlan] = useState(false);
 
+  // SSE connection state
+  const [sseConnected, setSseConnected] = useState(false);
+
   // Fetch all data
   const fetchData = useCallback(async () => {
     try {
@@ -89,6 +94,35 @@ export const AdminTab: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Refetch functions for SSE events
+  const refetchUsers = useCallback(async () => {
+    try {
+      const usersData = await api.getAdminUsers({ page, limit: 15, search, planId: planFilter, status: statusFilter });
+      setUsers(usersData.users);
+      setTotalPages(usersData.totalPages);
+    } catch (error) {
+      console.error('Error refetching users:', error);
+    }
+  }, [page, search, planFilter, statusFilter]);
+
+  const refetchMetrics = useCallback(async () => {
+    try {
+      const metricsData = await api.getAdminMetrics();
+      setMetrics(metricsData);
+    } catch (error) {
+      console.error('Error refetching metrics:', error);
+    }
+  }, []);
+
+  // SSE Real-time updates
+  useAdminRealtime(refetchUsers, refetchMetrics);
+
+  // Track SSE connection (visual indicator)
+  useEffect(() => {
+    setSseConnected(true);
+    return () => setSseConnected(false);
+  }, []);
 
   // Refresh metrics only
   const refreshMetrics = async () => {
@@ -189,9 +223,17 @@ export const AdminTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            Painel Administrativo
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Painel Administrativo
+            </h2>
+            {sseConnected && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <Radio size={10} className="text-emerald-400 animate-pulse" />
+                <span className="text-xs text-emerald-400">Live</span>
+              </div>
+            )}
+          </div>
           <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             Gerencie usuários, métricas e planos do sistema
           </p>

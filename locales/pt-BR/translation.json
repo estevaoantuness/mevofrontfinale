@@ -563,6 +563,34 @@
     "whatsapp": {
       "notConnected": "WhatsApp não conectado",
       "sendFailed": "Falha ao enviar mensagem"
+    },
+    "checkoutAuto": {
+      "dispatchWindow": "Janela de disparo",
+      "dispatchWindowHelp": "As mensagens serão enviadas dentro desta janela de 10 minutos",
+      "phoneLabel": "Telefone para notificações",
+      "phoneHelp": "Este número receberá os avisos de checkout diários",
+      "timeLabel": "Horário do envio",
+      "title": "Checkout Automático",
+      "subtitle": "Configure notificações automáticas de checkout por imóvel",
+      "activeCount": "{{count}} de {{total}} ativos",
+      "hidden": "oculto",
+      "hiddenPlural": "ocultos",
+      "howItWorks": "Como funciona?",
+      "howItWorksItems": [
+        "O sistema verifica seus calendários iCal todos os dias",
+        "Quando detecta um checkout, envia uma mensagem no horário configurado",
+        "Cada imóvel pode ter seu próprio telefone e horário"
+      ],
+      "configurePhone": "Configurar telefone",
+      "noProperties": "Nenhum imóvel cadastrado",
+      "noPropertiesDesc": "Cadastre imóveis na aba \"Meus Imóveis\" para configurar o checkout automático.",
+      "allHidden": "Todos os imóveis estão ocultos",
+      "noHidden": "Nenhum imóvel oculto",
+      "hiddenAppearHere": "Imóveis removidos da lista aparecerão aqui.",
+      "removeFromList": "Remover da lista",
+      "restoreToList": "Restaurar na lista",
+      "removedSuccess": "Imóvel removido da lista",
+      "restoredSuccess": "Imóvel restaurado"
     }
   },
   "common": {

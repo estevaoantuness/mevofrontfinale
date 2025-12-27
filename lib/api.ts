@@ -27,6 +27,7 @@ export interface Property {
   checkout_auto_enabled: boolean;
   checkout_notify_phone?: string;
   checkout_notify_time?: string;
+  checkout_dispatch_window?: number; // 0-5: janela de 10min (08:00-08:10 a 08:50-09:00)
   checkout_auto_hidden?: boolean;
   created_at: string;
 }
@@ -274,6 +275,7 @@ export interface CheckoutAutoConfig {
   enabled?: boolean;
   phone?: string;
   time?: string;
+  dispatch_window?: number; // 0-5: janela de 10min
 }
 
 export async function updatePropertyCheckoutAuto(

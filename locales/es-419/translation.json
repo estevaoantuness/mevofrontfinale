@@ -563,6 +563,34 @@
     "whatsapp": {
       "notConnected": "WhatsApp no conectado",
       "sendFailed": "Fallo al enviar mensaje"
+    },
+    "checkoutAuto": {
+      "dispatchWindow": "Ventana de envio",
+      "dispatchWindowHelp": "Los mensajes se enviaran dentro de esta ventana de 10 minutos",
+      "phoneLabel": "Telefono para notificaciones",
+      "phoneHelp": "Este numero recibira los avisos de checkout diarios",
+      "timeLabel": "Hora de envio",
+      "title": "Checkout Automatico",
+      "subtitle": "Configura notificaciones automaticas de checkout por propiedad",
+      "activeCount": "{{count}} de {{total}} activos",
+      "hidden": "oculto",
+      "hiddenPlural": "ocultos",
+      "howItWorks": "Como funciona?",
+      "howItWorksItems": [
+        "El sistema verifica tus calendarios iCal todos los dias",
+        "Cuando detecta un checkout, envia un mensaje en el horario configurado",
+        "Cada propiedad puede tener su propio telefono y horario"
+      ],
+      "configurePhone": "Configurar telefono",
+      "noProperties": "Sin propiedades registradas",
+      "noPropertiesDesc": "Registra propiedades en la pestana \"Mis Propiedades\" para configurar el checkout automatico.",
+      "allHidden": "Todas las propiedades estan ocultas",
+      "noHidden": "Sin propiedades ocultas",
+      "hiddenAppearHere": "Las propiedades removidas de la lista apareceran aqui.",
+      "removeFromList": "Remover de la lista",
+      "restoreToList": "Restaurar a la lista",
+      "removedSuccess": "Propiedad removida de la lista",
+      "restoredSuccess": "Propiedad restaurada"
     }
   },
   "common": {
