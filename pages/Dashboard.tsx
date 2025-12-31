@@ -46,6 +46,7 @@ import { SubscriptionRequiredModal } from '../components/billing/SubscriptionReq
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import { TrialBanner, TRIAL_BANNER_CONFIG } from '../components/ui/TrialBanner';
 import { useAuth } from '../lib/AuthContext';
 import { useTheme } from '../lib/ThemeContext';
 import { useToast } from '../components/ui/ToastContext';
@@ -177,6 +178,48 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   };
 
   const planBadge = getPlanBadge();
+
+  // Mapear nomes de icones para componentes (para o TrialBanner)
+  const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+    'LayoutGrid': LayoutGrid,
+    'Home': Home,
+    'Users': User, // Usando User como fallback
+    'MessageSquare': MessageCircle, // Usando MessageCircle como fallback
+    'Calculator': Calculator,
+    'MessageCircle': MessageCircle,
+    'User': User,
+    'Settings': Settings
+  };
+
+  // Funcao para abrir modal de trial quando clica no banner
+  const handleTrialBannerClick = () => {
+    setSubscriptionModal({
+      isOpen: true,
+      reason: 'no_subscription'
+    });
+  };
+
+  // Renderiza o banner de trial para uma aba especifica
+  const renderTrialBanner = (tabId: string) => {
+    // Nao mostrar banner se ja tem subscription ou em billing/overview
+    if (!subscription && tabId !== 'billing' && tabId !== 'overview' && tabId !== 'admin') {
+      const config = TRIAL_BANNER_CONFIG[tabId];
+      if (config) {
+        const IconComponent = iconMap[config.icon];
+        if (IconComponent) {
+          return (
+            <TrialBanner
+              icon={IconComponent}
+              title={config.title}
+              description={config.description}
+              onActivate={handleTrialBannerClick}
+            />
+          );
+        }
+      }
+    }
+    return null;
+  };
 
   // Fetch data on mount (includes WhatsApp status)
   useEffect(() => {
@@ -675,12 +718,21 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: PROPERTIES */}
           {activeTab === 'properties' && (
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('properties')}
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>Meus Imóveis</h3>
                   <p className="text-sm text-slate-500">Gerencie suas conexões iCal e equipe de limpeza</p>
                 </div>
                 <Button onClick={async () => {
+                  // Verificar se tem subscription antes de abrir modal
+                  if (!subscription) {
+                    setSubscriptionModal({
+                      isOpen: true,
+                      reason: 'no_subscription'
+                    });
+                    return;
+                  }
                   // Carregar telefone padrão das configurações
                   let defaultPhone = '';
                   try {
@@ -768,8 +820,9 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: WHATSAPP */}
           {activeTab === 'whatsapp' && (
-            <div className="max-w-2xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className={`rounded-xl p-10 text-center relative overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
+            <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('whatsapp')}
+              <div className={`mt-6 rounded-xl p-10 text-center relative overflow-hidden ${isDark ? 'bg-[#0B0C15] border border-white/5' : 'bg-white border border-slate-200 shadow-sm'}`}>
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50"></div>
 
                 <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-6 ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
@@ -951,6 +1004,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: CHECKOUT AUTO */}
           {activeTab === 'checkout' && (
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('checkout')}
               <CheckoutAutoTab
                 onPropertyUpdate={(updatedProperty) => {
                   // Sync the updated property to Dashboard's state
@@ -978,9 +1032,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             </div>
           )}
 
-          {/* TAB: LOGS */}
+          {/* TAB: PRICING */}
           {activeTab === 'pricing' && (
             <div className="max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('pricing')}
               <PricingTab properties={properties} subscription={subscription} />
             </div>
           )}
@@ -988,6 +1043,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           {/* TAB: PROFILE */}
           {activeTab === 'profile' && (
             <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('profile')}
               <ProfileTab
                 onLogout={onLogout}
                 properties={properties}
@@ -998,7 +1054,10 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
 
           {/* TAB: SETTINGS */}
           {activeTab === 'settings' && (
-            <SettingsTab onLogout={onLogout} />
+            <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {renderTrialBanner('settings')}
+              <SettingsTab onLogout={onLogout} />
+            </div>
           )}
 
           {/* TAB: ADMIN */}
