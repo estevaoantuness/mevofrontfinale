@@ -361,8 +361,26 @@ export const LandingPage = ({ onLogin, onRegister, onDashboard, onProfile, onLog
         </div>
       </section>
 
-      <footer className={`border-t py-12 text-center ${isDark ? 'border-white/5 bg-[#020205]' : 'border-slate-200 bg-slate-50'}`}>
-        <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} {t('landing.footer.copyright')}</p>
+      <footer className={`border-t py-12 ${isDark ? 'border-white/5 bg-[#020205]' : 'border-slate-200 bg-slate-50'}`}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} {t('landing.footer.copyright')}</p>
+            <div className="flex items-center gap-6">
+              <a
+                href="/termos"
+                className={`text-sm transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                {t('landing.footer.terms', 'Termos de Uso')}
+              </a>
+              <a
+                href="/privacidade"
+                className={`text-sm transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                {t('landing.footer.privacy', 'Privacidade')}
+              </a>
+            </div>
+          </div>
+        </div>
       </footer>
 
       {/* Checkout Modal */}

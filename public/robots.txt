@@ -1,0 +1,11 @@
+# Mevo - Robots.txt
+# https://mevoia.com
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /checkout
+Disallow: /api
+
+# Sitemap location
+Sitemap: https://mevoia.com/sitemap.xml

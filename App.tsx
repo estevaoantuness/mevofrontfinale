@@ -9,6 +9,8 @@ import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { CheckoutSuccess } from './pages/CheckoutSuccess';
+import { Terms } from './pages/Terms';
+import { Privacy } from './pages/Privacy';
 import { ToastProvider } from './components/ui/ToastContext';
 import { AuthTransition } from './components/AuthTransition';
 import { AppLoader } from './components/AppLoader';
@@ -141,6 +143,10 @@ function AppRoutes() {
 
       {/* Checkout cancel - redirect to dashboard */}
       <Route path="/checkout/cancel" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Legal pages */}
+      <Route path="/termos" element={<Terms />} />
+      <Route path="/privacidade" element={<Privacy />} />
 
       {/* 404 - Redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
