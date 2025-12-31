@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useUser, useClerk, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import * as api from './api';
 import type { User } from './api';
+
+// Intervalo de refresh do token (em ms) - 1 minuto
+const TOKEN_REFRESH_INTERVAL = 60 * 1000;
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const [authTransition, setAuthTransition] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true);
+    const tokenRefreshRef = useRef<NodeJS.Timeout | null>(null);
 
     const setInitialized = useCallback(() => {
         setIsInitializing(false);
@@ -86,6 +90,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         syncUser();
+    }, [clerkUser, clerkLoaded, getToken]);
+
+    // Token refresh automático a cada minuto para evitar expiração
+    useEffect(() => {
+        if (!clerkUser || !clerkLoaded) {
+            // Limpar interval se não há usuário
+            if (tokenRefreshRef.current) {
+                clearInterval(tokenRefreshRef.current);
+                tokenRefreshRef.current = null;
+            }
+            return;
+        }
+
+        const refreshToken = async () => {
+            try {
+                const token = await getToken();
+                if (token) {
+                    api.setToken(token);
+                    console.log('[AuthContext] Token refreshed automatically');
+                }
+            } catch (error) {
+                console.error('[AuthContext] Erro ao refresh token:', error);
+            }
+        };
+
+        // Refresh imediato
+        refreshToken();
+
+        // Configurar interval
+        tokenRefreshRef.current = setInterval(refreshToken, TOKEN_REFRESH_INTERVAL);
+
+        // Refresh quando a aba volta ao foco (usuário voltou pro site)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                console.log('[AuthContext] Tab visible - refreshing token');
+                refreshToken();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Refresh quando a janela ganha foco
+        const handleFocus = () => {
+            console.log('[AuthContext] Window focused - refreshing token');
+            refreshToken();
+        };
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            if (tokenRefreshRef.current) {
+                clearInterval(tokenRefreshRef.current);
+                tokenRefreshRef.current = null;
+            }
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+        };
     }, [clerkUser, clerkLoaded, getToken]);
 
     const logout = async () => {
