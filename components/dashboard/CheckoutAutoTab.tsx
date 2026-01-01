@@ -35,12 +35,13 @@ import type { Property } from '../../lib/api';
 // MESSAGE EDITOR COMPONENT
 // ============================================
 
-const DEFAULT_TEMPLATE = `Olá {nome}! 👋
+const DEFAULT_TEMPLATE = `Oi {nome}! 👋
 
-Lembrando que seu checkout é hoje às 10h.
-Por favor, deixe as chaves na recepção.
+Aviso de checkout:
+📍 {imovel}
+🕐 Disponível às {horario}
 
-Obrigado pela estadia! 🏠`;
+Conto contigo! Obrigado 🙏`;
 
 interface MessageEditorProps {
   expanded: boolean;
@@ -82,7 +83,7 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
 
   const handleSave = async () => {
     if (!template.includes('{nome}')) {
-      showError('A mensagem deve conter {nome} para incluir o nome do hóspede');
+      showError('A mensagem deve conter {nome} para incluir o nome da funcionária');
       return;
     }
 
@@ -178,10 +179,19 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
                 isDark ? 'bg-purple-500/5 border border-purple-500/20' : 'bg-purple-50 border border-purple-100'
               }`}>
                 <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
-                <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  Escreva uma mensagem exemplo. Nossa IA adaptará automaticamente para cada imóvel,
-                  incluindo horários e detalhes específicos. Use <code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{nome}'}</code> onde quiser o nome do hóspede.
-                </p>
+                <div className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  <p className="mb-2">
+                    Esta mensagem será enviada para sua funcionária de limpeza. Use os placeholders:
+                  </p>
+                  <ul className="space-y-1 ml-2">
+                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{nome}'}</code> → nome da funcionária</li>
+                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{imovel}'}</code> → nome do imóvel</li>
+                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{horario}'}</code> → horário de checkout</li>
+                  </ul>
+                  <p className="mt-2 opacity-80">
+                    Se a funcionária tiver múltiplos imóveis, a lista será agrupada automaticamente.
+                  </p>
+                </div>
               </div>
 
               {/* Textarea */}
@@ -195,7 +205,7 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
                       ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
                       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
                   }`}
-                  placeholder="Olá {nome}! Lembrando que seu checkout é hoje..."
+                  placeholder="Oi {nome}! Aviso de checkout: 📍 {imovel} 🕐 {horario}"
                 />
                 <div className="flex justify-between mt-1.5">
                   <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
