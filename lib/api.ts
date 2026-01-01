@@ -407,6 +407,29 @@ export async function updateSettings(settings: Partial<Settings>): Promise<void>
   await Promise.all(promises);
 }
 
+// Checkout Message Template
+export interface CheckoutMessageResponse {
+  template: string;
+  isDefault: boolean;
+}
+
+export async function getCheckoutMessage(): Promise<CheckoutMessageResponse> {
+  return apiFetch<CheckoutMessageResponse>('/settings/checkout-message');
+}
+
+export async function saveCheckoutMessage(template: string): Promise<{ success: boolean; message: string; template: string }> {
+  return apiFetch<{ success: boolean; message: string; template: string }>('/settings/checkout-message', {
+    method: 'PUT',
+    body: JSON.stringify({ template }),
+  });
+}
+
+export async function resetCheckoutMessage(): Promise<{ success: boolean; message: string; template: string }> {
+  return apiFetch<{ success: boolean; message: string; template: string }>('/settings/checkout-message/reset', {
+    method: 'POST',
+  });
+}
+
 // WhatsApp
 export async function getWhatsAppStatus(): Promise<WhatsAppStatus> {
   return apiFetch<WhatsAppStatus>('/whatsapp/status');

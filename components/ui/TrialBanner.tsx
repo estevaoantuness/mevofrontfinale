@@ -1,38 +1,93 @@
 import React from 'react';
-import { Sparkles, LucideIcon } from 'lucide-react';
+import { Sparkles, Lock, LucideIcon } from 'lucide-react';
 import { Button } from './Button';
 
 interface TrialBannerProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   title: string;
   description: string;
   onActivate: () => void;
+  onSelectPlan?: (plan: string) => void;
 }
 
 /**
  * Banner de Trial - Estilo igual ao CalendarView
  * Usado para incentivar usuários sem subscription a ativar o trial
+ * Versão slim no mobile, expandida no desktop
  */
 export const TrialBanner: React.FC<TrialBannerProps> = ({
-  icon: Icon,
+  icon: Icon = Lock,
   title,
   description,
-  onActivate
+  onActivate,
+  onSelectPlan
 }) => {
   return (
-    <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/20 rounded-xl p-4 sm:p-6 mb-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-            <Icon size={20} className="text-blue-400 sm:hidden" />
-            <Icon size={24} className="text-blue-400 hidden sm:block" />
+    <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/20 rounded-xl p-3 sm:p-6 mb-6">
+      {/* Mobile: versão compacta */}
+      <div className="flex items-center gap-3 sm:hidden">
+        <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+          <Lock size={18} className="text-blue-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-white truncate">{title}</h3>
+          <p className="text-[11px] text-slate-400 line-clamp-1">
+            Disponível no{' '}
+            <button
+              type="button"
+              onClick={() => onSelectPlan?.('starter') || onActivate()}
+              className="text-blue-400 font-medium"
+            >
+              Starter
+            </button>
+            {' '}ou{' '}
+            <button
+              type="button"
+              onClick={() => onSelectPlan?.('pro') || onActivate()}
+              className="text-purple-400 font-medium"
+            >
+              Trial
+            </button>
+          </p>
+        </div>
+        <Button
+          onClick={onActivate}
+          size="sm"
+          className="flex-shrink-0 px-3 py-1.5 text-xs"
+        >
+          <Sparkles size={12} className="mr-1" />
+          Trial
+        </Button>
+      </div>
+
+      {/* Desktop: versão completa */}
+      <div className="hidden sm:flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+            <Lock size={24} className="text-blue-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-base sm:text-lg font-semibold text-white mb-1">
+            <h3 className="text-lg font-semibold text-white mb-1">
               {title}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-400">
-              {description}
+            <p className="text-sm text-slate-400">
+              {description}{' '}
+              Disponível no plano{' '}
+              <button
+                type="button"
+                onClick={() => onSelectPlan?.('starter') || onActivate()}
+                className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
+              >
+                Starter
+              </button>{' '}
+              ou{' '}
+              <button
+                type="button"
+                onClick={() => onSelectPlan?.('pro') || onActivate()}
+                className="text-purple-400 font-medium hover:text-purple-300 transition-colors"
+              >
+                Trial Gratuito
+              </button>.
             </p>
           </div>
         </div>
@@ -41,59 +96,59 @@ export const TrialBanner: React.FC<TrialBannerProps> = ({
           className="flex-shrink-0 w-full md:w-auto"
         >
           <Sparkles size={16} className="mr-2" />
-          Ativar Trial Gratis
+          Ativar Trial Grátis
         </Button>
       </div>
     </div>
   );
 };
 
-// Configuracoes de banner por aba
+// Configurações de banner por aba
 export const TRIAL_BANNER_CONFIG: Record<string, { icon: string; title: string; description: string }> = {
   overview: {
     icon: 'LayoutGrid',
     title: 'Painel de Controle',
-    description: 'Visualize todas as suas reservas e gerencie seus imoveis em um so lugar. Disponivel no Trial Gratuito.'
+    description: 'Visualize todas as suas reservas e gerencie seus imóveis em um só lugar.'
   },
   properties: {
     icon: 'Home',
-    title: 'Gestao de Imoveis',
-    description: 'Cadastre ate 10 imoveis e sincronize automaticamente com Airbnb e Booking. Disponivel no Trial Gratuito.'
+    title: 'Gestão de Imóveis',
+    description: 'Cadastre seus imóveis e sincronize automaticamente com Airbnb e Booking.'
   },
   guests: {
     icon: 'Users',
-    title: 'Gestao de Hospedes',
-    description: 'Acesse historico completo de hospedes e envie mensagens automaticas. Disponivel no Trial Gratuito.'
+    title: 'Gestão de Hóspedes',
+    description: 'Acesse histórico completo de hóspedes e envie mensagens automáticas.'
   },
   templates: {
     icon: 'MessageSquare',
     title: 'Templates de Mensagens',
-    description: 'Crie mensagens personalizadas para check-in, check-out e lembretes. Disponivel no Trial Gratuito.'
+    description: 'Crie mensagens personalizadas para check-in, check-out e lembretes.'
   },
   pricing: {
     icon: 'Calculator',
-    title: 'Calculadora de Precos',
-    description: 'Configure precos dinamicos e regras de tarifacao automatica. Disponivel no Trial Gratuito.'
+    title: 'Calculadora de Preços',
+    description: 'Configure preços dinâmicos e regras de tarifação automática.'
   },
   whatsapp: {
     icon: 'MessageCircle',
-    title: 'Automacao WhatsApp',
-    description: 'Conecte seu WhatsApp e envie mensagens automaticas aos hospedes. Disponivel no Trial Gratuito.'
+    title: 'Integração WhatsApp',
+    description: 'Conecte seu WhatsApp e envie mensagens automáticas para sua equipe de limpeza.'
   },
   profile: {
     icon: 'User',
     title: 'Perfil Completo',
-    description: 'Gerencie suas configuracoes e dados de conta. Disponivel no Trial Gratuito.'
+    description: 'Gerencie suas configurações e dados de conta.'
   },
   settings: {
     icon: 'Settings',
-    title: 'Configuracoes Avancadas',
-    description: 'Personalize notificacoes, horarios e preferencias do sistema. Disponivel no Trial Gratuito.'
+    title: 'Configurações Avançadas',
+    description: 'Personalize notificações, horários e preferências do sistema.'
   },
   checkout: {
     icon: 'Home',
-    title: 'Check-out Automatico',
-    description: 'Configure alertas automaticos de check-out para sua equipe de limpeza. Disponivel no Trial Gratuito.'
+    title: 'Checkout Automático',
+    description: 'Configure alertas automáticos de checkout para sua equipe de limpeza.'
   }
 };
 

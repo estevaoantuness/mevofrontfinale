@@ -185,7 +185,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const { isDark } = useTheme();
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Inicializa com o primeiro dia do mês atual para garantir consistência
+  const [currentDate, setCurrentDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
   const [loading, setLoading] = useState(true);
@@ -508,8 +512,47 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     <div className="space-y-6">
       {/* Banner para não-assinantes */}
       {!hasCalendarAccess && (
-        <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/20 rounded-xl p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border border-blue-500/20 rounded-xl p-3 sm:p-6">
+          {/* Mobile: versão compacta */}
+          <div className="flex items-center gap-3 sm:hidden">
+            <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+              <Lock size={18} className="text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-white truncate">Calendário Sincronizado</h3>
+              <p className="text-[11px] text-slate-400 line-clamp-1">
+                Disponível no{' '}
+                <button
+                  type="button"
+                  onClick={() => onSelectPlan?.('starter')}
+                  className="text-blue-400 font-medium"
+                >
+                  Starter
+                </button>
+                {' '}ou{' '}
+                <button
+                  type="button"
+                  onClick={() => onSelectPlan?.('pro')}
+                  className="text-purple-400 font-medium"
+                >
+                  Trial
+                </button>
+              </p>
+            </div>
+            {onActivateTrial && (
+              <Button
+                onClick={() => (onSelectPlan ? onSelectPlan('pro') : onActivateTrial())}
+                size="sm"
+                className="flex-shrink-0 px-3 py-1.5 text-xs"
+              >
+                <Sparkles size={12} className="mr-1" />
+                Trial
+              </Button>
+            )}
+          </div>
+
+          {/* Desktop: versão completa */}
+          <div className="hidden sm:flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                 <Lock size={24} className="text-blue-400" />
@@ -519,7 +562,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                   Calendário Sincronizado
                 </h3>
                 <p className="text-sm text-slate-400">
-                  Visualize seus check-ins e check-outs automaticamente sincronizados do Airbnb e Booking.
+                  Visualize seus check-ins e check-outs automaticamente sincronizados do Airbnb e Booking.{' '}
                   Disponível no plano{' '}
                   <button
                     type="button"
@@ -542,7 +585,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             {onActivateTrial && (
               <Button
                 onClick={() => (onSelectPlan ? onSelectPlan('pro') : onActivateTrial())}
-                className="flex-shrink-0"
+                className="flex-shrink-0 w-full md:w-auto"
               >
                 <Sparkles size={16} className="mr-2" />
                 Ativar Trial Grátis

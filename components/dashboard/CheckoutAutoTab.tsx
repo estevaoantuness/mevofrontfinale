@@ -16,7 +16,13 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  Save
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -24,6 +30,221 @@ import { useTheme } from '../../lib/ThemeContext';
 import { useToast } from '../ui/ToastContext';
 import * as api from '../../lib/api';
 import type { Property } from '../../lib/api';
+
+// ============================================
+// MESSAGE EDITOR COMPONENT
+// ============================================
+
+const DEFAULT_TEMPLATE = `Olá {nome}! 👋
+
+Lembrando que seu checkout é hoje às 10h.
+Por favor, deixe as chaves na recepção.
+
+Obrigado pela estadia! 🏠`;
+
+interface MessageEditorProps {
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
+  const { isDark } = useTheme();
+  const { showError, showSuccess } = useToast();
+  const [template, setTemplate] = useState('');
+  const [originalTemplate, setOriginalTemplate] = useState('');
+  const [isDefault, setIsDefault] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  // Load current template
+  useEffect(() => {
+    if (expanded) {
+      loadTemplate();
+    }
+  }, [expanded]);
+
+  const loadTemplate = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getCheckoutMessage();
+      setTemplate(data.template);
+      setOriginalTemplate(data.template);
+      setIsDefault(data.isDefault);
+    } catch (err) {
+      console.error('Erro ao carregar template:', err);
+      setTemplate(DEFAULT_TEMPLATE);
+      setOriginalTemplate(DEFAULT_TEMPLATE);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!template.includes('{nome}')) {
+      showError('A mensagem deve conter {nome} para incluir o nome do hóspede');
+      return;
+    }
+
+    if (template.length > 2000) {
+      showError('Mensagem muito longa (máximo 2000 caracteres)');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const result = await api.saveCheckoutMessage(template);
+      setOriginalTemplate(template);
+      setIsDefault(template === DEFAULT_TEMPLATE);
+      showSuccess(result.message || 'Mensagem salva! Seus imóveis serão atualizados automaticamente.');
+    } catch (err: any) {
+      showError(err.message || 'Erro ao salvar mensagem');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      setResetting(true);
+      const result = await api.resetCheckoutMessage();
+      setTemplate(result.template);
+      setOriginalTemplate(result.template);
+      setIsDefault(true);
+      showSuccess(result.message || 'Mensagem restaurada para o padrão');
+    } catch (err: any) {
+      showError(err.message || 'Erro ao restaurar mensagem');
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const hasChanges = template !== originalTemplate;
+  const charCount = template.length;
+
+  return (
+    <div className={`rounded-xl border overflow-hidden transition-all ${
+      isDark ? 'bg-[#0B0C15] border-white/10' : 'bg-white border-slate-200 shadow-sm'
+    }`}>
+      {/* Header - Always visible */}
+      <button
+        onClick={onToggle}
+        className={`w-full flex items-center justify-between p-4 transition-colors ${
+          isDark ? 'hover:bg-white/5' : 'hover:bg-slate-50'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            isDark ? 'bg-purple-500/10' : 'bg-purple-50'
+          }`}>
+            <MessageSquare className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+          </div>
+          <div className="text-left">
+            <h3 className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Mensagem de Checkout
+            </h3>
+            <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+              Edite a mensagem que será enviada nos checkouts
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isDefault && (
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              isDark ? 'bg-purple-500/10 text-purple-400' : 'bg-purple-50 text-purple-600'
+            }`}>
+              Personalizada
+            </span>
+          )}
+          {expanded ? (
+            <ChevronUp className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+          ) : (
+            <ChevronDown className={`w-5 h-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+          )}
+        </div>
+      </button>
+
+      {/* Expanded content */}
+      {expanded && (
+        <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/10' : 'border-slate-100'}`}>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+            </div>
+          ) : (
+            <div className="pt-4 space-y-4">
+              {/* Info box */}
+              <div className={`rounded-lg p-3 flex items-start gap-3 ${
+                isDark ? 'bg-purple-500/5 border border-purple-500/20' : 'bg-purple-50 border border-purple-100'
+              }`}>
+                <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+                <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Escreva uma mensagem exemplo. Nossa IA adaptará automaticamente para cada imóvel,
+                  incluindo horários e detalhes específicos. Use <code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{nome}'}</code> onde quiser o nome do hóspede.
+                </p>
+              </div>
+
+              {/* Textarea */}
+              <div>
+                <textarea
+                  value={template}
+                  onChange={(e) => setTemplate(e.target.value)}
+                  rows={6}
+                  className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/40 resize-none ${
+                    isDark
+                      ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
+                  }`}
+                  placeholder="Olá {nome}! Lembrando que seu checkout é hoje..."
+                />
+                <div className="flex justify-between mt-1.5">
+                  <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {!template.includes('{nome}') && (
+                      <span className="text-amber-500">⚠ Inclua {'{nome}'} na mensagem</span>
+                    )}
+                  </p>
+                  <p className={`text-xs ${charCount > 2000 ? 'text-red-500' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {charCount}/2000
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  disabled={resetting || isDefault}
+                  className={isDefault ? 'opacity-50' : ''}
+                >
+                  {resetting ? (
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4 mr-1.5" />
+                  )}
+                  Restaurar padrão
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving || !hasChanges || !template.includes('{nome}') || charCount > 2000}
+                >
+                  {saving ? (
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-1.5" />
+                  )}
+                  Salvar mensagem
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Props interface for CheckoutAutoTab
 interface CheckoutAutoTabProps {
@@ -392,6 +613,7 @@ export const CheckoutAutoTab: React.FC<CheckoutAutoTabProps> = ({ onPropertyUpda
   const [properties, setProperties] = useState<Property[]>([]);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [showHidden, setShowHidden] = useState(false);
+  const [messageEditorExpanded, setMessageEditorExpanded] = useState(false);
 
   // Config Modal State
   const [configModal, setConfigModal] = useState<{
@@ -599,6 +821,12 @@ export const CheckoutAutoTab: React.FC<CheckoutAutoTabProps> = ({ onPropertyUpda
           )}
         </div>
       </div>
+
+      {/* Message Editor */}
+      <MessageEditor
+        expanded={messageEditorExpanded}
+        onToggle={() => setMessageEditorExpanded(!messageEditorExpanded)}
+      />
 
       {/* Properties Grid */}
       {properties.length === 0 ? (

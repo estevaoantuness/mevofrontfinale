@@ -27,7 +27,8 @@ import {
   X,
   MessageCircle,
   Copy,
-  Check
+  Check,
+  Crown
 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -167,19 +168,25 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   }>({ isOpen: false, title: '', message: '', variant: 'danger', onConfirm: () => {} });
 
   // Get plan badge text based on subscription status
-  const getPlanBadge = (): { text: string; color: string } => {
+  const getPlanBadge = (): { text: string; color: string; isAgency?: boolean } => {
     if (!subscription) return { text: 'Free', color: 'slate' };
-    if (subscription.status === 'trialing') return { text: 'Free Trial', color: 'purple' };
+    if (subscription.status === 'trialing') return { text: 'Trial', color: 'purple' };
     if (subscription.status === 'active' && subscription.planId) {
       const planName = subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1);
-      return { text: planName, color: 'blue' };
+      if (subscription.planId === 'agency') {
+        return { text: planName, color: 'red-dark', isAgency: true };
+      }
+      if (subscription.planId === 'pro') {
+        return { text: planName, color: 'blue-dark' };
+      }
+      return { text: planName, color: 'blue' }; // Starter
     }
     return { text: 'Free', color: 'slate' };
   };
 
   const planBadge = getPlanBadge();
 
-  // Mapear nomes de icones para componentes (para o TrialBanner)
+  // Mapear nomes de ícones para componentes (para o TrialBanner)
   const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     'LayoutGrid': LayoutGrid,
     'Home': Home,
@@ -191,7 +198,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     'Settings': Settings
   };
 
-  // Funcao para abrir modal de trial quando clica no banner
+  // Função para abrir modal de trial quando clica no banner
   const handleTrialBannerClick = () => {
     setSubscriptionModal({
       isOpen: true,
@@ -199,10 +206,15 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
     });
   };
 
-  // Renderiza o banner de trial para uma aba especifica
+  // Verificar se usuário tem acesso (subscription ativa ou em trial)
+  const hasActiveSubscription = subscription && ['active', 'trialing'].includes(subscription.status);
+
+  // Renderiza o banner de trial para uma aba específica
   const renderTrialBanner = (tabId: string) => {
-    // Nao mostrar banner se ja tem subscription ou em billing/overview
-    if (!subscription && tabId !== 'billing' && tabId !== 'overview' && tabId !== 'admin') {
+    // Mostrar banner em: Meus Imóveis, WhatsApp e Checkout Auto
+    // (Visão Geral/Calendário tem banner próprio no CalendarView)
+    const showBannerTabs = ['properties', 'whatsapp', 'checkout'];
+    if (!hasActiveSubscription && showBannerTabs.includes(tabId)) {
       const config = TRIAL_BANNER_CONFIG[tabId];
       if (config) {
         const IconComponent = iconMap[config.icon];
@@ -581,13 +593,18 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       <aside className={`hidden md:flex w-64 flex-shrink-0 border-r flex-col ${isDark ? 'border-white/5 bg-[#080911]' : 'border-slate-200 bg-white'}`}>
         <div className={`h-14 flex items-center px-6 border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
           <Logo size="text-lg" onClick={onGoToLanding} />
-          <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+          <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium border inline-flex items-center gap-1 ${
             planBadge.color === 'purple'
               ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-              : planBadge.color === 'blue'
+            : planBadge.color === 'red-dark'
+              ? 'bg-red-900/20 text-red-400 border-red-800/30'
+            : planBadge.color === 'blue-dark'
+              ? 'bg-blue-900/20 text-blue-300 border-blue-800/30'
+            : planBadge.color === 'blue'
               ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-              : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
           }`}>
+            {planBadge.isAgency && <Crown size={10} />}
             {planBadge.text}
           </span>
         </div>
