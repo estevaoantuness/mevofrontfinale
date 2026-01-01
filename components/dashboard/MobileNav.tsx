@@ -9,7 +9,8 @@ import {
   User,
   Settings,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Shield
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useTheme } from '../../lib/ThemeContext';
@@ -23,6 +24,7 @@ interface MobileNavProps {
   onGoToLanding?: () => void;
   userName?: string;
   userEmail?: string;
+  isAdmin?: boolean;
 }
 
 const navItems = [
@@ -43,9 +45,15 @@ export const MobileNav = ({
   onLogout,
   onGoToLanding,
   userName,
-  userEmail
+  userEmail,
+  isAdmin = false
 }: MobileNavProps) => {
   const { isDark } = useTheme();
+
+  // Build nav items with admin conditionally
+  const allNavItems = isAdmin
+    ? [...navItems, { id: 'admin', icon: Shield, label: 'Admin' }]
+    : navItems;
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -118,7 +126,7 @@ export const MobileNav = ({
           }`}>
             Menu
           </div>
-          {navItems.map(item => (
+          {allNavItems.map(item => (
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}

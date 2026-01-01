@@ -587,6 +587,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
         onGoToLanding={onGoToLanding}
         userName={user?.name}
         userEmail={user?.email}
+        isAdmin={user?.role === 'admin'}
       />
 
       {/* Sidebar - Hidden on mobile */}
