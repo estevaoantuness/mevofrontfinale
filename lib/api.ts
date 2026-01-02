@@ -1100,4 +1100,81 @@ export async function demoteAdmin(userId: number): Promise<{ success: boolean; m
   });
 }
 
+// =============================================
+// MESSAGE LOGS API Types
+// =============================================
+
+export interface MessageLog {
+  id: number;
+  channel: string;
+  recipient: string;
+  recipientName?: string;
+  recipientType: 'staff' | 'guest';
+  message?: string;
+  status: 'sent' | 'failed' | 'pending';
+  errorMessage?: string;
+  triggeredBy?: 'manual' | 'scheduler' | 'auto';
+  sentAt: string;
+  deliveredAt?: string;
+  readAt?: string;
+  property?: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface MessageLogsResponse {
+  logs: MessageLog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface MessageLogsStats {
+  total: number;
+  sent: number;
+  failed: number;
+  pending: number;
+  byRecipientType: {
+    staff: number;
+    guest: number;
+  };
+}
+
+// =============================================
+// MESSAGE LOGS API Functions
+// =============================================
+
+export async function getMessageLogs(params?: {
+  status?: 'sent' | 'failed' | 'pending';
+  recipientType?: 'staff' | 'guest';
+  propertyId?: number;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}): Promise<MessageLogsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.status) searchParams.append('status', params.status);
+  if (params?.recipientType) searchParams.append('recipientType', params.recipientType);
+  if (params?.propertyId) searchParams.append('propertyId', params.propertyId.toString());
+  if (params?.startDate) searchParams.append('startDate', params.startDate);
+  if (params?.endDate) searchParams.append('endDate', params.endDate);
+  if (params?.page) searchParams.append('page', params.page.toString());
+  if (params?.limit) searchParams.append('limit', params.limit.toString());
+  const query = searchParams.toString();
+  return apiFetch<MessageLogsResponse>(`/message-logs${query ? `?${query}` : ''}`);
+}
+
+export async function getMessageLogsStats(): Promise<MessageLogsStats> {
+  return apiFetch<MessageLogsStats>('/message-logs/stats');
+}
+
+export async function getMessageLogDetails(id: number): Promise<MessageLog> {
+  return apiFetch<MessageLog>(`/message-logs/${id}`);
+}
+
 export { API_URL };

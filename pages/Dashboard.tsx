@@ -41,6 +41,7 @@ import { CheckoutAutoTab } from '../components/dashboard/CheckoutAutoTab';
 import { PricingTab } from '../components/dashboard/PricingTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
 import { AdminTab } from '../components/dashboard/AdminTab';
+import { LogsTab } from '../components/dashboard/LogsTab';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { MobileHeader } from '../components/dashboard/MobileHeader';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
@@ -67,7 +68,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const { isDark } = useTheme();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
   const allowedTabs = useMemo(
-    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'profile', 'settings', 'admin']),
+    () => new Set(['overview', 'properties', 'checkout', 'pricing', 'whatsapp', 'logs', 'profile', 'settings', 'admin']),
     []
   );
   const [activeTab, setActiveTab] = useState('overview');
@@ -617,6 +618,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           <NavItem id="checkout" icon={Bell} label="Checkout Auto" />
           <NavItem id="pricing" icon={Calculator} label="Calculadora" />
           <NavItem id="whatsapp" icon={Smartphone} label="Conexão WhatsApp" />
+          <NavItem id="logs" icon={MessageCircle} label="Histórico" />
           <NavItem id="profile" icon={User} label="Meu Perfil" />
           <NavItem id="settings" icon={Settings} label="Configurações" />
           {user?.role === 'admin' && (
@@ -670,6 +672,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             {activeTab === 'checkout' && 'Checkout Automático'}
             {activeTab === 'pricing' && 'Calculadora'}
             {activeTab === 'whatsapp' && 'Conexão WhatsApp'}
+            {activeTab === 'logs' && 'Histórico de Mensagens'}
             {activeTab === 'profile' && 'Meu Perfil'}
             {activeTab === 'settings' && 'Configurações'}
           </h2>
@@ -1075,6 +1078,13 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
             <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
               {renderTrialBanner('settings')}
               <SettingsTab onLogout={onLogout} />
+            </div>
+          )}
+
+          {/* TAB: LOGS */}
+          {activeTab === 'logs' && (
+            <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <LogsTab properties={properties} />
             </div>
           )}
 

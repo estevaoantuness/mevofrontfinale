@@ -6,6 +6,7 @@ import {
   Bell,
   Calculator,
   MessageCircle,
+  MessageSquare,
   User,
   Settings,
   LogOut,
@@ -33,6 +34,7 @@ const navItems = [
   { id: 'checkout', icon: Bell, label: 'Checkout Auto' },
   { id: 'pricing', icon: Calculator, label: 'Calculadora' },
   { id: 'whatsapp', icon: MessageCircle, label: 'WhatsApp' },
+  { id: 'logs', icon: MessageSquare, label: 'Histórico' },
   { id: 'profile', icon: User, label: 'Meu Perfil' },
   { id: 'settings', icon: Settings, label: 'Configurações' },
 ];
