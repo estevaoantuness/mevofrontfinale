@@ -194,14 +194,53 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   const [todayData, setTodayData] = useState<TodayReservations | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [filterPropertyId, setFilterPropertyId] = useState<number | null>(null);
+  // Carregar filtro de imóvel e viewMode do localStorage
+  const [filterPropertyId, setFilterPropertyId] = useState<number | null>(() => {
+    const saved = localStorage.getItem('calendar_filter_property');
+    return saved ? parseInt(saved) : null;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [calendarPricing, setCalendarPricing] = useState<Record<string, CalendarPriceDay>>({});
   const [showPrices, setShowPrices] = useState(false);
-  const [viewMode, setViewMode] = useState<'compact' | 'stacked' | 'details'>('stacked');
+  const [viewMode, setViewMode] = useState<'compact' | 'stacked' | 'details'>(() => {
+    const saved = localStorage.getItem('calendar_view_mode');
+    return (saved as 'compact' | 'stacked' | 'details') || 'stacked';
+  });
   const [syncing, setSyncing] = useState(false);
+
+  // Setar primeiro imóvel como padrão se nenhum estiver selecionado
+  useEffect(() => {
+    if (properties.length > 0 && filterPropertyId === null) {
+      const firstPropertyId = properties[0].id;
+      setFilterPropertyId(firstPropertyId);
+      localStorage.setItem('calendar_filter_property', String(firstPropertyId));
+    }
+    // Verificar se o imóvel selecionado ainda existe
+    if (filterPropertyId !== null && properties.length > 0) {
+      const exists = properties.some(p => p.id === filterPropertyId);
+      if (!exists) {
+        const firstPropertyId = properties[0].id;
+        setFilterPropertyId(firstPropertyId);
+        localStorage.setItem('calendar_filter_property', String(firstPropertyId));
+      }
+    }
+  }, [properties]);
+
+  // Salvar filterPropertyId no localStorage quando mudar
+  useEffect(() => {
+    if (filterPropertyId !== null) {
+      localStorage.setItem('calendar_filter_property', String(filterPropertyId));
+    } else {
+      localStorage.removeItem('calendar_filter_property');
+    }
+  }, [filterPropertyId]);
+
+  // Salvar viewMode no localStorage quando mudar
+  useEffect(() => {
+    localStorage.setItem('calendar_view_mode', viewMode);
+  }, [viewMode]);
 
   // Verificar se usuário tem acesso ao calendário sincronizado
   const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
