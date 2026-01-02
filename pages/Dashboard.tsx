@@ -42,6 +42,7 @@ import { PricingTab } from '../components/dashboard/PricingTab';
 import { SettingsTab } from '../components/dashboard/SettingsTab';
 import { AdminTab } from '../components/dashboard/AdminTab';
 import { LogsTab } from '../components/dashboard/LogsTab';
+import { OnboardingModal } from '../components/onboarding/OnboardingModal';
 import { MobileNav } from '../components/dashboard/MobileNav';
 import { MobileHeader } from '../components/dashboard/MobileHeader';
 import { SubscriptionRequiredModal } from '../components/billing/SubscriptionRequiredModal';
@@ -81,6 +82,7 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // New Property Form State
   const [newProp, setNewProp] = useState({
@@ -270,6 +272,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
       setInitialized();
     }
   };
+
+  // Check if should show onboarding (first-time user with no properties)
+  useEffect(() => {
+    if (!loading) {
+      const hasCompletedOnboarding = localStorage.getItem('mevo_onboarding_completed');
+      if (!hasCompletedOnboarding && properties.length === 0) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [loading, properties.length]);
 
   // Fetch WhatsApp status when tab changes
   useEffect(() => {
@@ -1290,6 +1302,16 @@ export const Dashboard = ({ onLogout, onGoToLanding }: DashboardProps) => {
           </div>
         </form>
       </Modal>
+
+      {/* Onboarding Modal (first-time users) */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => {
+          setShowOnboarding(false);
+          fetchData(); // Refresh data after onboarding
+        }}
+      />
 
       {/* Subscription Required Modal */}
       <SubscriptionRequiredModal
