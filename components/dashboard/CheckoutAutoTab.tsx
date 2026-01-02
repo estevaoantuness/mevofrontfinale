@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bell,
@@ -22,7 +22,9 @@ import {
   ChevronDown,
   ChevronUp,
   RotateCcw,
-  Save
+  Save,
+  Plus,
+  GripVertical
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -32,7 +34,7 @@ import * as api from '../../lib/api';
 import type { Property } from '../../lib/api';
 
 // ============================================
-// MESSAGE EDITOR COMPONENT
+// MESSAGE EDITOR WITH CHIPS COMPONENT
 // ============================================
 
 const DEFAULT_TEMPLATE = `Oi {nome}! 👋
@@ -43,10 +45,69 @@ Aviso de checkout:
 
 Conto contigo! Obrigado 🙏`;
 
+// Placeholders disponíveis
+const PLACEHOLDERS = [
+  { id: 'nome', label: 'nome', description: 'Nome da funcionária', required: true },
+  { id: 'imovel', label: 'imovel', description: 'Nome do imóvel', required: false },
+  { id: 'horario', label: 'horario', description: 'Horário de checkout', required: false },
+];
+
 interface MessageEditorProps {
   expanded: boolean;
   onToggle: () => void;
 }
+
+// Chip component para placeholder
+const PlaceholderChip = ({
+  id,
+  label,
+  onRemove,
+  isDark,
+  inEditor = true
+}: {
+  id: string;
+  label: string;
+  onRemove?: () => void;
+  isDark: boolean;
+  inEditor?: boolean;
+}) => {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium transition-all select-none ${
+        inEditor
+          ? isDark
+            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+            : 'bg-blue-100 text-blue-700 border border-blue-200'
+          : isDark
+            ? 'bg-white/10 text-slate-300 border border-white/20 hover:bg-blue-500/20 hover:text-blue-300 hover:border-blue-500/30 cursor-pointer'
+            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-100 hover:text-blue-700 hover:border-blue-200 cursor-pointer'
+      }`}
+      draggable={!inEditor}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/plain', `{${id}}`);
+        e.dataTransfer.effectAllowed = 'copy';
+      }}
+    >
+      {!inEditor && <Plus size={10} className="opacity-60" />}
+      <span>{label}</span>
+      {inEditor && onRemove && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRemove();
+          }}
+          className={`ml-0.5 p-0.5 rounded hover:bg-black/20 transition-colors ${
+            isDark ? 'hover:bg-white/20' : 'hover:bg-black/10'
+          }`}
+        >
+          <X size={10} />
+        </button>
+      )}
+    </span>
+  );
+};
 
 const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
   const { isDark } = useTheme();
@@ -57,6 +118,7 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   // Load current template
   useEffect(() => {
@@ -81,6 +143,80 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
     }
   };
 
+  // Parse template to segments (text and placeholders)
+  const parseTemplate = (text: string) => {
+    const segments: { type: 'text' | 'placeholder'; value: string }[] = [];
+    const regex = /\{(nome|imovel|horario)\}/gi;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+      }
+      segments.push({ type: 'placeholder', value: match[1].toLowerCase() });
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      segments.push({ type: 'text', value: text.slice(lastIndex) });
+    }
+
+    return segments;
+  };
+
+  // Get which placeholders are used
+  const getUsedPlaceholders = () => {
+    const used = new Set<string>();
+    const regex = /\{(nome|imovel|horario)\}/gi;
+    let match;
+    while ((match = regex.exec(template)) !== null) {
+      used.add(match[1].toLowerCase());
+    }
+    return used;
+  };
+
+  // Get available (unused) placeholders
+  const getAvailablePlaceholders = () => {
+    const used = getUsedPlaceholders();
+    return PLACEHOLDERS.filter(p => !used.has(p.id));
+  };
+
+  // Remove placeholder from template
+  const removePlaceholder = (placeholderId: string) => {
+    const regex = new RegExp(`\\{${placeholderId}\\}`, 'gi');
+    setTemplate(prev => prev.replace(regex, ''));
+  };
+
+  // Add placeholder at cursor or end
+  const addPlaceholder = (placeholderId: string) => {
+    const placeholder = `{${placeholderId}}`;
+    setTemplate(prev => prev + placeholder);
+  };
+
+  // Handle drop on editor
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const placeholder = e.dataTransfer.getData('text/plain');
+    if (placeholder && placeholder.match(/^\{(nome|imovel|horario)\}$/i)) {
+      // Get drop position in textarea
+      const textarea = editorRef.current?.querySelector('textarea');
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const before = template.slice(0, start);
+        const after = template.slice(start);
+        setTemplate(before + placeholder + after);
+      } else {
+        setTemplate(prev => prev + placeholder);
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
   const handleSave = async () => {
     if (!template.includes('{nome}')) {
       showError('A mensagem deve conter {nome} para incluir o nome da funcionária');
@@ -97,7 +233,7 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
       const result = await api.saveCheckoutMessage(template);
       setOriginalTemplate(template);
       setIsDefault(template === DEFAULT_TEMPLATE);
-      showSuccess(result.message || 'Mensagem salva! Seus imóveis serão atualizados automaticamente.');
+      showSuccess(result.message || 'Mensagem salva!');
     } catch (err: any) {
       showError(err.message || 'Erro ao salvar mensagem');
     } finally {
@@ -122,6 +258,9 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
 
   const hasChanges = template !== originalTemplate;
   const charCount = template.length;
+  const usedPlaceholders = getUsedPlaceholders();
+  const availablePlaceholders = getAvailablePlaceholders();
+  const segments = parseTemplate(template);
 
   return (
     <div className={`rounded-xl border overflow-hidden transition-all ${
@@ -174,44 +313,115 @@ const MessageEditor = ({ expanded, onToggle }: MessageEditorProps) => {
             </div>
           ) : (
             <div className="pt-4 space-y-4">
-              {/* Info box */}
-              <div className={`rounded-lg p-3 flex items-start gap-3 ${
-                isDark ? 'bg-purple-500/5 border border-purple-500/20' : 'bg-purple-50 border border-purple-100'
-              }`}>
-                <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
-                <div className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  <p className="mb-2">
-                    Esta mensagem será enviada para sua funcionária de limpeza. Use os placeholders:
-                  </p>
-                  <ul className="space-y-1 ml-2">
-                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{nome}'}</code> → nome da funcionária</li>
-                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{imovel}'}</code> → nome do imóvel</li>
-                    <li><code className={`px-1 rounded ${isDark ? 'bg-white/10' : 'bg-purple-100'}`}>{'{horario}'}</code> → horário de checkout</li>
-                  </ul>
-                  <p className="mt-2 opacity-80">
-                    Se a funcionária tiver múltiplos imóveis, a lista será agrupada automaticamente.
-                  </p>
+              {/* Preview with chips */}
+              <div>
+                <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Pré-visualização
+                </label>
+                <div className={`rounded-lg p-3 min-h-[100px] text-sm whitespace-pre-wrap ${
+                  isDark ? 'bg-white/5 border border-white/10' : 'bg-slate-50 border border-slate-200'
+                }`}>
+                  {segments.map((segment, index) => (
+                    segment.type === 'placeholder' ? (
+                      <PlaceholderChip
+                        key={index}
+                        id={segment.value}
+                        label={segment.value}
+                        onRemove={() => removePlaceholder(segment.value)}
+                        isDark={isDark}
+                        inEditor={true}
+                      />
+                    ) : (
+                      <span key={index} className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                        {segment.value}
+                      </span>
+                    )
+                  ))}
+                  {segments.length === 0 && (
+                    <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>
+                      Digite sua mensagem abaixo...
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Textarea */}
+              {/* Available placeholders */}
               <div>
+                <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Variáveis disponíveis {availablePlaceholders.length > 0 && '(clique ou arraste para adicionar)'}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {PLACEHOLDERS.map(p => {
+                    const isUsed = usedPlaceholders.has(p.id);
+                    return (
+                      <div key={p.id} className="relative group">
+                        <button
+                          type="button"
+                          onClick={() => !isUsed && addPlaceholder(p.id)}
+                          disabled={isUsed}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            isUsed
+                              ? isDark
+                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 cursor-default'
+                                : 'bg-blue-100 text-blue-700 border border-blue-200 cursor-default'
+                              : isDark
+                                ? 'bg-white/5 text-slate-400 border border-white/10 hover:bg-blue-500/20 hover:text-blue-300 hover:border-blue-500/30'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200'
+                          }`}
+                          draggable={!isUsed}
+                          onDragStart={(e) => {
+                            if (!isUsed) {
+                              e.dataTransfer.setData('text/plain', `{${p.id}}`);
+                              e.dataTransfer.effectAllowed = 'copy';
+                            }
+                          }}
+                        >
+                          {isUsed ? (
+                            <CheckCircle size={12} className="text-blue-400" />
+                          ) : (
+                            <Plus size={12} />
+                          )}
+                          <span>{p.label}</span>
+                          {p.required && !isUsed && (
+                            <span className="text-amber-500">*</span>
+                          )}
+                        </button>
+                        {/* Tooltip */}
+                        <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 ${
+                          isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-900 text-white'
+                        }`}>
+                          {p.description}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!usedPlaceholders.has('nome') && (
+                  <p className="text-xs text-amber-500 mt-2">
+                    * A variável "nome" é obrigatória
+                  </p>
+                )}
+              </div>
+
+              {/* Textarea */}
+              <div ref={editorRef} onDrop={handleDrop} onDragOver={handleDragOver}>
+                <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Editar mensagem
+                </label>
                 <textarea
                   value={template}
                   onChange={(e) => setTemplate(e.target.value)}
                   rows={6}
-                  className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/40 resize-none ${
+                  className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/40 resize-none font-mono ${
                     isDark
                       ? 'bg-white/5 border-white/10 text-white placeholder-slate-500'
                       : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'
                   }`}
-                  placeholder="Oi {nome}! Aviso de checkout: 📍 {imovel} 🕐 {horario}"
+                  placeholder="Oi {nome}! Aviso de checkout no {imovel} às {horario}"
                 />
                 <div className="flex justify-between mt-1.5">
                   <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                    {!template.includes('{nome}') && (
-                      <span className="text-amber-500">⚠ Inclua {'{nome}'} na mensagem</span>
-                    )}
+                    Arraste variáveis para o texto ou digite manualmente
                   </p>
                   <p className={`text-xs ${charCount > 2000 ? 'text-red-500' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                     {charCount}/2000
