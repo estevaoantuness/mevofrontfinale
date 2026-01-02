@@ -12,7 +12,9 @@ import {
   Lock,
   Sparkles,
   DollarSign,
-  RefreshCw
+  RefreshCw,
+  List,
+  LayoutGrid as GridIcon
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -208,6 +210,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
     const saved = localStorage.getItem('calendar_view_mode');
     return (saved as 'compact' | 'stacked' | 'details') || 'stacked';
   });
+  const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('calendar_mobile_view');
+    return (saved as 'grid' | 'list') || 'list';
+  });
   const [syncing, setSyncing] = useState(false);
 
   // Setar primeiro imóvel como padrão se nenhum estiver selecionado
@@ -241,6 +247,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
   useEffect(() => {
     localStorage.setItem('calendar_view_mode', viewMode);
   }, [viewMode]);
+
+  // Salvar mobileViewMode no localStorage quando mudar
+  useEffect(() => {
+    localStorage.setItem('calendar_mobile_view', mobileViewMode);
+  }, [mobileViewMode]);
 
   // Verificar se usuário tem acesso ao calendário sincronizado
   const hasCalendarAccess = subscription && ['active', 'trialing'].includes(subscription.status);
@@ -413,6 +424,39 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
 
     return map;
   }, [reservations]);
+
+  // Eventos do mês ordenados por data (para lista mobile)
+  const sortedMonthEvents = useMemo(() => {
+    const events: Array<{
+      date: Date;
+      dateStr: string;
+      reservations: DayReservation[];
+      holiday: Holiday | null;
+    }> = [];
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayReservations = reservationsByDay[dateStr] || [];
+      const holiday = holidays.find(h => h.date === dateStr) || null;
+
+      // Só incluir dias com eventos ou feriados
+      if (dayReservations.length > 0 || holiday) {
+        events.push({
+          date,
+          dateStr,
+          reservations: dayReservations,
+          holiday
+        });
+      }
+    }
+
+    return events;
+  }, [currentDate, reservationsByDay, holidays]);
 
   // Calcular estatísticas do mês atual
   const monthlyStats = useMemo(() => {
@@ -645,15 +689,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <div className="flex items-center gap-1">
               <button
                 onClick={goToPreviousMonth}
-                className={`p-1.5 md:p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
+                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
               >
-                <ChevronLeft size={18} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
+                <ChevronLeft size={20} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
               </button>
               <button
                 onClick={goToNextMonth}
-                className={`p-1.5 md:p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
+                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${isDark ? 'hover:bg-white/5 active:bg-white/10' : 'hover:bg-slate-100 active:bg-slate-200'}`}
               >
-                <ChevronRight size={18} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
+                <ChevronRight size={20} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
               </button>
             </div>
           </div>
@@ -663,7 +707,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
             <div className="flex items-center gap-2">
               <button
                 onClick={goToToday}
-                className={`px-3 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-colors ${
+                className={`px-3 py-2 min-h-[44px] text-xs md:text-sm font-medium rounded-lg transition-colors ${
                   isDark
                     ? 'bg-white/5 hover:bg-white/10 text-slate-300'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -672,8 +716,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 Hoje
               </button>
 
-              {/* View Mode Toggle - Segmented Control */}
-              <div className={`flex rounded-lg p-0.5 text-[10px] md:text-xs ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
+              {/* Mobile View Toggle (Grid/List) - Only on mobile */}
+              <div className={`flex md:hidden rounded-lg p-0.5 ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
+                <button
+                  onClick={() => setMobileViewMode('list')}
+                  className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all ${
+                    mobileViewMode === 'list'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Lista"
+                >
+                  <List size={16} />
+                </button>
+                <button
+                  onClick={() => setMobileViewMode('grid')}
+                  className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md transition-all ${
+                    mobileViewMode === 'grid'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Grade"
+                >
+                  <GridIcon size={16} />
+                </button>
+              </div>
+
+              {/* View Mode Toggle - Segmented Control (Desktop) */}
+              <div className={`hidden md:flex rounded-lg p-0.5 text-[10px] md:text-xs ${isDark ? 'bg-white/5' : 'bg-slate-100'}`}>
                 {(['compact', 'stacked', 'details'] as const).map((mode) => (
                   <button
                     key={mode}
@@ -697,13 +767,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 {filterPropertyId && (
                   <button
                     onClick={() => setShowPrices(!showPrices)}
-                    className={`p-1.5 md:p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                    className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
                       isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
                     } ${showPrices ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
                     title={showPrices ? 'Ocultar preços' : 'Mostrar preços'}
                   >
-                    <DollarSign size={16} />
-                    {showPrices && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />}
+                    <DollarSign size={18} />
+                    {showPrices && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-emerald-500 rounded-full" />}
                   </button>
                 )}
 
@@ -711,12 +781,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 <button
                   onClick={handleSyncAll}
                   disabled={syncing}
-                  className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
                     isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
                   } ${syncing ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
                   title="Sincronizar calendários"
                 >
-                  <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                  <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
                 </button>
 
                 {/* Busca - escondida no mobile */}
@@ -738,12 +808,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
                 <div className="relative">
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`p-1.5 md:p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                    className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
                       isDark ? 'hover:bg-white/5' : 'hover:bg-slate-100'
                     } ${filterPropertyId ? 'text-blue-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}
                   >
-                    <Filter size={16} />
-                    {filterPropertyId && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                    <Filter size={18} />
+                    {filterPropertyId && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full" />}
                   </button>
 
                   {showFilters && (
@@ -785,8 +855,154 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ properties, stats, s
           </div>
         </div>
 
-        {/* Grade do Calendário */}
-        <div className={`rounded-xl overflow-hidden ${isDark ? 'border border-white/5' : 'border border-slate-200'}`}>
+        {/* Mobile List View */}
+        {mobileViewMode === 'list' && (
+          <div className={`md:hidden rounded-xl overflow-hidden ${isDark ? 'border border-white/5' : 'border border-slate-200'}`}>
+            {!hasCalendarAccess ? (
+              <div className={`p-6 text-center ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
+                <Lock className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
+                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Assine para ver eventos
+                </p>
+              </div>
+            ) : sortedMonthEvents.length === 0 ? (
+              <div className={`p-6 text-center ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
+                <Calendar className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
+                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Nenhum evento neste mês
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {sortedMonthEvents.map((event) => {
+                  const isEventToday = isToday(event.date);
+                  const checkouts = event.reservations.filter(r => r.type === 'checkout');
+                  const checkins = event.reservations.filter(r => r.type === 'checkin');
+                  const stays = event.reservations.filter(r => r.type === 'stay');
+
+                  return (
+                    <div
+                      key={event.dateStr}
+                      onClick={() => event.reservations.length > 0 && setSelectedDay(event.date)}
+                      className={`p-4 transition-colors ${
+                        event.reservations.length > 0 ? 'cursor-pointer active:bg-white/5' : ''
+                      } ${isEventToday ? (isDark ? 'bg-blue-500/10' : 'bg-blue-50') : ''}`}
+                    >
+                      {/* Date Header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-bold ${
+                            isEventToday ? 'text-blue-400' : isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
+                            {event.date.getDate()}
+                          </span>
+                          <span className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                            {WEEKDAYS[event.date.getDay()]}
+                          </span>
+                          {isEventToday && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500 text-white">
+                              HOJE
+                            </span>
+                          )}
+                        </div>
+                        {event.holiday && (
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            isDark ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-600'
+                          }`}>
+                            {event.holiday.name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Events List */}
+                      <div className="space-y-2">
+                        {/* Checkouts */}
+                        {checkouts.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <span className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-red-400 text-xs font-bold">←</span>
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-xs font-medium ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                                {checkouts.length} Checkout{checkouts.length > 1 ? 's' : ''}
+                              </span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {checkouts.slice(0, 3).map((c, i) => (
+                                  <span key={i} className={`text-xs px-2 py-0.5 rounded ${
+                                    isDark ? 'bg-white/5 text-slate-300' : 'bg-slate-100 text-slate-700'
+                                  }`}>
+                                    {c.propertyName}
+                                  </span>
+                                ))}
+                                {checkouts.length > 3 && (
+                                  <span className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    +{checkouts.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Checkins */}
+                        {checkins.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <span className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-emerald-400 text-xs font-bold">→</span>
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-xs font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                                {checkins.length} Check-in{checkins.length > 1 ? 's' : ''}
+                              </span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {checkins.slice(0, 3).map((c, i) => (
+                                  <span key={i} className={`text-xs px-2 py-0.5 rounded ${
+                                    isDark ? 'bg-white/5 text-slate-300' : 'bg-slate-100 text-slate-700'
+                                  }`}>
+                                    {c.propertyName}
+                                  </span>
+                                ))}
+                                {checkins.length > 3 && (
+                                  <span className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    +{checkins.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Stays (only show if no checkin/checkout) */}
+                        {stays.length > 0 && checkouts.length === 0 && checkins.length === 0 && (
+                          <div className="flex items-start gap-2">
+                            <span className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-blue-400 text-xs font-bold">•</span>
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-xs font-medium ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                                {stays.length} Ocupado{stays.length > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Holiday only */}
+                        {event.reservations.length === 0 && event.holiday && (
+                          <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                            Feriado - sem eventos
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Grade do Calendário - Hidden on mobile when list mode */}
+        <div className={`rounded-xl overflow-hidden ${mobileViewMode === 'list' ? 'hidden md:block' : ''} ${isDark ? 'border border-white/5' : 'border border-slate-200'}`}>
           {/* Header dos dias da semana */}
           <div className={`grid grid-cols-7 ${isDark ? 'bg-white/[0.02]' : 'bg-slate-50'}`}>
             {WEEKDAYS.map((day) => (
